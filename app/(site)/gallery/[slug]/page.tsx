@@ -1,0 +1,53 @@
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import PhotoDetail from "@/components/gallery/PhotoDetail";
+import JsonLd from "@/components/seo/JsonLd";
+import { getPhotoBySlug, getPhotoSlugs } from "@/lib/sanity.queries";
+import { buildMetadata, imageObjectJsonLd, breadcrumbListJsonLd } from "@/lib/seo";
+
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const slugs = await getPhotoSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
+
+export async function generateMetadata(props: PageProps<"/gallery/[slug]">): Promise<Metadata> {
+  const { slug } = await props.params;
+  const photo = await getPhotoBySlug(slug);
+  if (!photo) return {};
+  return buildMetadata({
+    title: photo.seo?.metaTitle || photo.title,
+    description: photo.seo?.metaDescription || photo.caption,
+    path: `/gallery/${slug}`,
+    image: photo.seo?.ogImage || photo.mainImage,
+  });
+}
+
+export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
+  const { slug } = await props.params;
+  const photo = await getPhotoBySlug(slug);
+  if (!photo) notFound();
+
+  return (
+    <div className="mx-auto max-w-6xl px-6 py-14">
+      <JsonLd
+        data={imageObjectJsonLd({
+          name: photo.title,
+          description: photo.caption,
+          path: `/gallery/${slug}`,
+          image: photo.mainImage,
+          dateCreated: photo.shotDetails?.captureDate,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbListJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Gallery", path: "/gallery" },
+          { name: photo.title, path: `/gallery/${slug}` },
+        ])}
+      />
+      <PhotoDetail photo={photo} />
+    </div>
+  );
+}
