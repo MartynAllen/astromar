@@ -205,3 +205,71 @@ export async function getDiscussionBySlug(slug: string): Promise<DiscussionDetai
     { next: { revalidate: REVALIDATE_SECONDS } },
   );
 }
+
+export type GuideDifficulty = "Beginner" | "Intermediate" | "Advanced";
+
+export interface GuideArticleSummary {
+  _id: string;
+  title: string;
+  slug: SanitySlug;
+  section: string;
+  order?: number;
+  difficulty?: GuideDifficulty;
+  summary?: string;
+}
+
+export interface GuideArticleDetail extends GuideArticleSummary {
+  body?: unknown[];
+  publishedAt?: string;
+  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: SanityImageSource };
+}
+
+export async function getAllGuideArticles(): Promise<GuideArticleSummary[]> {
+  return client.fetch(
+    /* groq */ `*[_type == "guideArticle"] | order(section asc, order asc) {
+      _id, title, slug, section, order, difficulty, summary
+    }`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export async function getGuideSlugs(): Promise<string[]> {
+  return client.fetch(
+    /* groq */ `*[_type == "guideArticle" && defined(slug.current)].slug.current`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export async function getGuideArticleBySlug(slug: string): Promise<GuideArticleDetail | null> {
+  return client.fetch(
+    /* groq */ `*[_type == "guideArticle" && slug.current == $slug][0]{
+      _id, title, slug, section, order, difficulty, summary, body, publishedAt, seo
+    }`,
+    { slug },
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export interface CalendarEvent {
+  _id: string;
+  title: string;
+  eventType: "personal-plan" | "celestial-event" | "local-meetup" | "other";
+  date: string;
+  endDate?: string;
+  description?: string;
+  externalLink?: string;
+}
+
+export async function getUpcomingCalendarEvents(): Promise<CalendarEvent[]> {
+  const now = new Date();
+  now.setDate(now.getDate() - 1); // include events from earlier today
+  return client.fetch(
+    /* groq */ `*[_type == "calendarEvent" && date >= $since] | order(date asc) {
+      _id, title, eventType, date, endDate, description, externalLink
+    }`,
+    { since: now.toISOString() },
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
