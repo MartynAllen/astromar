@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { ImageIcon } from "@sanity/icons";
+import { ImageIcon } from "@sanity/icons/Image";
 import ShotDetailsAutofill from "../components/ShotDetailsAutofill";
 
 interface SlugSourceDoc {

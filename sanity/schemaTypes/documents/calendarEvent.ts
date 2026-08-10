@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { CalendarIcon } from "@sanity/icons";
+import { CalendarIcon } from "@sanity/icons/Calendar";
 
 // Moon phase is computed live (lib/astro/moonPhase.ts) and the ~8 major annual
 // meteor showers live in a reviewed static file (lib/astro/meteorShowers.ts) —
