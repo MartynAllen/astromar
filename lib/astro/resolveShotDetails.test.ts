@@ -9,9 +9,8 @@ const SEED_DIR = path.join(import.meta.dirname, "..", "..", "scripts", "seed-ass
 
 async function readRawExif(filename: string): Promise<RawExifInput> {
   const buf = await readFile(path.join(SEED_DIR, filename));
-  const out = await exifr
-    .parse(buf, { makerNote: true, gps: true, ifd0: true, exif: true })
-    .catch(() => null);
+  // gps/ifd0/exif blocks are already on by default — only makerNote needs opting in.
+  const out = await exifr.parse(buf, { makerNote: true }).catch(() => null);
   return {
     make: out?.Make,
     imageDescription: out?.ImageDescription,

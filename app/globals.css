@@ -1,26 +1,73 @@
 @import "tailwindcss";
 
+@theme {
+  /* Void — near-black base and dark surfaces */
+  --color-void-950: #05060a;
+  --color-void-900: #0a0c14;
+  --color-void-800: #12141f;
+  --color-void-700: #1b1e2c;
+  --color-void-600: #262a3b;
+
+  /* Star — light text on dark */
+  --color-star-100: #f5f7fa;
+  --color-star-300: #c7cbd9;
+  --color-star-500: #8a90a6;
+  --color-star-700: #565b6e;
+
+  /* Nebula rose — primary accent, pulled from real Pelican/Veil nebula frames.
+     Contrast vs #05060A verified: 300=10.6:1 400=7.9:1 500=5.2:1 600=3.9:1 (fails AA body text). */
+  --color-nebula-rose-300: #f2a6c4;
+  --color-nebula-rose-400: #ec7fae;
+  --color-nebula-rose-500: #e0487f;
+  --color-nebula-rose-600: #c13868;
+  --color-nebula-rose-700: #9c2c53;
+
+  /* Nebula teal — secondary accent, from the East Veil frame's cyan filaments.
+     Contrast vs #05060A verified: 300=14.9:1 400=11.7:1 500=8.3:1 600=5.2:1. */
+  --color-nebula-teal-300: #94ede0;
+  --color-nebula-teal-400: #4fd9c7;
+  --color-nebula-teal-500: #2bb8ae;
+  --color-nebula-teal-600: #1d8f89;
+  --color-nebula-teal-700: #166f6a;
+
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  --shadow-glow-rose: 0 0 32px -4px color-mix(in oklab, var(--color-nebula-rose-500) 55%, transparent);
+  --shadow-glow-teal: 0 0 32px -4px color-mix(in oklab, var(--color-nebula-teal-500) 55%, transparent);
+}
+
+/* Astromar is a fixed dark theme (astrophotography reads best against near-black
+   regardless of system preference) — no light-mode variant by design. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-void-950);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 15% -10%, color-mix(in oklab, var(--color-nebula-rose-700) 28%, transparent), transparent),
+    radial-gradient(ellipse 70% 50% at 85% 0%, color-mix(in oklab, var(--color-nebula-teal-700) 24%, transparent), transparent);
+  background-repeat: no-repeat;
+  color: var(--color-star-100);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background-color: var(--color-nebula-rose-600);
+  color: var(--color-star-100);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-nebula-teal-400);
+  outline-offset: 2px;
+}
+
+.text-gradient-nebula {
+  background-image: linear-gradient(to right, var(--color-nebula-rose-400), var(--color-nebula-teal-400));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
 }
