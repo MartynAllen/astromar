@@ -273,3 +273,29 @@ export async function getUpcomingCalendarEvents(): Promise<CalendarEvent[]> {
     { next: { revalidate: REVALIDATE_SECONDS } },
   );
 }
+
+export interface GearItem {
+  name: string;
+  category: "telescope" | "camera" | "accessory" | "software";
+  image?: SanityImageWithDimensions;
+  notes?: string;
+  affiliateLink?: AffiliateLink;
+}
+
+export interface AboutPageContent {
+  heroImage?: SanityImageWithDimensions;
+  bio?: unknown[];
+  gear?: GearItem[];
+  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: SanityImageSource };
+}
+
+export async function getAboutPage(): Promise<AboutPageContent | null> {
+  return client.fetch(
+    /* groq */ `*[_type == "aboutPage"][0]{
+      bio, gear, seo,
+      "heroImage": heroImage{..., "dimensions": asset->metadata.dimensions}
+    }`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
