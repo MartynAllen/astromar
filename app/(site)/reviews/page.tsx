@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import RatingStars from "@/components/reviews/RatingStars";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { urlFor } from "@/sanity/image";
 import { getAllReviews } from "@/lib/sanity.queries";
 
@@ -17,6 +18,7 @@ export default async function ReviewsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-14">
+      <Breadcrumbs items={[{ name: "Reviews", path: "/reviews" }]} />
       <h1 className="font-display text-3xl font-semibold text-star-100">Reviews</h1>
       <p className="mt-2 text-star-500">
         Gear that&apos;s actually been used to make the photos in the gallery — nothing reviewed

@@ -6,9 +6,10 @@ import AffiliateButton from "@/components/reviews/AffiliateButton";
 import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { urlFor } from "@/sanity/image";
 import { getReviewBySlug, getReviewSlugs } from "@/lib/sanity.queries";
-import { buildMetadata, reviewJsonLd, breadcrumbListJsonLd } from "@/lib/seo";
+import { buildMetadata, reviewJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -45,12 +46,11 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
           datePublished: review.publishedAt,
         })}
       />
-      <JsonLd
-        data={breadcrumbListJsonLd([
-          { name: "Home", path: "/" },
+      <Breadcrumbs
+        items={[
           { name: "Reviews", path: "/reviews" },
           { name: review.title, path: `/reviews/${slug}` },
-        ])}
+        ]}
       />
 
       <AffiliateDisclosureBanner />

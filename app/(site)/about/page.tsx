@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import PortableTextContent from "@/components/PortableTextContent";
 import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
 import AffiliateButton from "@/components/reviews/AffiliateButton";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { urlFor } from "@/sanity/image";
 import { getAboutPage } from "@/lib/sanity.queries";
 
@@ -25,6 +26,7 @@ export default async function AboutPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
+      <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
       <h1 className="font-display text-3xl font-semibold text-star-100">About</h1>
 
       {about?.heroImage?.asset && (

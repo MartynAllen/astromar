@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import PhotoDetail from "@/components/gallery/PhotoDetail";
 import JsonLd from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { getPhotoBySlug, getPhotoSlugs } from "@/lib/sanity.queries";
-import { buildMetadata, imageObjectJsonLd, breadcrumbListJsonLd } from "@/lib/seo";
+import { buildMetadata, imageObjectJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -40,12 +41,11 @@ export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
           dateCreated: photo.shotDetails?.captureDate,
         })}
       />
-      <JsonLd
-        data={breadcrumbListJsonLd([
-          { name: "Home", path: "/" },
+      <Breadcrumbs
+        items={[
           { name: "Gallery", path: "/gallery" },
           { name: photo.title, path: `/gallery/${slug}` },
-        ])}
+        ]}
       />
       <PhotoDetail photo={photo} />
     </div>

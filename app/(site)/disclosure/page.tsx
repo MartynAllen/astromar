@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 export const metadata: Metadata = {
   title: "Affiliate Disclosure",
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
 export default function DisclosurePage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
+      <Breadcrumbs items={[{ name: "Affiliate Disclosure", path: "/disclosure" }]} />
       <h1 className="font-display text-3xl font-semibold text-star-100">
         Affiliate Disclosure
       </h1>

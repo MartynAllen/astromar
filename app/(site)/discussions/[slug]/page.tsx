@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import PortableTextContent from "@/components/PortableTextContent";
 import GiscusComments from "@/components/discussions/GiscusComments";
 import JsonLd from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { getDiscussionBySlug, getDiscussionSlugs } from "@/lib/sanity.queries";
-import { buildMetadata, discussionForumPostingJsonLd, breadcrumbListJsonLd } from "@/lib/seo";
+import { buildMetadata, discussionForumPostingJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -42,12 +43,11 @@ export default async function DiscussionPage(props: PageProps<"/discussions/[slu
           datePublished: discussion.publishedAt,
         })}
       />
-      <JsonLd
-        data={breadcrumbListJsonLd([
-          { name: "Home", path: "/" },
+      <Breadcrumbs
+        items={[
           { name: "Discussion", path: "/discussions" },
           { name: discussion.title, path: `/discussions/${slug}` },
-        ])}
+        ]}
       />
 
       <h1 className="font-display text-3xl font-semibold text-star-100">{discussion.title}</h1>

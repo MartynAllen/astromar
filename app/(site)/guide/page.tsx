@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { getAllGuideArticles } from "@/lib/sanity.queries";
 
 export const revalidate = 60;
@@ -15,6 +16,7 @@ export default async function GuidePage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-14">
+      <Breadcrumbs items={[{ name: "Guide", path: "/guide" }]} />
       <h1 className="font-display text-3xl font-semibold text-star-100">Beginner&apos;s Guide</h1>
       <p className="mt-2 text-star-500">
         Written from the smart-telescope side of the hobby — no assumed background in

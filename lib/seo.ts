@@ -127,3 +127,20 @@ export function articleJsonLd(input: {
     datePublished: input.datePublished,
   };
 }
+
+export function eventJsonLd(input: {
+  name: string;
+  description?: string;
+  startDate: string;
+  endDate?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: input.name,
+    description: input.description,
+    startDate: input.startDate,
+    endDate: input.endDate,
+    location: { "@type": "Place", name: "Astromar backyard observatory" },
+  };
+}

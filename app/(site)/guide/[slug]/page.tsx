@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { getGuideArticleBySlug, getGuideSlugs } from "@/lib/sanity.queries";
-import { buildMetadata, articleJsonLd, breadcrumbListJsonLd } from "@/lib/seo";
+import { buildMetadata, articleJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -39,12 +40,11 @@ export default async function GuideArticlePage(props: PageProps<"/guide/[slug]">
           datePublished: article.publishedAt,
         })}
       />
-      <JsonLd
-        data={breadcrumbListJsonLd([
-          { name: "Home", path: "/" },
+      <Breadcrumbs
+        items={[
           { name: "Guide", path: "/guide" },
           { name: article.title, path: `/guide/${slug}` },
-        ])}
+        ]}
       />
 
       <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">

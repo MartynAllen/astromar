@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { getAllPhotos, type PhotoCategory } from "@/lib/sanity.queries";
 
 export const revalidate = 60;
@@ -27,6 +28,7 @@ export default async function GalleryPage(props: PageProps<"/gallery">) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
+      <Breadcrumbs items={[{ name: "Gallery", path: "/gallery" }]} />
       <h1 className="font-display text-3xl font-semibold text-star-100">Gallery</h1>
       <p className="mt-2 max-w-2xl text-star-500">
         Every image here started as raw stacked subs off the Seestar S50 — tap any photo for

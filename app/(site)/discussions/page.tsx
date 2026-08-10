@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { getAllDiscussions } from "@/lib/sanity.queries";
 
 export const revalidate = 60;
@@ -23,6 +24,7 @@ export default async function DiscussionsPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
+      <Breadcrumbs items={[{ name: "Discussion", path: "/discussions" }]} />
       <h1 className="font-display text-3xl font-semibold text-star-100">Weekly Discussion</h1>
       <p className="mt-2 text-star-500">
         One topic a week — planning, processing, gear, whatever&apos;s worth talking through.

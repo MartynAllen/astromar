@@ -42,7 +42,7 @@ export default async function HomePage() {
         </h1>
         <p className="mt-5 max-w-xl text-base text-star-500 sm:text-lg">
           Nebulae, galaxies and the moon, captured one stacked exposure at a time —
-          plus the gear reviews, weekly discussion and beginner's notes that come with it.
+          plus the gear reviews, weekly discussion and beginner&apos;s notes that come with it.
         </p>
         <div className="mt-8 flex flex-wrap gap-4">
           <Link
