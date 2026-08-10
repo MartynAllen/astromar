@@ -106,3 +106,62 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
     { next: { revalidate: REVALIDATE_SECONDS } },
   );
 }
+
+export interface AffiliateLink {
+  retailer?: string;
+  label: string;
+  url: string;
+}
+
+export interface ReviewSummary {
+  _id: string;
+  title: string;
+  slug: SanitySlug;
+  productName: string;
+  productType?: string;
+  productImage?: SanityImageWithDimensions;
+  rating: number;
+  publishedAt?: string;
+}
+
+export interface ReviewDetail extends ReviewSummary {
+  affiliateLinks?: AffiliateLink[];
+  pros?: string[];
+  cons?: string[];
+  verdict?: string;
+  body?: unknown[];
+  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: SanityImageSource };
+}
+
+const reviewSummaryProjection = /* groq */ `{
+  _id, title, slug, productName, productType, rating, publishedAt,
+  "productImage": productImage{..., "dimensions": asset->metadata.dimensions}
+}`;
+
+export async function getAllReviews(): Promise<ReviewSummary[]> {
+  return client.fetch(
+    /* groq */ `*[_type == "reviewPost"] | order(publishedAt desc) ${reviewSummaryProjection}`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export async function getReviewSlugs(): Promise<string[]> {
+  return client.fetch(
+    /* groq */ `*[_type == "reviewPost" && defined(slug.current)].slug.current`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export async function getReviewBySlug(slug: string): Promise<ReviewDetail | null> {
+  return client.fetch(
+    /* groq */ `*[_type == "reviewPost" && slug.current == $slug][0]{
+      _id, title, slug, productName, productType, rating, publishedAt,
+      affiliateLinks, pros, cons, verdict, body, seo,
+      "productImage": productImage{..., "dimensions": asset->metadata.dimensions}
+    }`,
+    { slug },
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}

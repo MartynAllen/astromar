@@ -1,0 +1,123 @@
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import type { Metadata } from "next";
+import RatingStars from "@/components/reviews/RatingStars";
+import AffiliateButton from "@/components/reviews/AffiliateButton";
+import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
+import PortableTextContent from "@/components/PortableTextContent";
+import JsonLd from "@/components/seo/JsonLd";
+import { urlFor } from "@/sanity/image";
+import { getReviewBySlug, getReviewSlugs } from "@/lib/sanity.queries";
+import { buildMetadata, reviewJsonLd, breadcrumbListJsonLd } from "@/lib/seo";
+
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const slugs = await getReviewSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
+
+export async function generateMetadata(props: PageProps<"/reviews/[slug]">): Promise<Metadata> {
+  const { slug } = await props.params;
+  const review = await getReviewBySlug(slug);
+  if (!review) return {};
+  return buildMetadata({
+    title: review.seo?.metaTitle || review.title,
+    description: review.seo?.metaDescription || review.verdict,
+    path: `/reviews/${slug}`,
+    image: review.seo?.ogImage || review.productImage,
+  });
+}
+
+export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
+  const { slug } = await props.params;
+  const review = await getReviewBySlug(slug);
+  if (!review) notFound();
+
+  return (
+    <div className="mx-auto max-w-2xl px-6 py-14">
+      <JsonLd
+        data={reviewJsonLd({
+          productName: review.productName,
+          rating: review.rating,
+          reviewBody: review.verdict,
+          path: `/reviews/${slug}`,
+          datePublished: review.publishedAt,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbListJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Reviews", path: "/reviews" },
+          { name: review.title, path: `/reviews/${slug}` },
+        ])}
+      />
+
+      <AffiliateDisclosureBanner />
+
+      <div className="flex items-start gap-5">
+        {review.productImage?.asset && (
+          <Image
+            src={urlFor(review.productImage).width(240).height(240).url()}
+            alt={review.productName}
+            width={120}
+            height={120}
+            className="h-[120px] w-[120px] flex-none rounded-lg border border-void-700 object-cover"
+          />
+        )}
+        <div>
+          <h1 className="font-display text-3xl font-semibold text-star-100">{review.title}</h1>
+          <p className="mt-1 text-star-500">{review.productType}</p>
+          <div className="mt-2 text-lg">
+            <RatingStars rating={review.rating} />
+          </div>
+        </div>
+      </div>
+
+      {review.verdict && (
+        <p className="mt-8 border-l-2 border-nebula-rose-500 pl-4 text-lg text-star-100">
+          {review.verdict}
+        </p>
+      )}
+
+      {review.affiliateLinks && review.affiliateLinks.length > 0 && (
+        <div className="mt-6 flex flex-wrap gap-3">
+          {review.affiliateLinks.map((link) => (
+            <AffiliateButton key={link.url} link={link} />
+          ))}
+        </div>
+      )}
+
+      {(review.pros?.length || review.cons?.length) && (
+        <div className="mt-10 grid gap-6 sm:grid-cols-2">
+          {review.pros && review.pros.length > 0 && (
+            <div>
+              <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+                Pros
+              </p>
+              <ul className="mt-2 space-y-1.5 text-sm text-star-300">
+                {review.pros.map((pro) => (
+                  <li key={pro}>+ {pro}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {review.cons && review.cons.length > 0 && (
+            <div>
+              <p className="font-mono text-xs uppercase tracking-widest text-nebula-rose-400">
+                Cons
+              </p>
+              <ul className="mt-2 space-y-1.5 text-sm text-star-300">
+                {review.cons.map((con) => (
+                  <li key={con}>− {con}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      <PortableTextContent value={review.body} />
+    </div>
+  );
+}
