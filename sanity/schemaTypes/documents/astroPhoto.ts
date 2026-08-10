@@ -1,0 +1,131 @@
+import { defineField, defineType } from "sanity";
+import { ImageIcon } from "@sanity/icons";
+import ShotDetailsAutofill from "../components/ShotDetailsAutofill";
+
+interface SlugSourceDoc {
+  title?: string;
+  shotDetails?: { targetCatalogId?: string; captureDate?: string };
+}
+
+export default defineType({
+  name: "astroPhoto",
+  title: "Astro Photo",
+  type: "document",
+  icon: ImageIcon,
+  fields: [
+    defineField({
+      name: "title",
+      title: "Title",
+      type: "string",
+      validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "slug",
+      title: "Slug",
+      type: "slug",
+      validation: (r) => r.required(),
+      options: {
+        // Title alone collides for repeat targets (e.g. two NGC 7000 shoots) —
+        // default to target + capture date instead.
+        source: (doc) => {
+          const d = doc as SlugSourceDoc;
+          const target = d.shotDetails?.targetCatalogId || d.title || "photo";
+          const date = d.shotDetails?.captureDate?.slice(0, 10) ?? "";
+          return `${target} ${date}`.trim();
+        },
+        maxLength: 96,
+      },
+    }),
+    defineField({
+      name: "mainImage",
+      title: "Image",
+      type: "image",
+      validation: (r) => r.required(),
+      options: {
+        hotspot: true,
+        metadata: ["blurhash", "lqip", "palette", "exif", "location"],
+      },
+    }),
+    defineField({
+      name: "category",
+      title: "Category",
+      type: "string",
+      options: {
+        list: [
+          { title: "Deep sky", value: "deep-sky" },
+          { title: "Lunar", value: "lunar" },
+          { title: "Planetary", value: "planetary" },
+          { title: "Wide field", value: "wide-field" },
+          { title: "Gear", value: "gear" },
+        ],
+        layout: "radio",
+      },
+      validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "caption",
+      title: "Caption",
+      type: "string",
+      description: "Short 1-2 sentence blurb — used as the card subtitle and meta description fallback.",
+    }),
+    defineField({
+      name: "story",
+      title: "Story",
+      type: "array",
+      of: [{ type: "block" }],
+      description: "Optional long-form narrative for the photo's detail page.",
+    }),
+    defineField({ name: "gearNotes", title: "Gear notes", type: "string" }),
+    defineField({
+      name: "shotDetails",
+      title: "Shot details",
+      type: "shotDetails",
+      components: { input: ShotDetailsAutofill },
+    }),
+    defineField({
+      name: "featured",
+      title: "Featured on home page",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
+      name: "publishedAt",
+      title: "Published at",
+      type: "datetime",
+      initialValue: () => new Date().toISOString(),
+    }),
+    defineField({
+      name: "sourceFilename",
+      title: "Source filename",
+      type: "string",
+      readOnly: true,
+      hidden: true,
+      description: "Idempotency key for the import script — do not edit.",
+    }),
+    defineField({ name: "seo", title: "SEO", type: "seo" }),
+  ],
+  orderings: [
+    {
+      title: "Capture date, newest",
+      name: "captureDateDesc",
+      by: [{ field: "shotDetails.captureDate", direction: "desc" }],
+    },
+  ],
+  preview: {
+    select: {
+      title: "title",
+      target: "shotDetails.targetCommonName",
+      subs: "shotDetails.subCount",
+      exp: "shotDetails.subExposureSeconds",
+      filter: "shotDetails.filter",
+      media: "mainImage",
+    },
+    prepare({ title, target, subs, exp, filter, media }) {
+      const summary =
+        subs && exp
+          ? `${target ?? ""} · ${((subs * exp) / 60).toFixed(1)} min · ${filter ?? ""}`
+          : target;
+      return { title, subtitle: summary, media };
+    },
+  },
+});
