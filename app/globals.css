@@ -34,6 +34,14 @@
   --color-nebula-teal-600: #1f9db8;
   --color-nebula-teal-700: #1a7e93;
 
+  /* Nav accent colours — one per section, loosely a narrowband/Hubble-palette
+     spread (the different wavelength bands astro filters isolate) rather than
+     an arbitrary rainbow. Each verified 9:1+ contrast vs #05060A. */
+  --color-nebula-amber-400: #f0c26f;
+  --color-nebula-green-400: #8fe0ab;
+  --color-nebula-indigo-400: #8fb2f5;
+  --color-nebula-violet-400: #c99ef2;
+
   --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", monospace;
