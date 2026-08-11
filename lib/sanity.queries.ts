@@ -296,6 +296,65 @@ export async function getGuideArticleBySlug(
   );
 }
 
+export type ResearchStatus = "Idea" | "In progress" | "Complete";
+
+export interface ResearchProjectSummary {
+  _id: string;
+  title: string;
+  slug: SanitySlug;
+  status: ResearchStatus;
+  techniques?: string[];
+  summary?: string;
+  coverImage?: SanityImageWithDimensions;
+  publishedAt?: string;
+}
+
+export interface ResearchProjectDetail extends ResearchProjectSummary {
+  repoUrl?: string;
+  body?: unknown[];
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: SanityImageSource;
+  };
+}
+
+const researchSummaryProjection = /* groq */ `{
+  _id, title, slug, status, techniques, summary, publishedAt,
+  "coverImage": coverImage{..., "dimensions": asset->metadata.dimensions}
+}`;
+
+export async function getAllResearchProjects(): Promise<
+  ResearchProjectSummary[]
+> {
+  return client.fetch(
+    /* groq */ `*[_type == "researchProject"] | order(publishedAt desc) ${researchSummaryProjection}`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export async function getResearchSlugs(): Promise<string[]> {
+  return client.fetch(
+    /* groq */ `*[_type == "researchProject" && defined(slug.current)].slug.current`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export async function getResearchProjectBySlug(
+  slug: string,
+): Promise<ResearchProjectDetail | null> {
+  return client.fetch(
+    /* groq */ `*[_type == "researchProject" && slug.current == $slug][0]{
+      _id, title, slug, status, techniques, summary, repoUrl, body, publishedAt, seo,
+      "coverImage": coverImage{..., "dimensions": asset->metadata.dimensions}
+    }`,
+    { slug },
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
 export interface CalendarEvent {
   _id: string;
   title: string;

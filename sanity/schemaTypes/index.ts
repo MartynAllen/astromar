@@ -5,6 +5,7 @@ import reviewPost from "./documents/reviewPost";
 import discussionPost from "./documents/discussionPost";
 import guideArticle from "./documents/guideArticle";
 import calendarEvent from "./documents/calendarEvent";
+import researchProject from "./documents/researchProject";
 import siteSettings from "./documents/siteSettings";
 import aboutPage from "./documents/aboutPage";
 
@@ -21,6 +22,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     discussionPost,
     guideArticle,
     calendarEvent,
+    researchProject,
     siteSettings,
     aboutPage,
     // Objects

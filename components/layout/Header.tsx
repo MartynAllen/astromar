@@ -15,8 +15,8 @@ export default function Header() {
           Astromar
         </Link>
 
-        <nav className="hidden sm:block">
-          <ul className="flex items-center gap-7">
+        <nav className="hidden md:block">
+          <ul className="flex items-center gap-5 lg:gap-7">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <Link

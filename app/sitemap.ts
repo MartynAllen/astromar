@@ -9,6 +9,7 @@ const STATIC_ROUTES = [
   "/discussions",
   "/guide",
   "/calendar",
+  "/research",
   "/about",
   "/disclosure",
   "/privacy",
@@ -21,21 +22,20 @@ interface SlugRow {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const rows: SlugRow[] = await client.fetch(
-    /* groq */ `*[
-      (_type == "astroPhoto" || _type == "reviewPost" || _type == "discussionPost" || _type == "guideArticle")
+  const rows: SlugRow[] = await client.fetch(/* groq */ `*[
+      (_type == "astroPhoto" || _type == "reviewPost" || _type == "discussionPost" || _type == "guideArticle" || _type == "researchProject")
       && defined(slug.current)
     ]{
       "pathPrefix": select(
         _type == "astroPhoto" => "/gallery",
         _type == "reviewPost" => "/reviews",
         _type == "discussionPost" => "/discussions",
-        _type == "guideArticle" => "/guide"
+        _type == "guideArticle" => "/guide",
+        _type == "researchProject" => "/research"
       ),
       "slug": slug.current,
       "updatedAt": _updatedAt
-    }`,
-  );
+    }`);
 
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((path) => ({
     url: `${SITE_URL}${path}`,

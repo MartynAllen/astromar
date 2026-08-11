@@ -5,10 +5,14 @@ import { urlFor } from "@/sanity/image";
 const components: PortableTextComponents = {
   block: {
     h2: ({ children }) => (
-      <h2 className="mt-10 font-display text-2xl font-semibold text-star-100">{children}</h2>
+      <h2 className="mt-10 font-display text-2xl font-semibold text-star-100">
+        {children}
+      </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="mt-8 font-display text-xl font-semibold text-star-100">{children}</h3>
+      <h3 className="mt-8 font-display text-xl font-semibold text-star-100">
+        {children}
+      </h3>
     ),
     normal: ({ children }) => (
       <p className="mt-4 leading-relaxed text-star-300">{children}</p>
@@ -30,7 +34,9 @@ const components: PortableTextComponents = {
         {children}
       </a>
     ),
-    strong: ({ children }) => <strong className="text-star-100">{children}</strong>,
+    strong: ({ children }) => (
+      <strong className="text-star-100">{children}</strong>
+    ),
   },
   types: {
     image: ({ value }) => (
@@ -44,13 +50,36 @@ const components: PortableTextComponents = {
         />
       </span>
     ),
+    code: ({ value }) => (
+      <div className="mt-6 overflow-hidden rounded-lg border border-void-700 bg-void-900">
+        {(value?.filename || value?.language) && (
+          <div className="flex items-center justify-between border-b border-void-700 px-4 py-2">
+            <span className="font-mono text-xs text-star-500">
+              {value?.filename}
+            </span>
+            {value?.language && (
+              <span className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+                {value.language}
+              </span>
+            )}
+          </div>
+        )}
+        <pre className="overflow-x-auto p-4 font-mono text-sm leading-relaxed text-star-300">
+          <code>{value?.code}</code>
+        </pre>
+      </div>
+    ),
   },
   list: {
     bullet: ({ children }) => (
-      <ul className="mt-4 list-disc space-y-1 pl-5 text-star-300">{children}</ul>
+      <ul className="mt-4 list-disc space-y-1 pl-5 text-star-300">
+        {children}
+      </ul>
     ),
     number: ({ children }) => (
-      <ol className="mt-4 list-decimal space-y-1 pl-5 text-star-300">{children}</ol>
+      <ol className="mt-4 list-decimal space-y-1 pl-5 text-star-300">
+        {children}
+      </ol>
     ),
   },
 };
