@@ -86,4 +86,8 @@ npx eslint .
    domain there too.
 2. Set `NEXT_PUBLIC_SITE_URL` to the real production URL — it drives canonical URLs,
    the sitemap, and Open Graph images.
+
+## License
+
+All rights reserved — see [LICENSE](LICENSE).
 3. After the first deploy, submit `/sitemap.xml` to Google Search Console.
