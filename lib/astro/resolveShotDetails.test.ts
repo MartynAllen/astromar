@@ -33,7 +33,9 @@ test("prefers the FITS header hidden in EXIF over filename parsing", async () =>
   assert.equal(result.subCount, 601);
   assert.equal(result.subExposureSeconds, 10);
   assert.equal(result.filter, "LP");
-  assert.ok(Math.abs(result.latitude! - REDACTED_LAT) < 0.001);
+  // Real-world coordinate value intentionally not asserted here (it's a real
+  // home location) — just confirm the FITS SITELAT tier actually populated it.
+  assert.equal(typeof result.latitude, "number");
 });
 
 test("reads the Seestar MakerNote JSON for Lunar shots", async () => {
@@ -46,9 +48,24 @@ test("reads the Seestar MakerNote JSON for Lunar shots", async () => {
   assert.equal(result.targetCatalogId, "Moon");
   assert.equal(result.category, "lunar");
   assert.equal(result.captureDate, "2026-06-20T22:13:58.000Z");
-  // MakerNote lon_lat is [lng, lat] (GeoJSON order) — verify it wasn't spread positionally.
-  assert.ok(Math.abs(result.longitude! - REDACTED_LNG) < 0.001);
-  assert.ok(Math.abs(result.latitude! - REDACTED_LAT) < 0.001);
+  // Real-world coordinate values intentionally not asserted here (it's a real
+  // home location) — the GeoJSON-order mapping itself is covered by the
+  // synthetic-input test below instead.
+  assert.equal(typeof result.longitude, "number");
+  assert.equal(typeof result.latitude, "number");
+});
+
+test("maps MakerNote lon_lat as [lng, lat] (GeoJSON order), not spread positionally", () => {
+  // Synthetic input, decoupled from any real file — isolates the ordering
+  // logic without depending on (or asserting) a real-world location.
+  const makerNote = JSON.stringify({
+    result: { obj_name: "Moon", lon_lat: [10, 60] },
+  });
+  const result = resolveShotDetails("test.jpg", { make: "ZWO", makerNote });
+
+  assert.equal(result.tier, "seestar-makernote");
+  assert.equal(result.longitude, 10);
+  assert.equal(result.latitude, 60);
 });
 
 test("falls back to the EXIF ImageDescription when no MakerNote is present", async () => {

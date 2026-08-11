@@ -33,6 +33,12 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# raw source photos carry embedded GPS location — kept local, never public.
+# Re-populate from your camera/Seestar exports; scripts/import-photos.ts
+# reads from here but the files themselves don't need to be in the repo.
+/scripts/seed-assets/*
+!/scripts/seed-assets/.gitkeep
+
 # vercel
 .vercel
 
