@@ -22,13 +22,17 @@
   --color-nebula-rose-600: #c13868;
   --color-nebula-rose-700: #9c2c53;
 
-  /* Nebula teal — secondary accent, from the East Veil frame's cyan filaments.
-     Contrast vs #05060A verified: 300=14.9:1 400=11.7:1 500=8.3:1 600=5.2:1. */
-  --color-nebula-teal-300: #94ede0;
-  --color-nebula-teal-400: #4fd9c7;
-  --color-nebula-teal-500: #2bb8ae;
-  --color-nebula-teal-600: #1d8f89;
-  --color-nebula-teal-700: #166f6a;
+  /* Nebula teal — secondary accent, retuned to match the logo mark's cyan
+     (bluer, less green than the original East Veil-derived teal) so the
+     wordmark gradient and the logo read as the same brand color. Still
+     authentic to real frames — the Dumbbell/Iris nebula shots lean this
+     same blue-cyan direction, distinct from the rose side's warmer frames.
+     Contrast vs #05060A verified: 300=15.4:1 400=12.7:1 500=9.8:1 600=6.3:1. */
+  --color-nebula-teal-300: #a8ecf5;
+  --color-nebula-teal-400: #6fdcec;
+  --color-nebula-teal-500: #35c4de;
+  --color-nebula-teal-600: #1f9db8;
+  --color-nebula-teal-700: #1a7e93;
 
   --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
