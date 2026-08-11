@@ -8,7 +8,7 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Gallery",
-  description: "Deep-sky, lunar and wide-field astrophotography from a Seestar S50.",
+  description: "Deep-sky, lunar and wide-field astrophotography.",
 };
 
 const CATEGORIES: { label: string; value: PhotoCategory | undefined }[] = [
@@ -31,8 +31,7 @@ export default async function GalleryPage(props: PageProps<"/gallery">) {
       <Breadcrumbs items={[{ name: "Gallery", path: "/gallery" }]} />
       <h1 className="font-display text-3xl font-semibold text-star-100">Gallery</h1>
       <p className="mt-2 max-w-2xl text-star-500">
-        Every image here started as raw stacked subs off the Seestar S50 — tap any photo for
-        exposure details.
+        Every image here started as raw stacked subs — tap any photo for exposure details.
       </p>
 
       <div className="mt-8 flex flex-wrap gap-2">

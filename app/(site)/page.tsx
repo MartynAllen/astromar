@@ -34,7 +34,7 @@ export default async function HomePage() {
     <>
       <section className="mx-auto max-w-6xl px-6 pt-20 pb-16 sm:pt-28">
         <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
-          Backyard astrophotography · Seestar S50
+          Astronomy · Astrophotography
         </p>
         <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight text-star-100 sm:text-6xl">
           Deep-sky images from a{" "}

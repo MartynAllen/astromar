@@ -22,11 +22,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Astromar — Astrophotography with a Seestar S50",
+    default: "Astromar — Astronomy & Astrophotography",
     template: "%s — Astromar",
   },
   description:
-    "Deep-sky photography, gear reviews, and weekly astronomy discussion from a backyard Seestar S50 setup.",
+    "Deep-sky photography, gear reviews, and weekly astronomy discussion from a backyard observer.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
