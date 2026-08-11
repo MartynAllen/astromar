@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import MoonPhaseWidget from "@/components/calendar/MoonPhaseWidget";
 import MeteorShowerList from "@/components/calendar/MeteorShowerList";
+import VisibilityFinder from "@/components/calendar/VisibilityFinder";
 import EventCard from "@/components/calendar/EventCard";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import JsonLd from "@/components/seo/JsonLd";
@@ -39,6 +40,10 @@ export default async function CalendarPage() {
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <MoonPhaseWidget />
         <MeteorShowerList />
+      </div>
+
+      <div className="mt-6">
+        <VisibilityFinder />
       </div>
 
       <div className="mt-10">
