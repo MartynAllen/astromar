@@ -16,10 +16,10 @@ export default function DisclosurePage() {
 
       <div className="mt-8 space-y-4 text-star-300">
         <p>
-          Astromar is a participant in the Amazon Services LLC Associates Program, an
-          affiliate advertising program designed to provide a means for sites to earn
-          advertising fees by advertising and linking to Amazon.com. As an Amazon Associate,
-          Astromar earns from qualifying purchases.
+          Astromar is a participant in the Amazon EU Associates Programme, an affiliate
+          advertising programme designed to provide a means for sites to earn advertising
+          fees by advertising and linking to Amazon.co.uk. As an Amazon Associate, Astromar
+          earns from qualifying purchases.
         </p>
         <p>
           In practice: some links on the Reviews and About/Gear pages point to Amazon or

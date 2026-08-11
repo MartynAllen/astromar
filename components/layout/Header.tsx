@@ -9,7 +9,7 @@ export default function Header() {
       <div className="relative mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link
           href="/"
-          className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight text-gradient-nebula"
+          className="flex items-center gap-2 font-display text-xl font-semibold tracking-tight text-nebula-teal-400"
         >
           <Logo className="h-7 w-7 text-nebula-teal-400" />
           Astromar

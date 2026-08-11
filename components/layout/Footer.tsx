@@ -12,7 +12,7 @@ export default async function Footer() {
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-10 sm:grid-cols-3">
           <div>
-            <p className="font-display text-lg font-semibold text-gradient-nebula">
+            <p className="font-display text-lg font-semibold text-nebula-teal-400">
               {siteName}
             </p>
             <p className="mt-2 max-w-xs text-sm text-star-500">{tagline}</p>

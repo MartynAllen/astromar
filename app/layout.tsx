@@ -22,7 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Astromar — Astronomy & Astrophotography",
+    default: "Astromar",
     template: "%s — Astromar",
   },
   description:
