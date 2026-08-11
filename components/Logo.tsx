@@ -4,9 +4,9 @@ interface LogoProps {
 
 /**
  * Recreated from the source logo (a faceted crescent moon wrapped around a
- * camera-aperture glyph, with a small sparkle accent) as inline SVG rather
- * than a raster asset — stays crisp at any size and always matches the
- * current accent color via currentColor.
+ * camera-aperture glyph) as inline SVG rather than a raster asset — stays
+ * crisp at any size and always matches the current accent color via
+ * currentColor.
  */
 export default function Logo({ className }: LogoProps) {
   return (
@@ -40,12 +40,6 @@ export default function Logo({ className }: LogoProps) {
         stroke="currentColor"
         strokeWidth="2.5"
         strokeLinejoin="round"
-      />
-
-      {/* Sparkle accent — rose, so the mark carries both brand accents */}
-      <path
-        d="M90 78 Q92 84 98 86 Q92 88 90 94 Q88 88 82 86 Q88 84 90 78 Z"
-        fill="var(--color-nebula-rose-500)"
       />
     </svg>
   );

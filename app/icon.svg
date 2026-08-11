@@ -21,8 +21,4 @@
     stroke-width="2.5"
     stroke-linejoin="round"
   />
-  <path
-    d="M90 78 Q92 84 98 86 Q92 88 90 94 Q88 88 82 86 Q88 84 90 78 Z"
-    fill="#e0487f"
-  />
 </svg>
