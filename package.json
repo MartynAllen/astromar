@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --import tsx --test lib/**/*.test.ts",
-    "import": "tsx scripts/import-photos.ts"
+    "import": "node --env-file=.env.local --import tsx scripts/import-photos.ts"
   },
   "dependencies": {
     "@giscus/react": "^3.1.0",
