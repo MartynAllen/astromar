@@ -86,7 +86,7 @@ export default function VisibilityFinder() {
   return (
     <div className="rounded-lg border border-void-700 bg-void-900 p-5">
       <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
-        What&apos;s worth looking at
+        Optimal targets
       </p>
       <p className="mt-1 text-sm text-star-500">
         Search a location to see which deep-sky objects are best placed, hour by hour,

@@ -42,8 +42,7 @@ export default async function CalendarPage() {
             Astronomy Calendar
           </h1>
           <p className="mt-2 text-star-500">
-            What&apos;s worth looking up for, and what&apos;s coming up on this
-            end.
+            Optimal targets for tonight, and what&apos;s coming up on this end.
           </p>
         </div>
       </PageHero>

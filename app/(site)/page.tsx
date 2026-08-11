@@ -59,7 +59,7 @@ export default async function HomePage() {
           </p>
           <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight text-star-100 sm:text-6xl">
             Deep-sky images from a{" "}
-            <span className="text-gradient-nebula">very ordinary backyard</span>
+            <span className="text-gradient-nebula">very ordinary garden</span>
             .
           </h1>
           <p className="mt-5 max-w-xl text-base text-star-500 sm:text-lg">

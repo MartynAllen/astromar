@@ -5,7 +5,7 @@ import { getSiteSettings } from "@/lib/sanity.queries";
 export default async function Footer() {
   const settings = await getSiteSettings().catch(() => null);
   const siteName = settings?.siteName ?? "Astromar";
-  const tagline = settings?.tagline ?? "Astronomy and astrophotography from a backyard setup.";
+  const tagline = settings?.tagline ?? "Astronomy and astrophotography from a garden setup.";
 
   return (
     <footer className="border-t border-void-700 bg-void-900/40">

@@ -141,6 +141,6 @@ export function eventJsonLd(input: {
     description: input.description,
     startDate: input.startDate,
     endDate: input.endDate,
-    location: { "@type": "Place", name: "Astromar backyard observatory" },
+    location: { "@type": "Place", name: "Astromar garden observatory" },
   };
 }

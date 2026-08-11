@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s — Astromar",
   },
   description:
-    "Deep-sky photography, gear reviews, and weekly astronomy discussion from a backyard observer.",
+    "Deep-sky photography, gear reviews, and weekly astronomy discussion from a garden observer.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
