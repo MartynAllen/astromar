@@ -35,6 +35,13 @@ const SECTION_TEASERS = [
     border: "hover:border-nebula-indigo-400",
     heading: "group-hover:text-nebula-indigo-400",
   },
+  {
+    href: "/research",
+    title: "Research",
+    body: "Colour tracking, computer vision, exoplanet detection — turning the gallery into a dataset with Python.",
+    border: "hover:border-nebula-green-400",
+    heading: "group-hover:text-nebula-green-400",
+  },
 ];
 
 export default async function HomePage() {
@@ -93,7 +100,7 @@ export default async function HomePage() {
 
       <section className="border-t border-void-700 bg-void-900/30">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {SECTION_TEASERS.map((teaser) => (
               <Link
                 key={teaser.href}
