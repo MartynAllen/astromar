@@ -50,12 +50,9 @@ export default function ShotDetailsPanel({ details }: { details?: ShotDetails })
       <Row label="Filter" value={details.filter} />
       <Row label="Mosaic" value={details.isMosaic ? "Yes" : undefined} />
       <Row label="Telescope" value={details.telescope} />
-      {details.captureLocation && (
-        <Row
-          label="Location"
-          value={`${details.captureLocation.lat.toFixed(2)}, ${details.captureLocation.lng.toFixed(2)}`}
-        />
-      )}
+      {/* captureLocation is intentionally not rendered — it's your approximate
+          home address, embedded by the Seestar app itself. Kept in Sanity for
+          your own reference (e.g. the calendar's rise/set math), not shown publicly. */}
     </div>
   );
 }
