@@ -1,5 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import PhotoCard from "@/components/gallery/PhotoCard";
+import { urlFor } from "@/sanity/image";
 import { getFeaturedPhotos } from "@/lib/sanity.queries";
 
 export const revalidate = 60;
@@ -29,34 +31,56 @@ const SECTION_TEASERS = [
 
 export default async function HomePage() {
   const featured = await getFeaturedPhotos();
+  const heroPhoto = featured[0];
 
   return (
     <>
-      <section className="mx-auto max-w-6xl px-6 pt-20 pb-16 sm:pt-28">
-        <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
-          Astronomy · Astrophotography
-        </p>
-        <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight text-star-100 sm:text-6xl">
-          Deep-sky images from a{" "}
-          <span className="text-gradient-nebula">very ordinary backyard</span>.
-        </h1>
-        <p className="mt-5 max-w-xl text-base text-star-500 sm:text-lg">
-          Nebulae, galaxies and the moon, captured one stacked exposure at a time —
-          plus the gear reviews, weekly discussion and beginner&apos;s notes that come with it.
-        </p>
-        <div className="mt-8 flex flex-wrap gap-4">
-          <Link
-            href="/gallery"
-            className="rounded-md bg-nebula-rose-400 px-5 py-2.5 font-display text-sm font-medium text-void-950 shadow-glow-rose transition-transform hover:scale-[1.02]"
-          >
-            View the gallery
-          </Link>
-          <Link
-            href="/about"
-            className="rounded-md border border-void-600 px-5 py-2.5 font-display text-sm font-medium text-star-100 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
-          >
-            About the setup
-          </Link>
+      <section className="relative overflow-hidden">
+        {heroPhoto?.mainImage?.asset && (
+          <Image
+            src={urlFor(heroPhoto.mainImage)
+              .width(2400)
+              .height(1400)
+              .fit("crop")
+              .url()}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        )}
+        <div className="absolute inset-0 bg-void-950/80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-void-950 via-void-950/50 to-void-950/70" />
+
+        <div className="relative mx-auto max-w-6xl px-6 pt-20 pb-16 sm:pt-28">
+          <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+            Astronomy · Astrophotography
+          </p>
+          <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-tight text-star-100 sm:text-6xl">
+            Deep-sky images from a{" "}
+            <span className="text-gradient-nebula">very ordinary backyard</span>
+            .
+          </h1>
+          <p className="mt-5 max-w-xl text-base text-star-500 sm:text-lg">
+            Nebulae, galaxies and the moon, captured one stacked exposure at a
+            time — plus the gear reviews, weekly discussion and beginner&apos;s
+            notes that come with it.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4">
+            <Link
+              href="/gallery"
+              className="rounded-md bg-nebula-rose-400 px-5 py-2.5 font-display text-sm font-medium text-void-950 shadow-glow-rose transition-transform hover:scale-[1.02]"
+            >
+              View the gallery
+            </Link>
+            <Link
+              href="/about"
+              className="rounded-md border border-void-600 px-5 py-2.5 font-display text-sm font-medium text-star-100 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+            >
+              About the setup
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -66,7 +90,10 @@ export default async function HomePage() {
             <h2 className="font-display text-2xl font-semibold text-star-100">
               Featured shots
             </h2>
-            <Link href="/gallery" className="text-sm text-nebula-teal-400 hover:underline">
+            <Link
+              href="/gallery"
+              className="text-sm text-nebula-teal-400 hover:underline"
+            >
               All photos →
             </Link>
           </div>

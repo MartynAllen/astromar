@@ -26,7 +26,8 @@ export interface ShotDetails {
   raDec?: { ra?: number; dec?: number };
 }
 
-export type PhotoCategory = "deep-sky" | "lunar" | "planetary" | "wide-field" | "gear";
+export type PhotoCategory =
+  "deep-sky" | "lunar" | "planetary" | "wide-field" | "gear";
 
 export interface AstroPhotoSummary {
   _id: string;
@@ -42,7 +43,11 @@ export interface AstroPhotoSummary {
 export interface AstroPhotoDetail extends AstroPhotoSummary {
   story?: unknown[];
   gearNotes?: string;
-  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: SanityImageSource };
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: SanityImageSource;
+  };
 }
 
 export interface SiteSettings {
@@ -51,7 +56,11 @@ export interface SiteSettings {
   logo?: SanityImageSource;
   homeObservingLocation?: { lat: number; lng: number };
   socialLinks?: { platform: string; url: string }[];
-  defaultSeo?: { metaTitle?: string; metaDescription?: string; ogImage?: SanityImageSource };
+  defaultSeo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: SanityImageSource;
+  };
 }
 
 const photoSummaryProjection = /* groq */ `{
@@ -59,7 +68,9 @@ const photoSummaryProjection = /* groq */ `{
   "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions}
 }`;
 
-export async function getFeaturedPhotos(limit = 6): Promise<AstroPhotoSummary[]> {
+export async function getFeaturedPhotos(
+  limit = 6,
+): Promise<AstroPhotoSummary[]> {
   return client.fetch(
     /* groq */ `*[_type == "astroPhoto" && featured == true] | order(shotDetails.captureDate desc) [0...$limit] ${photoSummaryProjection}`,
     { limit },
@@ -67,7 +78,20 @@ export async function getFeaturedPhotos(limit = 6): Promise<AstroPhotoSummary[]>
   );
 }
 
-export async function getAllPhotos(category?: PhotoCategory): Promise<AstroPhotoSummary[]> {
+// Picks a stable-but-varied hero photo per page: different pages pass a
+// different offset so they don't all show the same shot, without needing a
+// dedicated "hero" flag in Studio.
+export async function getHeroPhoto(
+  offset = 0,
+): Promise<AstroPhotoSummary | null> {
+  const pool = await getFeaturedPhotos(8);
+  if (pool.length === 0) return null;
+  return pool[offset % pool.length];
+}
+
+export async function getAllPhotos(
+  category?: PhotoCategory,
+): Promise<AstroPhotoSummary[]> {
   const filter = category
     ? `_type == "astroPhoto" && category == $category`
     : `_type == "astroPhoto"`;
@@ -86,7 +110,9 @@ export async function getPhotoSlugs(): Promise<string[]> {
   );
 }
 
-export async function getPhotoBySlug(slug: string): Promise<AstroPhotoDetail | null> {
+export async function getPhotoBySlug(
+  slug: string,
+): Promise<AstroPhotoDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "astroPhoto" && slug.current == $slug][0]{
       _id, title, slug, category, caption, featured, shotDetails, story, gearNotes, seo,
@@ -130,7 +156,11 @@ export interface ReviewDetail extends ReviewSummary {
   cons?: string[];
   verdict?: string;
   body?: unknown[];
-  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: SanityImageSource };
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: SanityImageSource;
+  };
 }
 
 const reviewSummaryProjection = /* groq */ `{
@@ -154,7 +184,9 @@ export async function getReviewSlugs(): Promise<string[]> {
   );
 }
 
-export async function getReviewBySlug(slug: string): Promise<ReviewDetail | null> {
+export async function getReviewBySlug(
+  slug: string,
+): Promise<ReviewDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "reviewPost" && slug.current == $slug][0]{
       _id, title, slug, productName, productType, rating, publishedAt,
@@ -177,7 +209,11 @@ export interface DiscussionSummary {
 export interface DiscussionDetail extends DiscussionSummary {
   body?: unknown[];
   publishedAt?: string;
-  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: SanityImageSource };
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: SanityImageSource;
+  };
 }
 
 export async function getAllDiscussions(): Promise<DiscussionSummary[]> {
@@ -196,7 +232,9 @@ export async function getDiscussionSlugs(): Promise<string[]> {
   );
 }
 
-export async function getDiscussionBySlug(slug: string): Promise<DiscussionDetail | null> {
+export async function getDiscussionBySlug(
+  slug: string,
+): Promise<DiscussionDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "discussionPost" && slug.current == $slug][0]{
       _id, title, slug, weekOf, topic, body, publishedAt, seo
@@ -221,7 +259,11 @@ export interface GuideArticleSummary {
 export interface GuideArticleDetail extends GuideArticleSummary {
   body?: unknown[];
   publishedAt?: string;
-  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: SanityImageSource };
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: SanityImageSource;
+  };
 }
 
 export async function getAllGuideArticles(): Promise<GuideArticleSummary[]> {
@@ -242,7 +284,9 @@ export async function getGuideSlugs(): Promise<string[]> {
   );
 }
 
-export async function getGuideArticleBySlug(slug: string): Promise<GuideArticleDetail | null> {
+export async function getGuideArticleBySlug(
+  slug: string,
+): Promise<GuideArticleDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "guideArticle" && slug.current == $slug][0]{
       _id, title, slug, section, order, difficulty, summary, body, publishedAt, seo
@@ -286,7 +330,11 @@ export interface AboutPageContent {
   heroImage?: SanityImageWithDimensions;
   bio?: unknown[];
   gear?: GearItem[];
-  seo?: { metaTitle?: string; metaDescription?: string; ogImage?: SanityImageSource };
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    ogImage?: SanityImageSource;
+  };
 }
 
 export async function getAboutPage(): Promise<AboutPageContent | null> {

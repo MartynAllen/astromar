@@ -90,10 +90,11 @@ test("falls back to the filename tier for a plain Enhanced_Stacked_ file with no
   assert.equal(result.targetCommonName, "Western Veil Nebula");
 });
 
-test("flags genuinely unparseable files for manual review instead of guessing", async () => {
+test("flags genuinely unparseable files for manual review instead of guessing", () => {
+  // Synthetic input, not a real file — represents a DSLR/phone frame with no
+  // Seestar EXIF and a filename that doesn't match any known convention.
   for (const filename of ["IMG_2291.JPG", "DSC_0405.jpg"]) {
-    const exif = await readRawExif(filename);
-    const result = resolveShotDetails(filename, exif);
+    const result = resolveShotDetails(filename, {});
     assert.equal(result.tier, "unresolved");
     assert.equal(result.needsReview, true);
     assert.equal(result.targetCatalogId, undefined);

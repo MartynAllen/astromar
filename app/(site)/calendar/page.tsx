@@ -3,9 +3,10 @@ import MoonPhaseWidget from "@/components/calendar/MoonPhaseWidget";
 import MeteorShowerList from "@/components/calendar/MeteorShowerList";
 import VisibilityFinder from "@/components/calendar/VisibilityFinder";
 import EventCard from "@/components/calendar/EventCard";
+import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import JsonLd from "@/components/seo/JsonLd";
-import { getUpcomingCalendarEvents } from "@/lib/sanity.queries";
+import { getUpcomingCalendarEvents, getHeroPhoto } from "@/lib/sanity.queries";
 import { eventJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
@@ -16,11 +17,13 @@ export const metadata: Metadata = {
 };
 
 export default async function CalendarPage() {
-  const events = await getUpcomingCalendarEvents();
+  const [events, heroPhoto] = await Promise.all([
+    getUpcomingCalendarEvents(),
+    getHeroPhoto(5),
+  ]);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-14">
-      <Breadcrumbs items={[{ name: "Calendar", path: "/calendar" }]} />
+    <>
       {events.map((event) => (
         <JsonLd
           key={event._id}
@@ -32,34 +35,46 @@ export default async function CalendarPage() {
           })}
         />
       ))}
-      <h1 className="font-display text-3xl font-semibold text-star-100">Astronomy Calendar</h1>
-      <p className="mt-2 text-star-500">
-        What&apos;s worth looking up for, and what&apos;s coming up on this end.
-      </p>
+      <PageHero photo={heroPhoto}>
+        <div className="mx-auto w-full max-w-3xl px-6">
+          <Breadcrumbs items={[{ name: "Calendar", path: "/calendar" }]} />
+          <h1 className="font-display text-3xl font-semibold text-star-100">
+            Astronomy Calendar
+          </h1>
+          <p className="mt-2 text-star-500">
+            What&apos;s worth looking up for, and what&apos;s coming up on this
+            end.
+          </p>
+        </div>
+      </PageHero>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <MoonPhaseWidget />
-        <MeteorShowerList />
-      </div>
+      <div className="mx-auto max-w-3xl px-6 py-10">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <MoonPhaseWidget />
+          <MeteorShowerList />
+        </div>
 
-      <div className="mt-6">
-        <VisibilityFinder />
-      </div>
+        <div className="mt-6">
+          <VisibilityFinder />
+        </div>
 
-      <div className="mt-10">
-        <p className="font-mono text-xs uppercase tracking-widest text-star-500">
-          Upcoming events
-        </p>
-        {events.length === 0 ? (
-          <p className="mt-4 text-star-500">Nothing on the calendar right now.</p>
-        ) : (
-          <div className="mt-3 space-y-3">
-            {events.map((event) => (
-              <EventCard key={event._id} event={event} />
-            ))}
-          </div>
-        )}
+        <div className="mt-10">
+          <p className="font-mono text-xs uppercase tracking-widest text-star-500">
+            Upcoming events
+          </p>
+          {events.length === 0 ? (
+            <p className="mt-4 text-star-500">
+              Nothing on the calendar right now.
+            </p>
+          ) : (
+            <div className="mt-3 space-y-3">
+              {events.map((event) => (
+                <EventCard key={event._id} event={event} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
