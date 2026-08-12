@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # Public, non-secret identifiers (already exposed client-side) — needed
+      # at build time since pages fetch content from Sanity via generateStaticParams.
+      NEXT_PUBLIC_SANITY_PROJECT_ID: c4xcz8tq
+      NEXT_PUBLIC_SANITY_DATASET: production
+      NEXT_PUBLIC_SITE_URL: https://astromar.co.uk
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
