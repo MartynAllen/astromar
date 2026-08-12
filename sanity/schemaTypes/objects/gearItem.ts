@@ -24,6 +24,14 @@ export default defineType({
     defineField({ name: "image", title: "Image", type: "image" }),
     defineField({ name: "notes", title: "Notes", type: "text", rows: 2 }),
     defineField({
+      name: "items",
+      title: "Included items",
+      type: "array",
+      of: [{ type: "string" }],
+      description:
+        "Optional — for a catch-all tile (e.g. \"Miscellaneous\") listing several small things at once.",
+    }),
+    defineField({
       name: "affiliateLink",
       title: "Affiliate link",
       type: "affiliateLink",

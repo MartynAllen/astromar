@@ -336,6 +336,7 @@ export interface GearItem {
   category: "telescope" | "camera" | "accessory" | "software";
   image?: SanityImageWithDimensions;
   notes?: string;
+  items?: string[];
   affiliateLink?: AffiliateLink;
 }
 

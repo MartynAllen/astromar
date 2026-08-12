@@ -76,6 +76,16 @@ export default async function AboutPage() {
                     {item.name}
                   </p>
                   {item.notes && <p className="mt-1 text-sm text-star-500">{item.notes}</p>}
+                  {item.items && item.items.length > 0 && (
+                    <ul className="mt-2 space-y-1 text-sm text-star-300">
+                      {item.items.map((sub) => (
+                        <li key={sub} className="flex gap-2">
+                          <span className="text-star-700">·</span>
+                          {sub}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {item.affiliateLink && (
                     <div className="mt-3">
                       <AffiliateButton link={item.affiliateLink} />
