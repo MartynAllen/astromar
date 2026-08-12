@@ -25,6 +25,12 @@ jobs:
 
       - run: npm ci
 
+      # Generates .next/types/ so route helpers like PageProps<'/route'>
+      # resolve — without this, a fresh checkout fails typecheck before
+      # a build has ever run.
+      - name: Generate route types
+        run: npx next typegen
+
       - name: Type-check
         run: npm run typecheck
 
