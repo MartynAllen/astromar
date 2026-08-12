@@ -65,7 +65,7 @@ export default defineType({
       type: "array",
       of: [
         { type: "block" },
-        { type: "image" },
+        { type: "bodyImage" },
         { type: "code", options: { withFilename: true } },
       ],
     }),

@@ -198,52 +198,6 @@ export async function getReviewBySlug(
   );
 }
 
-export interface DiscussionSummary {
-  _id: string;
-  title: string;
-  slug: SanitySlug;
-  weekOf: string;
-  topic?: string;
-}
-
-export interface DiscussionDetail extends DiscussionSummary {
-  body?: unknown[];
-  publishedAt?: string;
-  seo?: {
-    metaTitle?: string;
-    metaDescription?: string;
-    ogImage?: SanityImageSource;
-  };
-}
-
-export async function getAllDiscussions(): Promise<DiscussionSummary[]> {
-  return client.fetch(
-    /* groq */ `*[_type == "discussionPost"] | order(weekOf desc) { _id, title, slug, weekOf, topic }`,
-    {},
-    { next: { revalidate: REVALIDATE_SECONDS } },
-  );
-}
-
-export async function getDiscussionSlugs(): Promise<string[]> {
-  return client.fetch(
-    /* groq */ `*[_type == "discussionPost" && defined(slug.current)].slug.current`,
-    {},
-    { next: { revalidate: REVALIDATE_SECONDS } },
-  );
-}
-
-export async function getDiscussionBySlug(
-  slug: string,
-): Promise<DiscussionDetail | null> {
-  return client.fetch(
-    /* groq */ `*[_type == "discussionPost" && slug.current == $slug][0]{
-      _id, title, slug, weekOf, topic, body, publishedAt, seo
-    }`,
-    { slug },
-    { next: { revalidate: REVALIDATE_SECONDS } },
-  );
-}
-
 export type GuideDifficulty = "Beginner" | "Intermediate" | "Advanced";
 
 export interface GuideArticleSummary {

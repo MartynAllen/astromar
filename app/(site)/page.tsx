@@ -15,13 +15,6 @@ const SECTION_TEASERS = [
     heading: "group-hover:text-nebula-rose-400",
   },
   {
-    href: "/discussions",
-    title: "Weekly Discussion",
-    body: "A new prompt every week — planning sessions, processing questions, whatever's worth talking through.",
-    border: "hover:border-nebula-violet-400",
-    heading: "group-hover:text-nebula-violet-400",
-  },
-  {
     href: "/guide",
     title: "Beginner's Guide",
     body: "Starting point for anyone new to astrophotography, written from the smart-telescope side of the hobby.",
@@ -78,8 +71,8 @@ export default async function HomePage() {
           </h1>
           <p className="mt-5 max-w-xl text-base text-star-500 sm:text-lg">
             Nebulae, galaxies and the moon, captured one stacked exposure at a
-            time — plus the gear reviews, weekly discussion and beginner&apos;s
-            notes that come with it.
+            time — plus the gear reviews, beginner&apos;s notes and research
+            that come with it.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link
@@ -100,7 +93,7 @@ export default async function HomePage() {
 
       <section className="border-t border-void-700 bg-void-900/30">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2">
             {SECTION_TEASERS.map((teaser) => (
               <Link
                 key={teaser.href}

@@ -94,23 +94,6 @@ export function reviewJsonLd(input: {
   };
 }
 
-export function discussionForumPostingJsonLd(input: {
-  headline: string;
-  text?: string;
-  path: string;
-  datePublished?: string;
-}) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "DiscussionForumPosting",
-    headline: input.headline,
-    text: input.text,
-    url: `${SITE_URL}${input.path}`,
-    author: { "@type": "Person", name: "Martyn" },
-    datePublished: input.datePublished,
-  };
-}
-
 export function articleJsonLd(input: {
   headline: string;
   description?: string;

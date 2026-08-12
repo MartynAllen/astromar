@@ -2,7 +2,6 @@ import { type SchemaTypeDefinition } from "sanity";
 
 import astroPhoto from "./documents/astroPhoto";
 import reviewPost from "./documents/reviewPost";
-import discussionPost from "./documents/discussionPost";
 import guideArticle from "./documents/guideArticle";
 import calendarEvent from "./documents/calendarEvent";
 import researchProject from "./documents/researchProject";
@@ -13,13 +12,13 @@ import shotDetails from "./objects/shotDetails";
 import seo from "./objects/seo";
 import affiliateLink from "./objects/affiliateLink";
 import gearItem from "./objects/gearItem";
+import bodyImage from "./objects/bodyImage";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     // Documents
     astroPhoto,
     reviewPost,
-    discussionPost,
     guideArticle,
     calendarEvent,
     researchProject,
@@ -30,5 +29,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     seo,
     affiliateLink,
     gearItem,
+    bodyImage,
   ],
 };

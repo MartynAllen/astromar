@@ -39,16 +39,23 @@ const components: PortableTextComponents = {
     ),
   },
   types: {
-    image: ({ value }) => (
-      <span className="mt-6 block overflow-hidden rounded-lg border border-void-700">
-        <Image
-          src={urlFor(value).width(1200).url()}
-          alt={value?.alt ?? ""}
-          width={1200}
-          height={800}
-          className="h-auto w-full"
-        />
-      </span>
+    bodyImage: ({ value }) => (
+      <figure className="mt-6">
+        <span className="block overflow-hidden rounded-lg border border-void-700">
+          <Image
+            src={urlFor(value.image).width(1200).url()}
+            alt={value?.alt ?? ""}
+            width={1200}
+            height={800}
+            className="h-auto w-full"
+          />
+        </span>
+        {value?.caption && (
+          <figcaption className="mt-2 text-center text-sm text-star-500">
+            {value.caption}
+          </figcaption>
+        )}
+      </figure>
     ),
     code: ({ value }) => (
       <div className="mt-6 overflow-hidden rounded-lg border border-void-700 bg-void-900">

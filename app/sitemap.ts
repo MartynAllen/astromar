@@ -6,7 +6,6 @@ const STATIC_ROUTES = [
   "",
   "/gallery",
   "/reviews",
-  "/discussions",
   "/guide",
   "/calendar",
   "/research",
@@ -23,13 +22,12 @@ interface SlugRow {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const rows: SlugRow[] = await client.fetch(/* groq */ `*[
-      (_type == "astroPhoto" || _type == "reviewPost" || _type == "discussionPost" || _type == "guideArticle" || _type == "researchProject")
+      (_type == "astroPhoto" || _type == "reviewPost" || _type == "guideArticle" || _type == "researchProject")
       && defined(slug.current)
     ]{
       "pathPrefix": select(
         _type == "astroPhoto" => "/gallery",
         _type == "reviewPost" => "/reviews",
-        _type == "discussionPost" => "/discussions",
         _type == "guideArticle" => "/guide",
         _type == "researchProject" => "/research"
       ),

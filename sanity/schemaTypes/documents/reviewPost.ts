@@ -62,7 +62,7 @@ export default defineType({
       name: "body",
       title: "Full review",
       type: "array",
-      of: [{ type: "block" }, { type: "image" }],
+      of: [{ type: "block" }, { type: "bodyImage" }],
     }),
     defineField({
       name: "publishedAt",

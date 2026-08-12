@@ -25,25 +25,6 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-lg font-semibold text-star-100">Comments</h2>
-          <p className="mt-2">
-            Comments on Weekly Discussion posts are powered by{" "}
-            <a
-              href="https://giscus.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-nebula-teal-400 hover:underline"
-            >
-              giscus
-            </a>
-            , which stores comments as GitHub Discussions. To comment, your browser talks
-            directly to GitHub and giscus.app, and you&apos;ll need a free GitHub account to
-            sign in. Astromar doesn&apos;t see or store anything from that exchange beyond
-            the comment itself, which is publicly visible on GitHub.
-          </p>
-        </section>
-
-        <section>
           <h2 className="font-display text-lg font-semibold text-star-100">Affiliate links</h2>
           <p className="mt-2">
             Some pages link out to Amazon and other retailers (see the{" "}
