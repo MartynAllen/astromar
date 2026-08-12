@@ -62,11 +62,11 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
             alt={review.productName}
             width={120}
             height={120}
-            className="h-[120px] w-[120px] flex-none rounded-lg border border-void-700 object-cover"
+            className="h-[120px] w-[120px] flex-none border border-void-700 object-cover"
           />
         )}
         <div>
-          <h1 className="font-display text-3xl font-semibold text-star-100">{review.title}</h1>
+          <h1 className="font-display text-4xl italic text-star-100">{review.title}</h1>
           <p className="mt-1 text-star-500">{review.productType}</p>
           <div className="mt-2 text-lg">
             <RatingStars rating={review.rating} />

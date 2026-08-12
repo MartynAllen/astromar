@@ -32,7 +32,7 @@ export default function ShotDetailsPanel({ details }: { details?: ShotDetails })
     : undefined;
 
   return (
-    <div className="rounded-lg border border-void-700 bg-void-900 p-4">
+    <div className="border border-void-700 bg-void-900 p-4">
       <p className="mb-1 font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
         Shot details
       </p>

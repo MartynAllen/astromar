@@ -8,7 +8,7 @@ export default function MeteorShowerList() {
   const upcoming = getUpcomingMeteorShowers();
 
   return (
-    <div className="rounded-lg border border-void-700 bg-void-900 p-5">
+    <div className="border border-void-700 bg-void-900 p-5">
       <p className="font-mono text-xs uppercase tracking-widest text-nebula-rose-400">
         Upcoming meteor showers
       </p>

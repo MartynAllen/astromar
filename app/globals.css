@@ -42,8 +42,8 @@
   --color-nebula-indigo-400: #8fb2f5;
   --color-nebula-violet-400: #c99ef2;
 
-  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", monospace;
 
   --shadow-glow-rose: 0 0 32px -4px color-mix(in oklab, var(--color-nebula-rose-500) 55%, transparent);
@@ -56,12 +56,17 @@
   color-scheme: dark;
 }
 
+/* A faint coordinate grid, like the declination/RA lines on a star chart —
+   deliberately near-invisible; it should read as texture on close look,
+   never as a pattern from normal reading distance. */
 body {
   background-color: var(--color-void-950);
   background-image:
     radial-gradient(ellipse 80% 50% at 15% -10%, color-mix(in oklab, var(--color-nebula-rose-700) 28%, transparent), transparent),
-    radial-gradient(ellipse 70% 50% at 85% 0%, color-mix(in oklab, var(--color-nebula-teal-700) 24%, transparent), transparent);
-  background-repeat: no-repeat;
+    radial-gradient(ellipse 70% 50% at 85% 0%, color-mix(in oklab, var(--color-nebula-teal-700) 24%, transparent), transparent),
+    repeating-linear-gradient(to right, color-mix(in oklab, var(--color-star-100) 3%, transparent) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(to bottom, color-mix(in oklab, var(--color-star-100) 3%, transparent) 0 1px, transparent 1px 88px);
+  background-repeat: no-repeat, no-repeat, repeat, repeat;
   color: var(--color-star-100);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;

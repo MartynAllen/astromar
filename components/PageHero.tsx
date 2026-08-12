@@ -3,6 +3,16 @@ import Link from "next/link";
 import { urlFor } from "@/sanity/image";
 import type { AstroPhotoSummary } from "@/lib/sanity.queries";
 
+function CornerMarks() {
+  return (
+    <>
+      <span className="absolute left-4 top-4 h-5 w-5 border-l border-t border-star-100/30" />
+      <span className="absolute bottom-4 left-4 h-5 w-5 border-b border-l border-star-100/30" />
+      <span className="absolute bottom-4 right-4 h-5 w-5 border-b border-r border-star-100/30" />
+    </>
+  );
+}
+
 export default function PageHero({
   photo,
   className = "h-64 sm:h-80",
@@ -13,16 +23,10 @@ export default function PageHero({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className={`relative overflow-hidden border-b border-void-700 ${className}`}
-    >
+    <div className={`relative overflow-hidden border-b border-void-700 ${className}`}>
       {photo?.mainImage?.asset && (
         <Image
-          src={urlFor(photo.mainImage)
-            .width(1920)
-            .height(800)
-            .fit("crop")
-            .url()}
+          src={urlFor(photo.mainImage).width(1920).height(800).fit("crop").url()}
           alt=""
           fill
           priority
@@ -32,9 +36,8 @@ export default function PageHero({
       )}
       <div className="absolute inset-0 bg-void-950/75" />
       <div className="absolute inset-0 bg-gradient-to-t from-void-950 via-void-950/30 to-void-950/60" />
-      <div className="relative flex h-full flex-col justify-end pb-8">
-        {children}
-      </div>
+      <CornerMarks />
+      <div className="relative flex h-full flex-col justify-end pb-8">{children}</div>
       {photo && (
         <Link
           href={`/gallery/${photo.slug.current}`}

@@ -58,9 +58,7 @@ export default async function ResearchProjectPage(
       />
 
       <div className="flex items-center gap-3">
-        <h1 className="font-display text-3xl font-semibold text-star-100">
-          {project.title}
-        </h1>
+        <h1 className="font-display text-4xl italic text-star-100">{project.title}</h1>
         <StatusBadge status={project.status} />
       </div>
 
@@ -86,14 +84,14 @@ export default async function ResearchProjectPage(
           href={project.repoUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-5 inline-flex items-center gap-2 rounded-md border border-void-600 px-4 py-2 font-display text-sm font-medium text-star-100 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+          className="mt-5 inline-flex items-center gap-2 border border-void-600 px-4 py-2 font-mono text-xs uppercase tracking-widest text-star-100 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
         >
           View code repository →
         </a>
       )}
 
       {project.coverImage?.asset && (
-        <div className="mt-8 overflow-hidden rounded-lg border border-void-700">
+        <div className="mt-8 overflow-hidden border border-void-700">
           <Image
             src={urlFor(project.coverImage).width(1200).url()}
             alt=""

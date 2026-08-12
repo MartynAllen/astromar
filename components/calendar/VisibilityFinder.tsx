@@ -84,7 +84,7 @@ export default function VisibilityFinder() {
   }
 
   return (
-    <div className="rounded-lg border border-void-700 bg-void-900 p-5">
+    <div className="border border-void-700 bg-void-900 p-5">
       <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
         Optimal targets
       </p>
@@ -99,13 +99,13 @@ export default function VisibilityFinder() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Town, city, or postcode"
-          className="w-full min-w-0 rounded-md border border-void-600 bg-void-950 px-3 py-2 text-sm text-star-100 placeholder:text-star-700 focus:border-nebula-teal-500 sm:flex-1"
+          className="w-full min-w-0 border border-void-600 bg-void-950 px-3 py-2 text-sm text-star-100 placeholder:text-star-700 focus:border-nebula-teal-500 sm:flex-1"
         />
         <div className="flex gap-2">
           <button
             type="submit"
             disabled={status === "loading"}
-            className="flex-1 rounded-md bg-nebula-teal-400 px-4 py-2 font-display text-sm font-medium text-void-950 disabled:opacity-60 sm:flex-none"
+            className="flex-1 bg-nebula-teal-400 px-4 py-2 font-mono text-xs uppercase tracking-widest text-void-950 disabled:opacity-60 sm:flex-none"
           >
             Search
           </button>
@@ -113,7 +113,7 @@ export default function VisibilityFinder() {
             type="button"
             onClick={handleUseMyLocation}
             disabled={status === "loading"}
-            className="flex-1 rounded-md border border-void-600 px-4 py-2 text-sm whitespace-nowrap text-star-300 hover:border-nebula-teal-500 disabled:opacity-60 sm:flex-none"
+            className="flex-1 border border-void-600 px-4 py-2 font-mono text-xs uppercase tracking-widest whitespace-nowrap text-star-300 hover:border-nebula-teal-500 disabled:opacity-60 sm:flex-none"
           >
             Use my location
           </button>
@@ -152,7 +152,7 @@ export default function VisibilityFinder() {
               </p>
             ) : (
               nights[activeDay].hours.map((hour, i) => (
-                <div key={i} className="rounded-md border border-void-700 bg-void-950 p-3">
+                <div key={i} className="border border-void-700 bg-void-950 p-3">
                   <p className="font-mono text-xs text-star-500">
                     {hour.time.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
                   </p>
@@ -163,7 +163,7 @@ export default function VisibilityFinder() {
                       hour.best.map((v) => (
                         <div
                           key={v.object.id}
-                          className="rounded border border-void-600 px-2.5 py-1.5"
+                          className="border border-void-600 px-2.5 py-1.5"
                           title={`${TYPE_LABEL[v.object.type]} · mag ${v.object.magnitude}`}
                         >
                           <p className="text-sm text-star-100">{v.object.name}</p>

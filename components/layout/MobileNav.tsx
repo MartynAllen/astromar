@@ -14,7 +14,7 @@ export default function MobileNav() {
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 w-10 items-center justify-center rounded-md text-star-100"
+        className="flex h-10 w-10 items-center justify-center text-star-100"
       >
         <svg
           width="22"
@@ -42,14 +42,14 @@ export default function MobileNav() {
       </button>
 
       {open && (
-        <nav className="absolute inset-x-0 top-16 border-t border-void-700 bg-void-950/95 px-6 py-4 backdrop-blur">
-          <ul className="flex flex-col gap-1">
+        <nav className="absolute inset-x-0 top-20 border-t border-void-700 bg-void-950/95 px-6 py-4 backdrop-blur">
+          <ul className="flex flex-col divide-y divide-void-700">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-md px-2 py-2.5 font-display text-base text-star-100 hover:text-nebula-teal-400"
+                  className="block py-3 font-display text-xl italic text-star-100 hover:text-nebula-teal-400"
                 >
                   {link.label}
                 </Link>

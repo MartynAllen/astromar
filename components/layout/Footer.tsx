@@ -9,17 +9,15 @@ export default async function Footer() {
 
   return (
     <footer className="border-t border-void-700 bg-void-900/40">
-      <div className="mx-auto max-w-6xl px-6 py-12">
-        <div className="grid gap-10 sm:grid-cols-3">
-          <div>
-            <p className="font-display text-lg font-semibold text-nebula-teal-400">
-              {siteName}
-            </p>
+      <div className="mx-auto max-w-6xl px-6 py-14">
+        <div className="grid gap-10 sm:grid-cols-3 sm:divide-x sm:divide-void-700">
+          <div className="sm:pr-8">
+            <p className="font-display text-2xl italic text-star-100">{siteName}</p>
             <p className="mt-2 max-w-xs text-sm text-star-500">{tagline}</p>
           </div>
 
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-star-500">
+          <div className="sm:px-8">
+            <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
               Explore
             </p>
             <ul className="mt-3 flex flex-col gap-2">
@@ -36,10 +34,10 @@ export default async function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="sm:pl-8">
             {settings?.socialLinks && settings.socialLinks.length > 0 && (
               <>
-                <p className="text-xs font-medium uppercase tracking-wider text-star-500">
+                <p className="font-mono text-xs uppercase tracking-widest text-nebula-rose-400">
                   Elsewhere
                 </p>
                 <ul className="mt-3 flex flex-col gap-2">
@@ -62,13 +60,16 @@ export default async function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-void-700 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-star-500">
-            © {new Date().getFullYear()} {siteName}. All photos are the author&apos;s own.
+          <p className="font-mono text-xs text-star-700">
+            © {new Date().getFullYear()} {siteName} — all photos are the author&apos;s own.
           </p>
           <ul className="flex gap-4">
             {LEGAL_LINKS.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="text-xs text-star-500 hover:text-star-300">
+                <Link
+                  href={link.href}
+                  className="font-mono text-xs text-star-700 hover:text-star-300"
+                >
                   {link.label}
                 </Link>
               </li>

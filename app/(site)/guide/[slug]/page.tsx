@@ -51,7 +51,7 @@ export default async function GuideArticlePage(props: PageProps<"/guide/[slug]">
         {article.section}
         {article.difficulty ? ` · ${article.difficulty}` : ""}
       </p>
-      <h1 className="mt-2 font-display text-3xl font-semibold text-star-100">{article.title}</h1>
+      <h1 className="mt-2 font-display text-4xl italic text-star-100">{article.title}</h1>
       {article.summary && <p className="mt-3 text-star-500">{article.summary}</p>}
 
       <PortableTextContent value={article.body} />

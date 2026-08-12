@@ -26,9 +26,7 @@ export default async function ReviewsPage() {
       <PageHero photo={heroPhoto}>
         <div className="mx-auto w-full max-w-3xl px-6">
           <Breadcrumbs items={[{ name: "Reviews", path: "/reviews" }]} />
-          <h1 className="font-display text-3xl font-semibold text-star-100">
-            Reviews
-          </h1>
+          <h1 className="font-display text-4xl italic text-star-100">Reviews</h1>
           <p className="mt-2 text-star-500">
             Gear that&apos;s actually been used to make the photos in the
             gallery — nothing reviewed sight-unseen.
@@ -58,11 +56,11 @@ export default async function ReviewsPage() {
                       alt={review.productName}
                       width={80}
                       height={80}
-                      className="h-20 w-20 flex-none rounded-md border border-void-700 object-cover"
+                      className="h-20 w-20 flex-none border border-void-700 object-cover"
                     />
                   )}
                   <div>
-                    <h2 className="font-display text-lg font-medium text-star-100 group-hover:text-nebula-rose-400">
+                    <h2 className="font-display text-xl italic text-star-100 group-hover:text-nebula-rose-400">
                       {review.title}
                     </h2>
                     <p className="text-sm text-star-500">

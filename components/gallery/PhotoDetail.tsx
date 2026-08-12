@@ -8,7 +8,7 @@ export default function PhotoDetail({ photo }: { photo: AstroPhotoDetail }) {
   const dims = photo.mainImage.dimensions;
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-      <div className="overflow-hidden rounded-lg border border-void-700 bg-void-900">
+      <div className="overflow-hidden border border-void-700 bg-void-900">
         <Image
           src={urlFor(photo.mainImage).width(1600).url()}
           alt={photo.caption || photo.title}
@@ -21,7 +21,7 @@ export default function PhotoDetail({ photo }: { photo: AstroPhotoDetail }) {
       </div>
 
       <div>
-        <h1 className="font-display text-2xl font-semibold text-star-100">{photo.title}</h1>
+        <h1 className="font-display text-3xl italic text-star-100">{photo.title}</h1>
         {photo.caption && <p className="mt-2 text-star-500">{photo.caption}</p>}
         <div className="mt-4">
           <ShotDetailsPanel details={photo.shotDetails} />

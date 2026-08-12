@@ -36,12 +36,10 @@ export default async function AboutPage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
       <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
-      <h1 className="font-display text-3xl font-semibold text-star-100">
-        About
-      </h1>
+      <h1 className="font-display text-4xl italic text-star-100">About</h1>
 
       {about?.heroImage?.asset && (
-        <div className="mt-6 overflow-hidden rounded-lg border border-void-700">
+        <div className="mt-6 overflow-hidden border border-void-700">
           <Image
             src={urlFor(about.heroImage).width(1200).url()}
             alt="Martyn's imaging setup"
@@ -60,9 +58,7 @@ export default async function AboutPage() {
 
       {about?.gear && about.gear.length > 0 && (
         <div className="mt-12">
-          <h2 className="font-display text-2xl font-semibold text-star-100">
-            The gear
-          </h2>
+          <h2 className="font-display text-3xl italic text-star-100">The gear</h2>
           <div className="mt-4">
             <AffiliateDisclosureBanner />
           </div>
@@ -73,7 +69,7 @@ export default async function AboutPage() {
               return (
                 <div
                   key={`${item.name}-${i}`}
-                  className={`flex items-start gap-4 rounded-lg border border-l-2 border-void-700 bg-void-900 p-4 ${color} ${spanFull ? "sm:col-span-2" : ""}`}
+                  className={`flex items-start gap-4 border border-l-2 border-void-700 bg-void-900 p-4 ${color} ${spanFull ? "sm:col-span-2" : ""}`}
                 >
                   {item.image?.asset ? (
                     <Image
@@ -81,10 +77,10 @@ export default async function AboutPage() {
                       alt={item.name}
                       width={72}
                       height={72}
-                      className="h-[72px] w-[72px] flex-none rounded-md border border-void-700 object-cover"
+                      className="h-[72px] w-[72px] flex-none border border-void-700 object-cover"
                     />
                   ) : (
-                    <div className="flex h-[72px] w-[72px] flex-none items-center justify-center rounded-md border border-void-700">
+                    <div className="flex h-[72px] w-[72px] flex-none items-center justify-center border border-void-700">
                       <CategoryIcon
                         category={item.category}
                         className="h-8 w-8"
@@ -92,10 +88,10 @@ export default async function AboutPage() {
                     </div>
                   )}
                   <div className="flex-1">
-                    <p className="text-xs uppercase tracking-wider">
+                    <p className="font-mono text-xs uppercase tracking-wider">
                       {CATEGORY_LABEL[item.category] ?? item.category}
                     </p>
-                    <p className="mt-0.5 font-display text-base font-medium text-star-100">
+                    <p className="mt-0.5 font-display text-lg italic text-star-100">
                       {item.name}
                     </p>
                     {item.notes && (
