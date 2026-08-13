@@ -24,7 +24,7 @@ export default function PhotoCard({ photo }: { photo: AstroPhotoSummary }) {
         className="h-auto w-full transition-transform duration-300 group-hover:scale-[1.03]"
       />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-void-950/95 via-void-950/40 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-        <p className="font-display text-base italic text-star-100">{photo.title}</p>
+        <p className="font-display text-base text-star-100">{photo.title}</p>
         {summary && (
           <p className="mt-0.5 font-mono text-xs text-nebula-teal-400">{summary}</p>
         )}

@@ -36,7 +36,7 @@ export default async function AboutPage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
       <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
-      <h1 className="font-display text-4xl italic text-star-100">About</h1>
+      <h1 className="font-display text-4xl text-star-100">About</h1>
 
       {about?.heroImage?.asset && (
         <div className="mt-6 overflow-hidden border border-void-700">
@@ -58,7 +58,7 @@ export default async function AboutPage() {
 
       {about?.gear && about.gear.length > 0 && (
         <div className="mt-12">
-          <h2 className="font-display text-3xl italic text-star-100">The gear</h2>
+          <h2 className="font-display text-3xl text-star-100">The gear</h2>
           <div className="mt-4">
             <AffiliateDisclosureBanner />
           </div>
@@ -91,7 +91,7 @@ export default async function AboutPage() {
                     <p className="font-mono text-xs uppercase tracking-wider">
                       {CATEGORY_LABEL[item.category] ?? item.category}
                     </p>
-                    <p className="mt-0.5 font-display text-lg italic text-star-100">
+                    <p className="mt-0.5 font-display text-lg text-star-100">
                       {item.name}
                     </p>
                     {item.notes && (

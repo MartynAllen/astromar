@@ -21,7 +21,7 @@ export default function PhotoDetail({ photo }: { photo: AstroPhotoDetail }) {
       </div>
 
       <div>
-        <h1 className="font-display text-3xl italic text-star-100">{photo.title}</h1>
+        <h1 className="font-display text-3xl text-star-100">{photo.title}</h1>
         {photo.caption && <p className="mt-2 text-star-500">{photo.caption}</p>}
         <div className="mt-4">
           <ShotDetailsPanel details={photo.shotDetails} />

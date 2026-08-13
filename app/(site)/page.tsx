@@ -50,10 +50,10 @@ export default async function HomePage() {
             className="object-cover"
           />
         )}
-        <div className="absolute inset-0 bg-void-950/82" />
-        <div className="absolute inset-0 bg-gradient-to-t from-void-950 via-void-950/45 to-void-950/70" />
-        <span className="absolute left-4 top-4 h-5 w-5 border-l border-t border-star-100/30 sm:left-6 sm:top-6" />
-        <span className="absolute right-4 top-4 h-5 w-5 border-r border-t border-star-100/30 sm:right-6 sm:top-6" />
+        <div className="absolute inset-0 bg-void-950/28" />
+        <div className="absolute inset-0 bg-gradient-to-t from-void-950 via-void-950/60 to-transparent" />
+        <span className="absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-star-100/60 sm:left-6 sm:top-6" />
+        <span className="absolute right-4 top-4 h-6 w-6 border-r-2 border-t-2 border-star-100/60 sm:right-6 sm:top-6" />
 
         <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-24 sm:pt-32">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-nebula-teal-400">
@@ -98,7 +98,7 @@ export default async function HomePage() {
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div className="flex-1">
-                  <h3 className={`font-display text-2xl italic text-star-100 ${teaser.color}`}>
+                  <h3 className={`font-display text-2xl text-star-100 ${teaser.color}`}>
                     {teaser.title}
                   </h3>
                   <p className="mt-1.5 max-w-xl text-sm text-star-500">{teaser.body}</p>
@@ -117,7 +117,7 @@ export default async function HomePage() {
       {featured.length > 0 && (
         <section className="mx-auto max-w-6xl px-6 py-16">
           <div className="mb-6 flex items-baseline justify-between border-b border-void-700 pb-4">
-            <h2 className="font-display text-3xl italic text-star-100">Featured shots</h2>
+            <h2 className="font-display text-3xl text-star-100">Featured shots</h2>
             <Link
               href="/gallery"
               className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400 hover:underline"

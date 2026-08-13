@@ -5,12 +5,12 @@ import { urlFor } from "@/sanity/image";
 const components: PortableTextComponents = {
   block: {
     h2: ({ children }) => (
-      <h2 className="mt-12 border-t border-void-700 pt-6 font-display text-3xl italic text-star-100">
+      <h2 className="mt-12 border-t border-void-700 pt-6 font-display text-3xl text-star-100">
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="mt-8 font-display text-2xl italic text-star-100">{children}</h3>
+      <h3 className="mt-8 font-display text-2xl text-star-100">{children}</h3>
     ),
     normal: ({ children }) => (
       <p className="mt-4 leading-relaxed text-star-300">{children}</p>

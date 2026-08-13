@@ -49,7 +49,7 @@ export default function MobileNav() {
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block py-3 font-display text-xl italic text-star-100 hover:text-nebula-teal-400"
+                  className="block py-3 font-display text-xl text-star-100 hover:text-nebula-teal-400"
                 >
                   {link.label}
                 </Link>

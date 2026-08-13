@@ -58,7 +58,7 @@ export default async function ResearchProjectPage(
       />
 
       <div className="flex items-center gap-3">
-        <h1 className="font-display text-4xl italic text-star-100">{project.title}</h1>
+        <h1 className="font-display text-4xl text-star-100">{project.title}</h1>
         <StatusBadge status={project.status} />
       </div>
 

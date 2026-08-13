@@ -6,9 +6,9 @@ import type { AstroPhotoSummary } from "@/lib/sanity.queries";
 function CornerMarks() {
   return (
     <>
-      <span className="absolute left-4 top-4 h-5 w-5 border-l border-t border-star-100/30" />
-      <span className="absolute bottom-4 left-4 h-5 w-5 border-b border-l border-star-100/30" />
-      <span className="absolute bottom-4 right-4 h-5 w-5 border-b border-r border-star-100/30" />
+      <span className="absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-star-100/60" />
+      <span className="absolute bottom-4 left-4 h-6 w-6 border-b-2 border-l-2 border-star-100/60" />
+      <span className="absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-star-100/60" />
     </>
   );
 }
@@ -34,14 +34,14 @@ export default function PageHero({
           className="object-cover"
         />
       )}
-      <div className="absolute inset-0 bg-void-950/75" />
-      <div className="absolute inset-0 bg-gradient-to-t from-void-950 via-void-950/30 to-void-950/60" />
+      <div className="absolute inset-0 bg-void-950/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-void-950 via-void-950/50 to-transparent" />
       <CornerMarks />
       <div className="relative flex h-full flex-col justify-end pb-8">{children}</div>
       {photo && (
         <Link
           href={`/gallery/${photo.slug.current}`}
-          className="absolute right-4 top-4 z-10 font-mono text-[11px] text-star-500 transition-colors hover:text-nebula-teal-400"
+          className="absolute right-4 top-4 z-10 bg-void-950/50 px-2 py-1 font-mono text-[11px] text-star-300 backdrop-blur-sm transition-colors hover:text-nebula-teal-400"
         >
           {photo.title} →
         </Link>

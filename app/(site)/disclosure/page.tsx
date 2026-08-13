@@ -10,7 +10,7 @@ export default function DisclosurePage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
       <Breadcrumbs items={[{ name: "Affiliate Disclosure", path: "/disclosure" }]} />
-      <h1 className="font-display text-4xl italic text-star-100">Affiliate Disclosure</h1>
+      <h1 className="font-display text-4xl text-star-100">Affiliate Disclosure</h1>
 
       <div className="mt-8 space-y-4 text-star-300">
         <p>
