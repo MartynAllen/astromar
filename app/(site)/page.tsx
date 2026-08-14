@@ -3,6 +3,7 @@ import Link from "next/link";
 import PhotoCard from "@/components/gallery/PhotoCard";
 import { urlFor } from "@/sanity/image";
 import { getFeaturedPhotos } from "@/lib/sanity.queries";
+import { formatShotSummary } from "@/lib/astro/shotDetails";
 
 export const revalidate = 60;
 
@@ -36,6 +37,9 @@ const SECTION_TEASERS = [
 export default async function HomePage() {
   const featured = await getFeaturedPhotos();
   const heroPhoto = featured[0];
+  const heroSummary = heroPhoto?.shotDetails
+    ? formatShotSummary(heroPhoto.shotDetails)
+    : undefined;
 
   return (
     <>
@@ -77,6 +81,21 @@ export default async function HomePage() {
             time — plus the gear reviews, beginner&apos;s notes and research
             that come with it.
           </p>
+          {(heroPhoto?.shotDetails?.targetCommonName || heroSummary) && (
+            <div className="mt-6 inline-flex flex-wrap items-center gap-x-3 gap-y-1 border border-void-700 bg-void-950/50 px-4 py-2.5 backdrop-blur-sm">
+              <span className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+                This shot
+              </span>
+              {heroPhoto?.shotDetails?.targetCommonName && (
+                <span className="font-mono text-xs text-star-100">
+                  {heroPhoto.shotDetails.targetCommonName}
+                </span>
+              )}
+              {heroSummary && (
+                <span className="font-mono text-xs text-star-500">{heroSummary}</span>
+              )}
+            </div>
+          )}
           <div className="mt-9 flex flex-wrap gap-3">
             <Link
               href="/gallery"

@@ -147,6 +147,7 @@ export interface ReviewSummary {
   productType?: string;
   productImage?: SanityImageWithDimensions;
   rating: number;
+  verdict?: string;
   publishedAt?: string;
 }
 
@@ -164,7 +165,7 @@ export interface ReviewDetail extends ReviewSummary {
 }
 
 const reviewSummaryProjection = /* groq */ `{
-  _id, title, slug, productName, productType, rating, publishedAt,
+  _id, title, slug, productName, productType, rating, verdict, publishedAt,
   "productImage": productImage{..., "dimensions": asset->metadata.dimensions}
 }`;
 

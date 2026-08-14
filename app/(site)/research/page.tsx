@@ -39,15 +39,15 @@ export default async function ResearchPage() {
             No research projects posted yet.
           </p>
         ) : (
-          <ul className="mt-2 divide-y divide-void-700">
+          <ul className="mt-2 space-y-4">
             {projects.map((project) => (
-              <li key={project._id} className="py-6">
+              <li key={project._id}>
                 <Link
                   href={`/research/${project.slug.current}`}
-                  className="group block"
+                  className="group block border border-void-700 border-l-2 border-l-nebula-green-400 bg-void-900 p-5 transition-colors hover:border-void-600"
                 >
                   <div className="flex items-center gap-3">
-                    <h2 className="font-display text-xl text-star-100 group-hover:text-nebula-teal-400">
+                    <h2 className="font-display text-xl text-star-100 group-hover:text-nebula-green-400">
                       {project.title}
                     </h2>
                     <StatusBadge status={project.status} />
@@ -62,7 +62,7 @@ export default async function ResearchPage() {
                       {project.techniques.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full border border-void-600 px-2.5 py-0.5 text-xs text-star-500"
+                          className="rounded-full border border-nebula-green-400/30 px-2.5 py-0.5 font-mono text-xs text-nebula-green-400"
                         >
                           {tag}
                         </span>
