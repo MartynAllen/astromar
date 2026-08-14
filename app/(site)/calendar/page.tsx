@@ -36,7 +36,7 @@ export default async function CalendarPage() {
         />
       ))}
       <PageHero photo={heroPhoto}>
-        <div className="mx-auto w-full max-w-3xl px-6">
+        <div className="mx-auto w-full max-w-4xl px-6">
           <Breadcrumbs items={[{ name: "Calendar", path: "/calendar" }]} />
           <h1 className="font-display text-4xl text-star-100">Astronomy Calendar</h1>
           <p className="mt-2 text-star-500">
@@ -45,7 +45,7 @@ export default async function CalendarPage() {
         </div>
       </PageHero>
 
-      <div className="mx-auto max-w-3xl px-6 py-10">
+      <div className="mx-auto max-w-4xl px-6 py-10">
         <div className="grid gap-4 sm:grid-cols-2">
           <MoonPhaseWidget />
           <MeteorShowerList />

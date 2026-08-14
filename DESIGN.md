@@ -210,13 +210,21 @@ button labels, badges, the home page's `01`/`02`/`03` list index, shot-detail ro
 
 ## Layout
 
-Content sits in one of three fixed-width containers depending on the page's density,
+Content sits in one of four fixed-width containers depending on the page's density,
 centred with `mx-auto` and `px-6` horizontal padding: `max-w-6xl` for wide, photo-grid
-pages (Home, Gallery), `max-w-3xl` for medium list pages (Reviews, Guide, Calendar,
-Research index), and `max-w-2xl` for narrow reading pages (About, Privacy, Disclosure,
-and every article/review/photo detail page). The header is a fixed `h-20` sticky bar
-(`bg-void-950/85` with `backdrop-blur`) with a hairline bottom border; the same `max-w-6xl`
-container governs it.
+pages (Home, Gallery), `max-w-3xl` for medium list pages (Reviews, Guide, Research
+index), `max-w-4xl` for Calendar specifically, and `max-w-2xl` for narrow reading pages
+(About, Privacy, Disclosure, and every article/review/photo detail page). The header is
+a fixed `h-20` sticky bar (`bg-void-950/85` with `backdrop-blur`) with a hairline bottom
+border; the same `max-w-6xl` container governs it.
+
+Calendar breaks from its list-page siblings' `max-w-3xl` on purpose: unlike Reviews or
+Guide, it isn't a list of titles, it's a dashboard of widgets (the moon-phase/meteor-
+shower pair, the visibility finder's wrapping per-hour result chips). At `max-w-3xl` the
+finder's chip rows wrapped raggedly — a lone chip stranding itself on its own row with
+a few hundred px of dead space beside it. `max-w-4xl` gives that flex-wrap content
+enough room to settle before repeating the pattern elsewhere: a data-dense page earns
+more width than a reading-page container, it doesn't inherit one by default.
 
 List-style pages favour `divide-y divide-void-700` rows over card grids — the home page's
 section-teaser list and every index page's article/review list read as a single ruled
