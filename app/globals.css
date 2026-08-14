@@ -82,13 +82,6 @@ body {
   outline-offset: 2px;
 }
 
-.text-gradient-nebula {
-  background-image: linear-gradient(to right, var(--color-nebula-rose-400), var(--color-nebula-teal-400));
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-}
-
 /* Shutter intro — a camera-iris reveal played once per browser session.
    The hexagon starts collapsed (fully covering, via the SVG mask in
    ShutterIntro.tsx), holds briefly like a shutter cocking, then snaps
@@ -133,5 +126,39 @@ body {
   .shutter-hole,
   .shutter-wordmark {
     animation: none !important;
+  }
+}
+
+/* Lightbox entrance — the clicked photo morphs in from its grid thumbnail
+   (the position/scale transform is computed and played in Lightbox.tsx,
+   since it depends on where the thumbnail actually sits on screen). This
+   half handles what doesn't need that runtime measurement: the backdrop
+   and the surrounding detail content settling in a beat after the photo. */
+@keyframes lightbox-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes lightbox-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.lightbox-backdrop {
+  animation: lightbox-backdrop-in 220ms ease-out both;
+}
+
+.lightbox-content {
+  animation: lightbox-content-in 320ms cubic-bezier(0.16, 1, 0.3, 1) 60ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox-backdrop,
+  .lightbox-content {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
   }
 }

@@ -13,6 +13,7 @@ export default function PhotoCard({ photo }: { photo: AstroPhotoSummary }) {
   return (
     <Link
       href={`/gallery/${photo.slug.current}`}
+      data-photo-slug={photo.slug.current}
       className="group relative mb-4 block break-inside-avoid overflow-hidden border border-void-700 bg-void-900"
     >
       <Image

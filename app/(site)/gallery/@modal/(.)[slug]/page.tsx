@@ -9,7 +9,7 @@ export default async function PhotoModal(props: PageProps<"/gallery/[slug]">) {
   if (!photo) notFound();
 
   return (
-    <Lightbox>
+    <Lightbox slug={slug}>
       <PhotoDetail photo={photo} />
     </Lightbox>
   );

@@ -245,6 +245,42 @@ declination/RA lines rather than a literal decoration.
 Interactive feedback comes from border-colour and text-colour transitions
 (`transition-colors`) or a background fill (buttons), never from elevation.
 
+## Motion
+
+Two authored moments, deliberately not more: the once-per-session shutter-open intro
+(`ShutterIntro.tsx`), and the gallery lightbox's shared-element photo morph
+(`Lightbox.tsx`). Everything else moves only as fast, functional feedback —
+`transition-colors` on hover/focus, the `group-hover:scale-[1.03]` on `PhotoCard` — never
+as scroll reveals, staggered list entrances, or decoration.
+
+**The lightbox morph.** Opening a photo computes the on-screen delta between the grid
+thumbnail just clicked (still mounted behind the modal — parallel routes never unmount
+the grid) and the modal's own image, then plays it as a single WAAPI transform
+(`translate()` + `scale()`, 420ms, `cubic-bezier(0.16, 1, 0.3, 1)`, with a 2px mid-flight
+blur to mask pixel-snap artifacts). Closing reverses the same calculation at 200ms —
+exit faster than entrance — before calling `router.back()`, so the photo visibly returns
+to its thumbnail rather than just vanishing. The backdrop and detail panel fade in
+separately via plain CSS keyframes (`.lightbox-backdrop`, `.lightbox-content`), since
+those don't need the runtime position lookup the photo itself does.
+
+React's `<ViewTransition>` (the API Next 16's own docs feature for this exact shared-element
+case) was deliberately not used — it isn't in the installed React yet (19.2.8 stable;
+the component ships in canary only), and this site doesn't carry an experimental React
+dependency for it. The Web Animations API gets the same result on the current stack.
+
+`prefers-reduced-motion` drops the transform entirely on both directions — the modal
+opens and closes with `router.back()` called directly, no measurement, no animation — while
+the backdrop/content CSS keyframes collapse to a 0.01ms duration rather than `animation:
+none`, so content still resolves to its correct end state instead of getting stuck
+mid-keyframe.
+
+### Named Rules
+**The One Focal Moment Rule.** A new interaction earns motion only if it acknowledges an
+action, explains a state or spatial change, or preserves continuity across a navigation —
+never to make a static area "feel alive." Before adding a third authored moment, ask
+whether it's actually explaining something the shutter intro or the lightbox morph
+don't already cover.
+
 ## Shapes
 
 Sharp corners everywhere except two deliberate exceptions: pills (`rounded-full`) for
