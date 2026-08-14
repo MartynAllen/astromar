@@ -7,6 +7,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import CategoryIcon from "@/components/about/CategoryIcon";
 import { urlFor } from "@/sanity/image";
 import { getAboutPage } from "@/lib/sanity.queries";
+import { SUPPORT_URL } from "@/lib/navigation";
 
 export const revalidate = 60;
 
@@ -119,6 +120,25 @@ export default async function AboutPage() {
           </div>
         </div>
       )}
+
+      <div className="mt-12 border-t border-void-700 pt-8">
+        <h2 className="font-display text-3xl text-star-100">Support the site</h2>
+        <p className="mt-3 text-star-500">
+          Astromar doesn&apos;t run ads, and the odd affiliate link barely dents the cost
+          of the gear above. If you&apos;ve enjoyed the photos or found a guide useful,
+          you&apos;re welcome to buy me a coffee — it goes straight back into camera
+          gear, clear-sky trips, and the very late nights that make these images happen.
+          Never expected, always genuinely appreciated.
+        </p>
+        <a
+          href={SUPPORT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center gap-2 border border-void-600 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-star-300 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+        >
+          Buy me a coffee
+        </a>
+      </div>
     </div>
   );
 }

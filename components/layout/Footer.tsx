@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { NAV_LINKS, LEGAL_LINKS } from "@/lib/navigation";
+import { NAV_LINKS, LEGAL_LINKS, SUPPORT_URL } from "@/lib/navigation";
 import { getSiteSettings } from "@/lib/sanity.queries";
 
 export default async function Footer() {
@@ -21,6 +21,17 @@ export default async function Footer() {
           <div className="sm:pr-8">
             <p className="font-display text-2xl italic text-star-100">{siteName}</p>
             <p className="mt-2 max-w-xs text-sm text-star-500">{tagline}</p>
+            <p className="mt-3 max-w-xs text-sm text-star-500">
+              Enjoying the photos?{" "}
+              <a
+                href={SUPPORT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-nebula-teal-400 hover:text-nebula-teal-300 hover:underline"
+              >
+                Buy me a coffee →
+              </a>
+            </p>
           </div>
 
           <div className="sm:px-8">

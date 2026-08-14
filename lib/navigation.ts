@@ -16,3 +16,5 @@ export const LEGAL_LINKS: NavLink[] = [
   { href: "/disclosure", label: "Affiliate Disclosure" },
   { href: "/privacy", label: "Privacy" },
 ];
+
+export const SUPPORT_URL = "https://buymeacoffee.com/astromar";
