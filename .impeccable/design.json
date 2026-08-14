@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-14T10:01:13Z",
+  "title": "Design System: Astromar",
+  "extensions": {
+    "colorMeta": {
+      "nebula-rose-400": {
+        "role": "primary",
+        "displayName": "Nebula Rose",
+        "canonical": "#ec7fae",
+        "tonalRamp": ["#f2a6c4", "#ec7fae", "#e0487f", "#c13868", "#9c2c53"]
+      },
+      "nebula-teal-400": {
+        "role": "secondary",
+        "displayName": "Nebula Teal",
+        "canonical": "#6fdcec",
+        "tonalRamp": ["#a8ecf5", "#6fdcec", "#35c4de", "#1f9db8", "#1a7e93"]
+      },
+      "nebula-amber-400": {
+        "role": "tertiary",
+        "displayName": "Nebula Amber",
+        "canonical": "#f0c26f"
+      },
+      "nebula-green-400": {
+        "role": "tertiary",
+        "displayName": "Nebula Green",
+        "canonical": "#8fe0ab"
+      },
+      "nebula-indigo-400": {
+        "role": "tertiary",
+        "displayName": "Nebula Indigo",
+        "canonical": "#8fb2f5"
+      },
+      "void-950": {
+        "role": "neutral",
+        "displayName": "Void",
+        "canonical": "#05060a",
+        "tonalRamp": ["#05060a", "#0a0c14", "#1b1e2c", "#262a3b"]
+      },
+      "star-100": {
+        "role": "neutral",
+        "displayName": "Star",
+        "canonical": "#f5f7fa",
+        "tonalRamp": ["#f5f7fa", "#c7cbd9", "#8a90a6", "#565b6e"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page headlines and the home hero only. Single weight — hierarchy is size, not boldness." },
+      "body": { "displayName": "Body", "purpose": "Reading copy: descriptions, article prose, captions." },
+      "label": { "displayName": "Label / Mono", "purpose": "Nav, buttons, badges, index numbers, shot-detail readouts — the system's instrument-panel voice." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "shutter-open", "value": "1.1s cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "The once-per-session camera-iris intro reveal on first page load." },
+      { "name": "shutter-wordmark-out", "value": "1.1s ease-out", "purpose": "Wordmark fade-in/out timed against the shutter-open reveal." },
+      { "name": "color/border transition", "value": "0.2s ease (Tailwind's transition-colors default)", "purpose": "The only motion on interactive elements — border and text colour shifts on hover/focus. No shadow, scale, or transform on hover by default." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one 'act now' affordance — outlined at rest, fills solid on hover. Used for the main gallery CTA and affiliate links.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">View the gallery</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #ec7fae; background: transparent; color: #ec7fae; padding: 10px 20px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; text-decoration: none; transition: background-color 0.2s, color 0.2s; } .ds-btn-primary:hover, .ds-btn-primary:focus-visible { background: #ec7fae; color: #05060a; } .ds-btn-primary:focus-visible { outline: 2px solid #6fdcec; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Lower-emphasis action, same shape and padding as primary but neutral at rest.",
+      "html": "<a class=\"ds-btn-secondary\" href=\"#\">About the setup</a>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; border: 1px solid #262a3b; background: transparent; color: #c7cbd9; padding: 10px 20px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; text-decoration: none; transition: border-color 0.2s, color 0.2s; } .ds-btn-secondary:hover, .ds-btn-secondary:focus-visible { border-color: #f5f7fa; color: #f5f7fa; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Full-pill label for status/category/tag. Neutral at rest; an accent variant tints border, background (10% opacity), and text together.",
+      "html": "<span class=\"ds-badge\">Idea</span> <span class=\"ds-badge ds-badge--accent\">In progress</span>",
+      "css": ".ds-badge { display: inline-flex; border-radius: 9999px; border: 1px solid #262a3b; color: #8a90a6; padding: 2px 10px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; } .ds-badge--accent { border-color: rgba(240, 194, 111, 0.4); background: rgba(240, 194, 111, 0.1); color: #f0c26f; }"
+    },
+    {
+      "name": "Nav Link",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Desktop header navigation item — mono, uppercase, no background, colour shift only.",
+      "html": "<a class=\"ds-nav-link\" href=\"#\">Gallery</a>",
+      "css": ".ds-nav-link { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #8a90a6; text-decoration: none; transition: color 0.2s; } .ds-nav-link:hover, .ds-nav-link:focus-visible { color: #6fdcec; }"
+    },
+    {
+      "name": "Accent Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The gear-tile / bordered-panel pattern: sharp corners, a raised void-900 surface, and a 2px accent left-edge carrying the item's category colour.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-icon\">&#9679;</div><div><p class=\"ds-card-label\">Telescope</p><p class=\"ds-card-title\">Askar 71F</p></div></div>",
+      "css": ".ds-card { display: flex; gap: 16px; align-items: flex-start; border: 1px solid #1b1e2c; border-left: 2px solid #6fdcec; background: #0a0c14; padding: 16px; } .ds-card-icon { color: #6fdcec; } .ds-card-label { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #6fdcec; margin: 0; } .ds-card-title { font-family: 'Instrument Serif', Georgia, serif; font-size: 18px; color: #f5f7fa; margin: 4px 0 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Observatory Log",
+    "overview": "Astromar reads like a precision instrument's logbook, not a SaaS template with space-themed copy. The system was built as a deliberate reaction against the default visual grammar of AI-generated sites in 2025-26 - near-black background, rounded bordered cards, a Grotesk/Inter pairing, hover-reveals-color as the only interaction - which is tasteful but has no point of view. Astromar commits to a specific one instead: sharp corners, hairline rules, an oversized single-weight serif for headlines, and a monospace voice pushed far beyond its usual \"code block\" job into nav labels, buttons, badges, and data readouts throughout. The real photos carry the vibrancy. Early passes buried them under near-opaque overlays and reduced the whole site to \"dark template with a caption\" - the exact failure this system exists to avoid. Hero photos are now genuinely visible; a light flat wash plus one top-fading gradient darkens only what sits directly behind text. Colour itself stays restrained everywhere else: one deliberate accent per moment, not a wash of hue on every surface.",
+    "keyCharacteristics": [
+      "Sharp corners everywhere except pills/badges and one circular icon button — never a soft, ambiguous middle ground.",
+      "A single-weight display serif (Instrument Serif) that carries hierarchy through size alone, never through fake-bolding a weight it doesn't have.",
+      "JetBrains Mono as a structural voice: nav, buttons, badges, index numbers, category labels, shot-detail readouts — not just code.",
+      "A restrained core palette (rose + teal) with four single-shade section accents, applied sparingly rather than saturating every surface.",
+      "Real astrophotography as the dominant visual material, not decoration around text."
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Never more than one accent colour is doing active work in a single component at once. A card's border, label, and icon all share the same accent — they don't each pick a different one.", "section": "colors" },
+      { "name": "The Section Colour Rule", "body": "Amber, green, and indigo each belong to exactly one section (Guide, Research, Calendar). Introducing a new top-level section should either reuse an existing colour from a related gear category or extend the scale deliberately, never borrow another section's colour.", "section": "colors" },
+      { "name": "The Italic Rule", "body": "Italic is reserved for exactly two things sitewide: the \"Astromar\" wordmark and the one emphasised phrase in the home hero. Every other heading is upright.", "section": "typography" },
+      { "name": "The Mono-Does-More Rule", "body": "JetBrains Mono is not reserved for literal code. It's the system's \"instrument readout\" voice: anywhere the UI is labelling, counting, or reporting a value rather than writing prose, it's mono, uppercase, and letter-spaced.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "No component gains a shadow at any state, including hover. Interactive feedback comes from border-colour and text-colour transitions or a background fill, never from elevation.", "section": "elevation" },
+      { "name": "The Sharp Edge Rule", "body": "If it's a container it has zero border-radius. If it's a label or a control showing an on/off or selected state, it's a full pill. There is no partial-radius middle state anywhere in the system.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do use border-void-700 as the default divider/border colour; reach for border-void-600 only on interactive controls that need to read as slightly more prominent.",
+      "Do keep JetBrains Mono uppercase and tracking-widest whenever it's labelling something — that treatment is what signals \"instrument readout\" rather than \"this is a code snippet.\"",
+      "Do use near-black text (text-void-950) on filled accent buttons, never white — it reads as an \"instrument readout\" and has measurably better contrast than white on these accent tones.",
+      "Do let real photos carry vibrancy. If a section feels flat or too monochrome, the fix is usually \"let more of the actual photo show through,\" not \"add another accent colour.\"",
+      "Do reuse PageHero for any new section index page rather than building a bespoke header — it's the system's signature component, and one-off headers fragment the identity fast."
+    ],
+    "donts": [
+      "Don't add rounded-md or rounded-lg to any container.",
+      "Don't italicise a new heading by default.",
+      "Don't add a drop shadow anywhere, including on hover.",
+      "Don't darken a hero photo past the point it reads clearly as a photo.",
+      "Don't introduce a fifth section accent colour casually."
+    ]
+  }
+}
