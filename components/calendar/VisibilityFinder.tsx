@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { getWeekVisibility, type GeoLocation, type NightVisibility } from "@/lib/astro/visibility";
+import {
+  getWeekVisibility,
+  type GeoLocation,
+  type HourlyVisibility,
+  type NightVisibility,
+} from "@/lib/astro/visibility";
+import SkyChart from "./SkyChart";
 
 interface GeocodeResult {
   lat: number;
@@ -32,11 +38,15 @@ export default function VisibilityFinder() {
   const [activeDay, setActiveDay] = useState(0);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [hoveredHour, setHoveredHour] = useState<HourlyVisibility | null>(null);
+  const [hoveredObjectId, setHoveredObjectId] = useState<string | null>(null);
 
   function computeAndSet(loc: GeoLocation) {
     setLocation(loc);
     setNights(getWeekVisibility(loc));
     setActiveDay(0);
+    setHoveredHour(null);
+    setHoveredObjectId(null);
     setStatus("idle");
   }
 
@@ -132,7 +142,11 @@ export default function VisibilityFinder() {
             {nights.map((night, i) => (
               <button
                 key={i}
-                onClick={() => setActiveDay(i)}
+                onClick={() => {
+                  setActiveDay(i);
+                  setHoveredHour(null);
+                  setHoveredObjectId(null);
+                }}
                 className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                   activeDay === i
                     ? "border-nebula-teal-500 bg-nebula-teal-500/10 text-nebula-teal-400"
@@ -144,40 +158,68 @@ export default function VisibilityFinder() {
             ))}
           </div>
 
-          <div className="mt-4 space-y-3">
-            {nights[activeDay].hours.length === 0 ? (
-              <p className="text-sm text-star-500">
-                No astronomically dark hours this night at this location (likely summer
-                twilight at high latitude).
-              </p>
-            ) : (
-              nights[activeDay].hours.map((hour, i) => (
-                <div key={i} className="border border-void-700 bg-void-950 p-3">
-                  <p className="font-mono text-xs text-star-500">
-                    {hour.time.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {hour.best.length === 0 ? (
-                      <span className="text-sm text-star-700">Nothing well-placed</span>
-                    ) : (
-                      hour.best.map((v) => (
-                        <div
-                          key={v.object.id}
-                          className="border border-void-600 px-2.5 py-1.5"
-                          title={`${TYPE_LABEL[v.object.type]} · mag ${v.object.magnitude}`}
-                        >
-                          <p className="text-sm text-star-100">{v.object.name}</p>
-                          <p className="font-mono text-xs text-nebula-teal-400">
-                            {v.altitude.toFixed(0)}° {v.compass}
-                          </p>
-                        </div>
-                      ))
-                    )}
-                  </div>
+          {nights[activeDay].hours.length === 0 ? (
+            <p className="mt-4 text-sm text-star-500">
+              No astronomically dark hours this night at this location (likely summer
+              twilight at high latitude).
+            </p>
+          ) : (
+            <>
+              <div className="mt-4 border border-void-700 bg-void-950 p-4">
+                <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+                  Sky chart ·{" "}
+                  {(hoveredHour ?? nights[activeDay].hours[0]).time.toLocaleTimeString("en-GB", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+                <div className="mt-3 flex justify-center">
+                  <SkyChart
+                    objects={(hoveredHour ?? nights[activeDay].hours[0]).best}
+                    activeId={hoveredObjectId}
+                  />
                 </div>
-              ))
-            )}
-          </div>
+              </div>
+
+              <div
+                className="mt-4 space-y-3"
+                onMouseLeave={() => {
+                  setHoveredHour(null);
+                  setHoveredObjectId(null);
+                }}
+              >
+                {nights[activeDay].hours.map((hour, i) => (
+                  <div key={i} className="border border-void-700 bg-void-950 p-3">
+                    <p className="font-mono text-xs text-star-500">
+                      {hour.time.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {hour.best.length === 0 ? (
+                        <span className="text-sm text-star-700">Nothing well-placed</span>
+                      ) : (
+                        hour.best.map((v) => (
+                          <div
+                            key={v.object.id}
+                            onMouseEnter={() => {
+                              setHoveredHour(hour);
+                              setHoveredObjectId(v.object.id);
+                            }}
+                            className="border border-void-600 px-2.5 py-1.5 transition-colors hover:border-nebula-teal-500"
+                            title={`${TYPE_LABEL[v.object.type]} · mag ${v.object.magnitude}`}
+                          >
+                            <p className="text-sm text-star-100">{v.object.name}</p>
+                            <p className="font-mono text-xs text-nebula-teal-400">
+                              {v.altitude.toFixed(0)}° {v.compass}
+                            </p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
 
           <p className="mt-4 text-xs text-star-700">
             Times shown in your browser&apos;s local timezone. Altitude filtered to 25°+

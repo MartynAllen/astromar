@@ -255,11 +255,39 @@ Interactive feedback comes from border-colour and text-colour transitions
 
 ## Motion
 
-Two authored moments, deliberately not more: the once-per-session shutter-open intro
-(`ShutterIntro.tsx`), and the gallery lightbox's shared-element photo morph
-(`Lightbox.tsx`). Everything else moves only as fast, functional feedback —
-`transition-colors` on hover/focus, the `group-hover:scale-[1.03]` on `PhotoCard` — never
-as scroll reveals, staggered list entrances, or decoration.
+Five authored moments, each one tied to something real about the product rather than
+decoration: the once-per-session shutter-open intro (`ShutterIntro.tsx`); the gallery
+lightbox's shared-element photo morph (`Lightbox.tsx`); the gallery grid's stacking
+reveal, where photos resolve into focus as they scroll into view, echoing how a real
+stacked exposure actually accumulates signal; the calendar's live sky chart, a genuine
+Canvas-rendered polar plot of real computed altitude/azimuth positions
+(`SkyChart.tsx`); and the lightbox's sky reconstruction, a Canvas starfield of the real
+night sky at each photo's actual capture time (`SkyBackdrop.tsx`). Everything else moves
+only as fast, functional feedback — `transition-colors` on hover/focus, the
+`group-hover:scale-[1.03]` on `PhotoCard` — never as decoration for its own sake.
+
+**The stacking reveal.** `PhotoCard`'s wrapper carries a `stack-reveal` class driven by
+CSS `animation-timeline: view()` (`app/globals.css`): a photo starts at
+`blur(8px) brightness(0.35) scale(0.98)` and resolves to full clarity as it crosses the
+first 65% of its entry into the viewport — no JS, and entirely inside an `@supports`
+block, so browsers without view-timeline support simply render photos at full clarity
+from the start. `prefers-reduced-motion` disables the animation outright.
+
+**The sky chart.** `VisibilityFinder`'s per-hour results already carried real altitude
+and azimuth for each object (`lib/astro/visibility.ts`, via `astronomy-engine`) — the
+chart just gives that data a second, visual reading: a polar plot with zenith at centre
+and the horizon at the edge, N/E/S/W labelled. Hovering a target chip in the text list
+below highlights its matching point on the chart (`activeId`); the two views share one
+state in `VisibilityFinder`, not decoration layered over static data.
+
+**The sky reconstruction.** Opening a photo renders a Canvas starfield of the ~50
+brightest naked-eye stars (`lib/astro/starCatalog.ts`), positioned for that exact photo's
+real `captureDate` using the same `astronomy-engine` `Horizon`/`Observer` calls the
+visibility finder already relies on (`lib/astro/starPositions.ts`). It deliberately does
+not use the photo's real embedded GPS — that stays private per the Privacy-First
+principle — so positions are computed against a fixed, already-public approximate
+location (Devon, UK), not the precise capture coordinates. Static single render, no
+continuous animation: a real backdrop, not a moving effect.
 
 **The lightbox morph.** Opening a photo computes the on-screen delta between the grid
 thumbnail just clicked (still mounted behind the modal — parallel routes never unmount
@@ -283,11 +311,14 @@ none`, so content still resolves to its correct end state instead of getting stu
 mid-keyframe.
 
 ### Named Rules
-**The One Focal Moment Rule.** A new interaction earns motion only if it acknowledges an
-action, explains a state or spatial change, or preserves continuity across a navigation —
-never to make a static area "feel alive." Before adding a third authored moment, ask
-whether it's actually explaining something the shutter intro or the lightbox morph
-don't already cover.
+**The Earned Moment Rule.** A new interaction earns motion only if it acknowledges an
+action, explains a state or spatial change, preserves continuity across a navigation, or
+visualises something genuinely real about the product — never to make a static area
+"feel alive." Every authored moment on the site traces to real content or real data (a
+real photo's position, a real stacked-exposure process, a real sky) rather than a
+generic effect borrowed for polish; that traceability is the actual bar, not a numeric
+cap on how many moments exist. Before adding another one, ask what real thing it's
+showing that isn't shown anywhere else yet.
 
 ## Shapes
 

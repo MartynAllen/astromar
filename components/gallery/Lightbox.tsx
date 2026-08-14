@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import SkyBackdrop from "./SkyBackdrop";
 
 const SETTLE_EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -34,9 +35,11 @@ function deltaTransform(from: DOMRect, to: DOMRect) {
 
 export default function Lightbox({
   slug,
+  captureDate,
   children,
 }: {
   slug: string;
+  captureDate?: string;
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -119,7 +122,8 @@ export default function Lightbox({
       aria-modal="true"
       aria-label="Photo detail"
     >
-      <div ref={contentRef} className="lightbox-content mx-auto max-w-6xl px-6 py-10">
+      <SkyBackdrop captureDate={captureDate} />
+      <div ref={contentRef} className="lightbox-content relative mx-auto max-w-6xl px-6 py-10">
         <button
           ref={closeButtonRef}
           type="button"

@@ -56,7 +56,10 @@
       { "name": "color/border transition", "value": "0.2s ease (Tailwind's transition-colors default)", "purpose": "The only motion on interactive elements — border and text colour shifts on hover/focus. No shadow, scale, or transform on hover by default." },
       { "name": "lightbox-morph-open", "value": "420ms cubic-bezier(0.16, 1, 0.3, 1), WAAPI transform+blur", "purpose": "Shared-element morph: the clicked gallery thumbnail becomes the lightbox's full photo, computed from the thumbnail's live position." },
       { "name": "lightbox-morph-close", "value": "200ms ease-in, WAAPI transform+blur", "purpose": "Reverse of lightbox-morph-open — exit faster than entrance — played before router.back() completes the close." },
-      { "name": "lightbox-backdrop-in / lightbox-content-in", "value": "220ms / 320ms cubic-bezier(0.16, 1, 0.3, 1), CSS keyframes", "purpose": "Backdrop and detail-panel fade-in on lightbox open; reduces to 0.01ms under prefers-reduced-motion." }
+      { "name": "lightbox-backdrop-in / lightbox-content-in", "value": "220ms / 320ms cubic-bezier(0.16, 1, 0.3, 1), CSS keyframes", "purpose": "Backdrop and detail-panel fade-in on lightbox open; reduces to 0.01ms under prefers-reduced-motion." },
+      { "name": "stack-reveal", "value": "CSS animation-timeline: view(), animation-range: entry 0%-65%", "purpose": "Gallery/featured-shot photos resolve from blur(8px) brightness(0.35) scale(0.98) to full clarity as they scroll into view — echoes real stacked-exposure signal accumulation. @supports-gated; disabled under prefers-reduced-motion." },
+      { "name": "sky-chart-render", "value": "Canvas 2D, redraws on hover/selection change", "purpose": "Calendar's polar sky chart — real altitude/azimuth positions from astronomy-engine, not decorative. No continuous animation." },
+      { "name": "sky-backdrop-render", "value": "Canvas 2D, single render on lightbox mount", "purpose": "Lightbox backdrop — real star positions for the photo's actual capture date via astronomy-engine, using a fixed public-approximate location (never the private embedded GPS). Static, not animated." }
     ],
     "breakpoints": [
       { "name": "sm", "value": "640px" },
