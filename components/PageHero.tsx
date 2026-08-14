@@ -41,7 +41,7 @@ export default function PageHero({
       {photo && (
         <Link
           href={`/gallery/${photo.slug.current}`}
-          className="absolute right-4 top-4 z-10 bg-void-950/50 px-2 py-1 font-mono text-[11px] text-star-300 backdrop-blur-sm transition-colors hover:text-nebula-teal-400"
+          className="absolute right-4 top-4 z-10 bg-void-950/50 px-2 py-1 font-mono text-xs text-star-300 backdrop-blur-sm transition-colors hover:text-nebula-teal-400"
         >
           {photo.title} →
         </Link>

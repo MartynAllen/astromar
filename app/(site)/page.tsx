@@ -53,9 +53,18 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-void-950/28" />
         <div className="absolute inset-0 bg-gradient-to-t from-void-950 via-void-950/60 to-transparent" />
         <span className="absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-star-100/60 sm:left-6 sm:top-6" />
-        <span className="absolute right-4 top-4 h-6 w-6 border-r-2 border-t-2 border-star-100/60 sm:right-6 sm:top-6" />
+        <span className="absolute bottom-4 left-4 h-6 w-6 border-b-2 border-l-2 border-star-100/60 sm:bottom-6 sm:left-6" />
+        <span className="absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-star-100/60 sm:bottom-6 sm:right-6" />
+        {heroPhoto && (
+          <Link
+            href={`/gallery/${heroPhoto.slug.current}`}
+            className="absolute right-4 top-4 z-10 bg-void-950/50 px-2 py-1 font-mono text-xs text-star-300 backdrop-blur-sm transition-colors hover:text-nebula-teal-400 sm:right-6 sm:top-6"
+          >
+            {heroPhoto.title} →
+          </Link>
+        )}
 
-        <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-24 sm:pt-32">
+        <div className="relative mx-auto max-w-6xl px-6 pb-10 pt-24 sm:pb-20 sm:pt-32">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-nebula-teal-400">
             Field log · Astronomy &amp; Astrophotography
           </p>
@@ -94,17 +103,17 @@ export default async function HomePage() {
                 href={teaser.href}
                 className="group flex items-baseline gap-5 py-6 sm:gap-8"
               >
-                <span className="font-mono text-sm text-star-700">
+                <span className="font-mono text-sm text-star-500">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div className="flex-1">
-                  <h3 className={`font-display text-2xl text-star-100 ${teaser.color}`}>
+                  <h2 className={`font-display text-2xl text-star-100 ${teaser.color}`}>
                     {teaser.title}
-                  </h3>
+                  </h2>
                   <p className="mt-1.5 max-w-xl text-sm text-star-500">{teaser.body}</p>
                 </div>
                 <span
-                  className={`hidden font-mono text-sm text-star-700 sm:block ${teaser.color}`}
+                  className={`hidden font-mono text-sm text-star-500 sm:block ${teaser.color}`}
                 >
                   →
                 </span>
@@ -114,7 +123,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {featured.length > 0 && (
+      {featured.length > 1 && (
         <section className="mx-auto max-w-6xl px-6 py-16">
           <div className="mb-6 flex items-baseline justify-between border-b border-void-700 pb-4">
             <h2 className="font-display text-3xl text-star-100">Featured shots</h2>
@@ -126,7 +135,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-            {featured.map((photo) => (
+            {featured.slice(1).map((photo) => (
               <PhotoCard key={photo._id} photo={photo} />
             ))}
           </div>

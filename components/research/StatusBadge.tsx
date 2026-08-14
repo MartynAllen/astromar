@@ -11,7 +11,7 @@ const STYLES: Record<ResearchStatus, string> = {
 export default function StatusBadge({ status }: { status: ResearchStatus }) {
   return (
     <span
-      className={`flex-none rounded-full border px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-widest ${STYLES[status]}`}
+      className={`flex-none rounded-full border px-2.5 py-0.5 font-mono text-xs uppercase tracking-widest ${STYLES[status]}`}
     >
       {status}
     </span>

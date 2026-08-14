@@ -167,7 +167,7 @@ export default function VisibilityFinder() {
                           title={`${TYPE_LABEL[v.object.type]} · mag ${v.object.magnitude}`}
                         >
                           <p className="text-sm text-star-100">{v.object.name}</p>
-                          <p className="font-mono text-[11px] text-nebula-teal-400">
+                          <p className="font-mono text-xs text-nebula-teal-400">
                             {v.altitude.toFixed(0)}° {v.compass}
                           </p>
                         </div>
