@@ -39,7 +39,8 @@ export default function PrivacyPage() {
         <section>
           <h2 className="font-display text-xl text-star-100">Contact</h2>
           <p className="mt-2">
-            Questions about any of this can be raised via the social links in the footer.
+            No contact form here yet — social links will appear in the footer once
+            they&apos;re set up.
           </p>
         </section>
       </div>

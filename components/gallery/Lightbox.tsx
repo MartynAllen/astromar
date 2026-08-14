@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Lightbox({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
     return () => {
       document.body.style.overflow = previousOverflow;
     };
@@ -23,9 +25,15 @@ export default function Lightbox({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-void-950/95 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto bg-void-950/95 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Photo detail"
+    >
       <div className="mx-auto max-w-6xl px-6 py-10">
         <button
+          ref={closeButtonRef}
           type="button"
           onClick={() => router.back()}
           aria-label="Close"

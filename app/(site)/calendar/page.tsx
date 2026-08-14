@@ -40,7 +40,7 @@ export default async function CalendarPage() {
           <Breadcrumbs items={[{ name: "Calendar", path: "/calendar" }]} />
           <h1 className="font-display text-4xl text-star-100">Astronomy Calendar</h1>
           <p className="mt-2 text-star-500">
-            Optimal targets for tonight, and what&apos;s coming up on this end.
+            Optimal targets for tonight, and what&apos;s coming up in the sky.
           </p>
         </div>
       </PageHero>

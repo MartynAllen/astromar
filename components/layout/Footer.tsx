@@ -6,11 +6,18 @@ export default async function Footer() {
   const settings = await getSiteSettings().catch(() => null);
   const siteName = settings?.siteName ?? "Astromar";
   const tagline = settings?.tagline ?? "Astronomy and astrophotography from a garden setup.";
+  const hasSocial = Boolean(settings?.socialLinks && settings.socialLinks.length > 0);
 
   return (
     <footer className="border-t border-void-700 bg-void-900/40">
       <div className="mx-auto max-w-6xl px-6 py-14">
-        <div className="grid gap-10 sm:grid-cols-3 sm:divide-x sm:divide-void-700">
+        <div
+          className={
+            hasSocial
+              ? "grid gap-10 sm:grid-cols-3 sm:divide-x sm:divide-void-700"
+              : "grid gap-10 sm:grid-cols-2 sm:divide-x sm:divide-void-700"
+          }
+        >
           <div className="sm:pr-8">
             <p className="font-display text-2xl italic text-star-100">{siteName}</p>
             <p className="mt-2 max-w-xs text-sm text-star-500">{tagline}</p>
@@ -34,29 +41,27 @@ export default async function Footer() {
             </ul>
           </div>
 
-          <div className="sm:pl-8">
-            {settings?.socialLinks && settings.socialLinks.length > 0 && (
-              <>
-                <p className="font-mono text-xs uppercase tracking-widest text-nebula-rose-400">
-                  Elsewhere
-                </p>
-                <ul className="mt-3 flex flex-col gap-2">
-                  {settings.socialLinks.map((social) => (
-                    <li key={social.url}>
-                      <a
-                        href={social.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-star-300 hover:text-nebula-rose-400"
-                      >
-                        {social.platform}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
+          {hasSocial && (
+            <div className="sm:pl-8">
+              <p className="font-mono text-xs uppercase tracking-widest text-nebula-rose-400">
+                Elsewhere
+              </p>
+              <ul className="mt-3 flex flex-col gap-2">
+                {settings!.socialLinks!.map((social) => (
+                  <li key={social.url}>
+                    <a
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-star-300 hover:text-nebula-rose-400"
+                    >
+                      {social.platform}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-void-700 pt-6 sm:flex-row sm:items-center sm:justify-between">

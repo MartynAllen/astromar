@@ -45,6 +45,7 @@ const components: PortableTextComponents = {
             alt={value?.alt ?? ""}
             width={1200}
             height={800}
+            sizes="(min-width: 1024px) 672px, 100vw"
             className="h-auto w-full"
           />
         </span>
