@@ -20,10 +20,10 @@ function triangleNormal(t: Triangle): [number, number, number] {
   return [uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx];
 }
 
-test("triangle count matches struts*12 plus the wall ring's 12-per-segment", () => {
+test("triangle count matches (struts + spine + divider)*12 plus the wall ring's 12-per-segment", () => {
   const geometry = computeBahtinovGeometry(VALID_INPUTS);
   const mesh = buildMaskMesh(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
-  const expected = geometry.struts.length * 12 + WALL_SEGMENTS * 12;
+  const expected = (geometry.struts.length + 2) * 12 + WALL_SEGMENTS * 12;
   assert.equal(mesh.length, expected);
 });
 
@@ -41,8 +41,25 @@ test("a single axis-aligned strut extrudes with correct outward face normals", (
   const syntheticGeometry = {
     apertureRadiusMm: 10,
     wallInnerRadiusMm: 10,
+    wallFillInnerRadiusMm: 10,
     wallOuterRadiusMm: 11,
     focalRatio: 5,
+    spine: {
+      corners: [
+        [-0.5, -10],
+        [0.5, -10],
+        [0.5, 10],
+        [-0.5, 10],
+      ] as [number, number][],
+    },
+    divider: {
+      corners: [
+        [-10, -0.5],
+        [10, -0.5],
+        [10, 0.5],
+        [-10, 0.5],
+      ] as [number, number][],
+    },
     struts: [
       {
         corners: [
@@ -78,7 +95,8 @@ test("a single axis-aligned strut extrudes with correct outward face normals", (
 test("the mounting wall's skirt extends well below the grating plate", () => {
   const geometry = computeBahtinovGeometry(VALID_INPUTS);
   const mesh = buildMaskMesh(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
-  const wallMesh = mesh.slice(geometry.struts.length * 12);
+  const plateShapeCount = geometry.struts.length + 2; // + spine + divider
+  const wallMesh = mesh.slice(plateShapeCount * 12);
   const plateZLo = -VALID_INPUTS.maskThicknessMm / 2;
   const lowestZ = Math.min(...wallMesh.flatMap((t) => [t.a[2], t.b[2], t.c[2]]));
   assert.ok(
@@ -87,14 +105,15 @@ test("the mounting wall's skirt extends well below the grating plate", () => {
   );
 });
 
-test("struts and the wall's skirt occupy overlapping Z ranges (fuse into one solid)", () => {
+test("struts/spine/divider and the wall's skirt occupy overlapping Z ranges (fuse into one solid)", () => {
   const geometry = computeBahtinovGeometry(VALID_INPUTS);
   const mesh = buildMaskMesh(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
-  const strutMesh = mesh.slice(0, geometry.struts.length * 12);
-  const wallMesh = mesh.slice(geometry.struts.length * 12);
-  const strutZLo = Math.min(...strutMesh.flatMap((t) => [t.a[2], t.b[2], t.c[2]]));
+  const plateShapeCount = geometry.struts.length + 2;
+  const plateMesh = mesh.slice(0, plateShapeCount * 12);
+  const wallMesh = mesh.slice(plateShapeCount * 12);
+  const plateZLo = Math.min(...plateMesh.flatMap((t) => [t.a[2], t.b[2], t.c[2]]));
   const wallZLo = Math.min(...wallMesh.flatMap((t) => [t.a[2], t.b[2], t.c[2]]));
-  assert.ok(wallZLo < strutZLo, "wall skirt should reach below the strut plate's own Z range");
+  assert.ok(wallZLo < plateZLo, "wall skirt should reach below the plate's own Z range");
 });
 
 test("serializeStlAscii produces a well-formed ASCII STL", () => {

@@ -98,13 +98,17 @@ export function buildMaskMesh(
   for (const strut of geometry.struts) {
     triangles.push(...extrudeQuad(strut.corners, zLo, zHi));
   }
+  // Spine and divider are part of the flat grating plate, not the mounting
+  // collar — same Z range as the struts, not the deeper skirt below.
+  triangles.push(...extrudeQuad(geometry.spine.corners, zLo, zHi));
+  triangles.push(...extrudeQuad(geometry.divider.corners, zLo, zHi));
   // The wall spans a taller Z range than the struts — same top surface
   // (zHi), but extended well below the plate as a plain cylindrical skirt
   // that slides over the tube, the way a lens cap or dew shield cap
   // actually grips: a flush ring flush with a 3mm plate has nowhere near
   // enough contact area to hold on by friction alone.
   triangles.push(
-    ...buildWallTriangles(geometry.wallInnerRadiusMm, geometry.wallOuterRadiusMm, zLo - skirtDepthMm, zHi),
+    ...buildWallTriangles(geometry.wallFillInnerRadiusMm, geometry.wallOuterRadiusMm, zLo - skirtDepthMm, zHi),
   );
   return triangles;
 }

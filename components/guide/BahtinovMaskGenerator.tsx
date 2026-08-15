@@ -32,6 +32,8 @@ const ADVANCED_FIELDS: FieldConfig[] = [
   { key: "offsetAngleDeg", label: "Grating offset angle", suffix: "°", step: 1 },
   { key: "fitClearanceMm", label: "Print fit clearance", suffix: "mm", step: 0.1 },
   { key: "skirtDepthMm", label: "Mounting skirt depth", suffix: "mm", step: 1 },
+  { key: "spineWidthMm", label: "Center spine width", suffix: "mm", step: 0.5 },
+  { key: "dividerWidthMm", label: "Divider bar width", suffix: "mm", step: 0.5 },
 ];
 
 // A common small-refractor setup — gives a working preview immediately
@@ -47,6 +49,8 @@ const INITIAL_VALUES: Record<FieldKey, string> = {
   offsetAngleDeg: String(DEFAULT_ADVANCED.offsetAngleDeg),
   fitClearanceMm: String(DEFAULT_ADVANCED.fitClearanceMm),
   skirtDepthMm: String(DEFAULT_ADVANCED.skirtDepthMm),
+  spineWidthMm: String(DEFAULT_ADVANCED.spineWidthMm),
+  dividerWidthMm: String(DEFAULT_ADVANCED.dividerWidthMm),
 };
 
 const inputClass =
@@ -176,7 +180,7 @@ function BahtinovPreview({
 }: {
   geometry: NonNullable<ReturnType<typeof computeBahtinovGeometry>>;
 }) {
-  const { wallOuterRadiusMm, wallInnerRadiusMm, struts } = geometry;
+  const { wallOuterRadiusMm, wallFillInnerRadiusMm, struts, spine, divider } = geometry;
   const pad = wallOuterRadiusMm * 0.08;
   const size = wallOuterRadiusMm + pad;
 
@@ -195,9 +199,17 @@ function BahtinovPreview({
           flip into the geometry itself. */}
       <g transform="scale(1,-1)">
         <path
-          d={`${ring(wallOuterRadiusMm)} ${ring(wallInnerRadiusMm)}`}
+          d={`${ring(wallOuterRadiusMm)} ${ring(wallFillInnerRadiusMm)}`}
           fillRule="evenodd"
           className="fill-void-600"
+        />
+        <polygon
+          points={spine.corners.map(([x, y]) => `${x},${y}`).join(" ")}
+          className="fill-nebula-teal-400"
+        />
+        <polygon
+          points={divider.corners.map(([x, y]) => `${x},${y}`).join(" ")}
+          className="fill-nebula-teal-400"
         />
         {struts.map((strut, i) => (
           <polygon

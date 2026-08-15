@@ -1,11 +1,17 @@
 /**
- * Pure geometry for a classic 3-sector Bahtinov mask: the clear aperture is
- * divided into three 120° wedges (bisectors at 90°, 210°, 330° — the
- * familiar "peace sign" layout), each filled with a parallel-slit grating at
- * its own angle. Group 0 (top wedge) is the horizontal reference grating;
- * groups 1/2 (lower wedges) are mirrored at ±offsetAngleDeg — the spike
- * angle that actually matters optically is the slit-line angle, not which
- * wedge it sits in, so wedge placement and grating angle are independent.
+ * Geometry for a cross-braced Bahtinov mask: a solid vertical spine (x=0)
+ * and horizontal divider (y=0) split the aperture into three grating zones
+ * — Zone 1 (top, horizontal reference grating, mirrored left/right of the
+ * spine), Zone 2 (bottom-left, angled) and Zone 3 (bottom-right, angled,
+ * mirrored from Zone 2). Every slat's inner edge is bounded by whichever
+ * structural member closes off its zone (spine and/or divider) and its
+ * outer edge by the mounting wall, each clipped with a small overlap past
+ * the member's own edge rather than an exact touch — so every slat is
+ * guaranteed to fuse into solid structure at both ends by construction,
+ * not by checking afterwards whether it happened to reach far enough. The
+ * earlier design (three 120° wedges radiating from a point) let a slat's
+ * inner end land in open space with nothing to connect to; that's the
+ * defect this shape avoids structurally rather than patching around.
  *
  * Everything here is 2D (mm, origin at mask center); lib/bahtinov/stl.ts
  * extrudes it into a printable solid.
@@ -22,6 +28,8 @@ export interface BahtinovInputs {
   offsetAngleDeg: number;
   fitClearanceMm: number;
   skirtDepthMm: number;
+  spineWidthMm: number;
+  dividerWidthMm: number;
 }
 
 export const DEFAULT_ADVANCED: Pick<
@@ -32,6 +40,8 @@ export const DEFAULT_ADVANCED: Pick<
   | "offsetAngleDeg"
   | "fitClearanceMm"
   | "skirtDepthMm"
+  | "spineWidthMm"
+  | "dividerWidthMm"
 > = {
   maskThicknessMm: 3,
   slitsPerGroup: 9,
@@ -43,6 +53,8 @@ export const DEFAULT_ADVANCED: Pick<
   // contacts the tube along that same 3mm band, nowhere near enough
   // surface area for a secure friction fit. 15mm gives it real grip.
   skirtDepthMm: 15,
+  spineWidthMm: 5,
+  dividerWidthMm: 5,
 };
 
 // [min, max] physically-sane bounds per field, and the required-field list.
@@ -57,6 +69,8 @@ const RANGES: Record<keyof BahtinovInputs, [number, number]> = {
   offsetAngleDeg: [1, 60],
   fitClearanceMm: [0, 5],
   skirtDepthMm: [5, 40],
+  spineWidthMm: [4, 6],
+  dividerWidthMm: [4, 6],
 };
 
 export type ValidationErrors = Partial<Record<keyof BahtinovInputs, string>>;
@@ -90,12 +104,21 @@ export interface StrutRect {
 export interface BahtinovGeometry {
   apertureRadiusMm: number;
   wallInnerRadiusMm: number;
+  /** Where the wall's solid mesh actually starts filling — apertureRadius,
+   *  always, so there's never a gap between the optical pattern and the
+   *  wall even when wallInnerRadiusMm (the tube-fit surface) sits further out. */
+  wallFillInnerRadiusMm: number;
   wallOuterRadiusMm: number;
+  /** Vertical structural bar at x=0, reaching top and bottom rim. */
+  spine: StrutRect;
+  /** Horizontal structural bar at y=0, reaching left and right rim. */
+  divider: StrutRect;
+  /** The grating slats only — spine/divider are separate, always-solid fields. */
   struts: StrutRect[];
   focalRatio: number;
 }
 
-/** t-interval where the line d(fixed) + t*dir(theta) lies inside a circle of given radius, centered at origin. */
+/** t-interval where d(fixed) + t*dir(theta) lies inside a circle of given radius, centered at origin. */
 function circleInterval(d: number, radius: number): [number, number] {
   const disc = radius * radius - d * d;
   if (disc <= 0) return [Infinity, -Infinity];
@@ -104,52 +127,72 @@ function circleInterval(d: number, radius: number): [number, number] {
 }
 
 /**
- * t-interval where the line satisfies sign*cross((cos phi, sin phi), P(t)) >= 0,
- * i.e. is on one side of the ray through the origin at angle phi. Used to
- * clip a grating line to one wedge boundary.
+ * t-interval where the line d*perp(theta) + t*dir(theta) has its x or y
+ * coordinate on the requested side of `boundary` — a straight structural
+ * edge (the spine or the divider), not necessarily through the origin,
+ * unlike the wedge boundaries the previous design clipped against.
  */
-function halfPlaneInterval(d: number, theta: number, phi: number, sign: 1 | -1): [number, number] {
-  const delta = phi - theta;
-  const k = sign * Math.sin(delta);
-  const c = sign * d * Math.cos(delta);
+function axisHalfPlaneInterval(
+  d: number,
+  theta: number,
+  axis: "x" | "y",
+  boundary: number,
+  keepBelow: boolean,
+): [number, number] {
+  // P(t).x = -d*sin(theta) + t*cos(theta); P(t).y = d*cos(theta) + t*sin(theta)
+  const coeff = axis === "x" ? Math.cos(theta) : Math.sin(theta);
+  const base = axis === "x" ? -d * Math.sin(theta) : d * Math.cos(theta);
   const EPS = 1e-9;
-  if (Math.abs(k) < EPS) {
-    return c >= 0 ? [-Infinity, Infinity] : [Infinity, -Infinity];
+  if (Math.abs(coeff) < EPS) {
+    const holds = keepBelow ? base <= boundary : base >= boundary;
+    return holds ? [-Infinity, Infinity] : [Infinity, -Infinity];
   }
-  const bound = c / k;
-  return k > 0 ? [-Infinity, bound] : [bound, Infinity];
+  const tBound = (boundary - base) / coeff;
+  if (keepBelow) {
+    return coeff > 0 ? [-Infinity, tBound] : [tBound, Infinity];
+  }
+  return coeff > 0 ? [tBound, Infinity] : [-Infinity, tBound];
 }
 
 function intersect3(a: [number, number], b: [number, number], c: [number, number]): [number, number] {
   return [Math.max(a[0], b[0], c[0]), Math.min(a[1], b[1], c[1])];
 }
 
+interface ZoneConfig {
+  theta: number;
+  xBoundary: number;
+  xKeepBelow: boolean;
+  yBoundary: number;
+  yKeepBelow: boolean;
+}
+
+/** Clips a grating line (fixed d, angle theta) against a zone's circle + 2 straight edges. */
+function clipZone(d: number, theta: number, radius: number, zone: ZoneConfig): [number, number] {
+  return intersect3(
+    intersect3(circleInterval(d, radius), axisHalfPlaneInterval(d, theta, "x", zone.xBoundary, zone.xKeepBelow), [
+      -Infinity,
+      Infinity,
+    ]),
+    axisHalfPlaneInterval(d, theta, "y", zone.yBoundary, zone.yKeepBelow),
+    [-Infinity, Infinity],
+  );
+}
+
 /**
- * A wedge's footprint on the d-axis (perpendicular offset) doesn't line up
- * neatly with [-R, R] in general — it depends on the angle between the
- * grating direction and the wedge's own boundary rays, which differs per
- * group. Rather than deriving that footprint in closed form (error-prone
- * for three different wedge/angle combinations), scan it numerically: this
- * is the same tLo<tHi test the real clipping uses, so it can't drift out of
- * sync with it, and at mask scale (mm, a few hundred samples) the cost is
+ * A zone's usable d-range (perpendicular offset where some t makes the line
+ * satisfy all 3 constraints) isn't a simple closed form once the grating
+ * angle and the zone's straight edges aren't aligned — found numerically,
+ * same reasoning as the wedge design this replaces: it's the same
+ * clipZone test the real slat placement uses, so it can't drift out of
+ * sync with it, and at mask scale the cost of a few hundred samples is
  * irrelevant.
  */
-function findUsableDRange(
-  theta: number,
-  phi1: number,
-  phi2: number,
-  radius: number,
-  samples = 400,
-): [number, number] | null {
+function findUsableDRange(theta: number, radius: number, zone: ZoneConfig, samples = 400): [number, number] | null {
   let dMin = Infinity;
   let dMax = -Infinity;
   for (let k = 0; k <= samples; k++) {
     const d = -radius + (2 * radius * k) / samples;
-    const [tLo, tHi] = intersect3(
-      circleInterval(d, radius),
-      halfPlaneInterval(d, theta, phi1, 1),
-      halfPlaneInterval(d, theta, phi2, -1),
-    );
+    const [tLo, tHi] = clipZone(d, theta, radius, zone);
     if (tLo < tHi && Number.isFinite(tLo) && Number.isFinite(tHi)) {
       dMin = Math.min(dMin, d);
       dMax = Math.max(dMax, d);
@@ -158,8 +201,13 @@ function findUsableDRange(
   return dMin < dMax ? [dMin, dMax] : null;
 }
 
-const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
+// How far a slat is required to penetrate past a structural member's own
+// face into its solid interior — a slat that merely touches the spine,
+// divider, or wall at a single point is exactly the failure mode this
+// design replaces; a real volumetric overlap is what actually fuses two
+// independently-triangulated solids into one printable part.
+const CONNECT_OVERLAP_MM = 2;
 
 export function computeBahtinovGeometry(inputs: BahtinovInputs): BahtinovGeometry {
   const {
@@ -171,33 +219,90 @@ export function computeBahtinovGeometry(inputs: BahtinovInputs): BahtinovGeometr
     strutWidthPercent,
     offsetAngleDeg,
     focalLengthMm,
+    spineWidthMm,
+    dividerWidthMm,
   } = inputs;
 
   const apertureRadius = apertureMm / 2;
+  // wallInnerRadius is the tube-fit surface — must track tube OD for the
+  // mask to physically slide on, so it can genuinely exceed apertureRadius
+  // (a Newtonian/SCT's tube is routinely wider than its clear aperture).
+  // When it does, that gap between the optical pattern's edge and the
+  // actual gripping surface was previously left as open air: the wall mesh
+  // only filled from wallInnerRadius outward, and slats stopped at their
+  // own clip radius short of it. wallFillInnerRadius removes that gap by
+  // making the solid fill start at apertureRadius unconditionally, so
+  // "clip every slat a little past apertureRadius" is *always* enough to
+  // land inside solid material, with no separate case to get wrong.
   const wallInnerRadius = Math.max(apertureRadius, tubeOuterDiameterMm / 2 + fitClearanceMm);
   const wallOuterRadius = wallInnerRadius + rimWidthMm;
+  const wallFillInnerRadius = Math.min(apertureRadius, wallInnerRadius);
+  const strutClipRadius = apertureRadius + CONNECT_OVERLAP_MM;
 
-  // Struts are clipped to this radius, not apertureRadius — they need to
-  // genuinely penetrate into the wall's solid volume, not merely touch its
-  // inner edge at a single point (zero-overlap "touching" meshes routinely
-  // fail to fuse into one printable part in a slicer, especially when
-  // wallInnerRadius > apertureRadius and there'd otherwise be an actual gap
-  // of open air between the strut tips and the wall). Capped well inside
-  // the wall's own thickness so it never pokes out the far side.
-  const strutClipRadius = Math.min(wallInnerRadius + 2, wallInnerRadius + rimWidthMm * 0.5);
+  const spineHalf = spineWidthMm / 2;
+  const dividerHalf = dividerWidthMm / 2;
+  const spineOverlap = Math.min(CONNECT_OVERLAP_MM, spineHalf);
+  const dividerOverlap = Math.min(CONNECT_OVERLAP_MM, dividerHalf);
+  const barReach = strutClipRadius;
+
+  const spine: StrutRect = {
+    corners: [
+      [-spineHalf, -barReach],
+      [spineHalf, -barReach],
+      [spineHalf, barReach],
+      [-spineHalf, barReach],
+    ],
+  };
+  const divider: StrutRect = {
+    corners: [
+      [-barReach, -dividerHalf],
+      [barReach, -dividerHalf],
+      [barReach, dividerHalf],
+      [-barReach, dividerHalf],
+    ],
+  };
 
   const offsetRad = offsetAngleDeg * DEG;
-  const groupLineAngles = [0, offsetRad, -offsetRad];
-  const halfWedge = TAU / 6; // 60°
-  const wedgeBisectors = [Math.PI / 2, Math.PI / 2 + TAU / 3, Math.PI / 2 + (2 * TAU) / 3];
+
+  const zones: ZoneConfig[] = [
+    // Zone 1, right half: horizontal reference grating, spine on the left, divider below.
+    {
+      theta: 0,
+      xBoundary: spineHalf - spineOverlap,
+      xKeepBelow: false,
+      yBoundary: dividerHalf - dividerOverlap,
+      yKeepBelow: false,
+    },
+    // Zone 1, left half: mirrored.
+    {
+      theta: 0,
+      xBoundary: -(spineHalf - spineOverlap),
+      xKeepBelow: true,
+      yBoundary: dividerHalf - dividerOverlap,
+      yKeepBelow: false,
+    },
+    // Zone 2, bottom-left: angled grating, spine on the right, divider above.
+    {
+      theta: offsetRad,
+      xBoundary: -(spineHalf - spineOverlap),
+      xKeepBelow: true,
+      yBoundary: -(dividerHalf - dividerOverlap),
+      yKeepBelow: true,
+    },
+    // Zone 3, bottom-right: mirrored.
+    {
+      theta: -offsetRad,
+      xBoundary: spineHalf - spineOverlap,
+      xKeepBelow: false,
+      yBoundary: -(dividerHalf - dividerOverlap),
+      yKeepBelow: true,
+    },
+  ];
 
   const struts: StrutRect[] = [];
 
-  for (let g = 0; g < 3; g++) {
-    const theta = groupLineAngles[g];
-    const bisector = wedgeBisectors[g];
-    const phi1 = bisector - halfWedge;
-    const phi2 = bisector + halfWedge;
+  for (const zone of zones) {
+    const { theta } = zone;
     const dir: [number, number] = [Math.cos(theta), Math.sin(theta)];
     const perp: [number, number] = [-Math.sin(theta), Math.cos(theta)];
     const toXY = (d: number, t: number): [number, number] => [
@@ -205,7 +310,7 @@ export function computeBahtinovGeometry(inputs: BahtinovInputs): BahtinovGeometr
       d * perp[1] + t * dir[1],
     ];
 
-    const dRange = findUsableDRange(theta, phi1, phi2, apertureRadius);
+    const dRange = findUsableDRange(theta, strutClipRadius, zone);
     if (!dRange) continue;
     const [dMin, dMax] = dRange;
     const pitch = (dMax - dMin) / slitsPerGroup;
@@ -216,56 +321,43 @@ export function computeBahtinovGeometry(inputs: BahtinovInputs): BahtinovGeometr
       const dInner = dCenter - halfStrutWidth;
       const dOuter = dCenter + halfStrutWidth;
 
-      // Clip at both edges of the strut, not just its centerline, and keep
-      // the tighter interval — the circle constraint is nonlinear in d, so
-      // clipping only at dCenter let the outer edge's corners poke past the
-      // aperture radius by up to halfStrutWidth. Using the more restrictive
-      // of the two edges keeps the whole rectangle safely inside the true
-      // (non-rectangular) clipped region, at the cost of a strut that's a
-      // hair shorter than theoretically possible at one edge.
+      // Clip at both edges of the strut band, not just its centerline —
+      // the circle constraint is nonlinear in d, so clipping only at
+      // dCenter would let the outer edge's corners poke past whichever
+      // boundary is curved. Using the tighter of the two edges keeps the
+      // whole rectangle safely inside the true (non-rectangular) clipped
+      // region, at the cost of a strut that's a hair shorter than
+      // theoretically possible at one edge.
       const [tLo, tHi] = intersect3(
-        intersect3(
-          circleInterval(dInner, strutClipRadius),
-          halfPlaneInterval(dInner, theta, phi1, 1),
-          halfPlaneInterval(dInner, theta, phi2, -1),
-        ),
-        intersect3(
-          circleInterval(dOuter, strutClipRadius),
-          halfPlaneInterval(dOuter, theta, phi1, 1),
-          halfPlaneInterval(dOuter, theta, phi2, -1),
-        ),
+        clipZone(dInner, theta, strutClipRadius, zone),
+        clipZone(dOuter, theta, strutClipRadius, zone),
         [-Infinity, Infinity],
       );
 
       if (!(tLo < tHi) || !Number.isFinite(tLo) || !Number.isFinite(tHi)) continue;
 
-      const corners: [number, number][] = [
-        toXY(dInner, tLo),
-        toXY(dOuter, tLo),
-        toXY(dOuter, tHi),
-        toXY(dInner, tHi),
-      ];
+      // Every slat is now anchored to solid structure at both ends by
+      // construction (see clipZone), but a slat can still come out too
+      // short to be worth printing — a sliver right at a corner where two
+      // constraints bind almost simultaneously. Drop those rather than
+      // hand a slicer a fragile, near-zero-length fragment.
+      const strutWidth = halfStrutWidth * 2;
+      const minLength = Math.max(2 * strutWidth, 5);
+      if (tHi - tLo < minLength) continue;
 
-      // Near a wedge's angular edges, a strut's t-range is bounded by the
-      // wedge boundary itself rather than the aperture circle — it can end
-      // up as a short sliver entirely landlocked well inside the aperture,
-      // nowhere near the wall no matter how far strutClipRadius extends the
-      // circle constraint (that constraint was never the limiting one for
-      // this strut). Extending the radius can't connect a strut whose real
-      // limit is angular, not radial — so drop it instead of printing a
-      // disconnected fragment. It's always one of the last 1-2 struts at a
-      // wedge's tip, never a meaningful loss to the pattern.
-      const maxCornerRadius = Math.max(...corners.map(([x, y]) => Math.hypot(x, y)));
-      if (maxCornerRadius <= apertureRadius) continue;
-
-      struts.push({ corners });
+      struts.push({
+        corners: [toXY(dInner, tLo), toXY(dOuter, tLo), toXY(dOuter, tHi), toXY(dInner, tHi)],
+      });
     }
   }
 
   return {
     apertureRadiusMm: apertureRadius,
     wallInnerRadiusMm: wallInnerRadius,
+    wallFillInnerRadiusMm: wallFillInnerRadius,
     wallOuterRadiusMm: wallOuterRadius,
+    spine,
+    divider,
     struts,
     focalRatio: focalLengthMm / apertureMm,
   };
