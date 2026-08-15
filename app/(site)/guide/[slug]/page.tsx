@@ -4,6 +4,7 @@ import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BahtinovMaskGenerator from "@/components/guide/BahtinovMaskGenerator";
+import BahtinovMaskFieldGuide from "@/components/guide/BahtinovMaskFieldGuide";
 import { getGuideArticleBySlug, getGuideSlugs } from "@/lib/sanity.queries";
 import { buildMetadata, articleJsonLd } from "@/lib/seo";
 
@@ -58,7 +59,8 @@ export default async function GuideArticlePage(props: PageProps<"/guide/[slug]">
       <PortableTextContent value={article.body} />
 
       {slug === "bahtinov-mask-focusing" && (
-        <div className="mt-12">
+        <div className="mt-12 space-y-6">
+          <BahtinovMaskFieldGuide />
           <BahtinovMaskGenerator />
         </div>
       )}
