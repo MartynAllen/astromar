@@ -26,7 +26,7 @@ export default async function ReviewsPage() {
       <PageHero photo={heroPhoto}>
         <div className="mx-auto w-full max-w-3xl px-6">
           <Breadcrumbs items={[{ name: "Reviews", path: "/reviews" }]} />
-          <h1 className="font-display text-4xl text-star-100">Reviews</h1>
+          <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Reviews</h1>
           <p className="mt-2 text-star-500">
             Gear that&apos;s actually been used to make the photos in the
             gallery — nothing reviewed sight-unseen.
@@ -64,7 +64,7 @@ export default async function ReviewsPage() {
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <h2 className="font-display text-xl text-star-100 group-hover:text-nebula-rose-400">
+                    <h2 className="font-mono text-xl uppercase tracking-wide text-star-100 group-hover:text-nebula-rose-400">
                       {review.title}
                     </h2>
                     <p className="text-sm text-star-500">

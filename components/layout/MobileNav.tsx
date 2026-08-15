@@ -42,14 +42,14 @@ export default function MobileNav() {
       </button>
 
       {open && (
-        <nav className="absolute inset-x-0 top-20 border-t border-void-700 bg-void-950/95 px-6 py-4 backdrop-blur">
+        <nav className="absolute inset-x-0 top-20 border-t border-void-700 bg-void-950 px-6 py-4 backdrop-blur">
           <ul className="flex flex-col divide-y divide-void-700">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block py-3 font-display text-xl text-star-100 hover:text-nebula-teal-400"
+                  className="block py-3 font-mono text-xl uppercase tracking-wide text-star-100 hover:text-nebula-teal-400"
                 >
                   {link.label}
                 </Link>

@@ -24,7 +24,7 @@ export default async function ResearchPage() {
       <PageHero photo={heroPhoto}>
         <div className="mx-auto w-full max-w-3xl px-6">
           <Breadcrumbs items={[{ name: "Research", path: "/research" }]} />
-          <h1 className="font-display text-4xl text-star-100">Research</h1>
+          <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Research</h1>
           <p className="mt-2 text-star-500">
             Turning the gallery into a dataset — colour tracking, computer
             vision, exoplanet detection and whatever else comes out of pointing
@@ -47,7 +47,7 @@ export default async function ResearchPage() {
                   className="group block border border-void-700 border-l-2 border-l-nebula-green-400 bg-void-900 p-5 transition-colors hover:border-void-600"
                 >
                   <div className="flex items-center gap-3">
-                    <h2 className="font-display text-xl text-star-100 group-hover:text-nebula-green-400">
+                    <h2 className="font-mono text-xl uppercase tracking-wide text-star-100 group-hover:text-nebula-green-400">
                       {project.title}
                     </h2>
                     <StatusBadge status={project.status} />

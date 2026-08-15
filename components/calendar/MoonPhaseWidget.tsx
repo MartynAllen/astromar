@@ -22,7 +22,7 @@ export default function MoonPhaseWidget() {
         <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
           Tonight&apos;s moon
         </p>
-        <p className="mt-1 font-display text-xl text-star-100">{phaseName}</p>
+        <p className="mt-1 font-mono text-xl uppercase tracking-wide text-star-100">{phaseName}</p>
         <p className="text-sm text-star-500">{Math.round(fraction * 100)}% illuminated</p>
       </div>
     </div>

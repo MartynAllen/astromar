@@ -50,7 +50,6 @@
   --color-nebula-indigo-400: #8fb2f5;
   --color-nebula-violet-400: #c99ef2;
 
-  --font-display: var(--font-instrument-serif), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SFMono-Regular", monospace;
 
@@ -199,5 +198,34 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .stack-reveal {
     animation: none !important;
+  }
+}
+
+/* Hero paragraph resolve — the subhead settles into focus a beat after
+   load, the same "signal resolving out of blur" language as the gallery's
+   stack-reveal above, but played once on mount rather than on scroll since
+   this block is already on-screen at load. Delayed to start as the
+   shutter-open aperture is mid-reveal rather than racing it. */
+@keyframes hero-resolve {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.hero-resolve {
+  animation: hero-resolve 700ms cubic-bezier(0.16, 1, 0.3, 1) 300ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-resolve {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
   }
 }

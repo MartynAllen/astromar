@@ -25,7 +25,7 @@ export default function EventCard({ event }: { event: CalendarEvent }) {
         </p>
         <span className="font-mono text-xs text-star-500">{formatDate(event.date)}</span>
       </div>
-      <p className="mt-1.5 font-display text-lg text-star-100">{event.title}</p>
+      <p className="mt-1.5 font-mono text-lg uppercase tracking-wide text-star-100">{event.title}</p>
       {event.description && <p className="mt-1 text-sm text-star-500">{event.description}</p>}
       {event.externalLink && (
         <a

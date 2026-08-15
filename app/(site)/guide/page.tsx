@@ -24,7 +24,7 @@ export default async function GuidePage() {
       <PageHero photo={heroPhoto}>
         <div className="mx-auto w-full max-w-3xl px-6">
           <Breadcrumbs items={[{ name: "Guide", path: "/guide" }]} />
-          <h1 className="font-display text-4xl text-star-100">Beginner&apos;s Guide</h1>
+          <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Beginner&apos;s Guide</h1>
           <p className="mt-2 text-star-500">
             Written from the smart-telescope side of the hobby — no assumed
             background in manual mounts or PixInsight.
@@ -41,7 +41,7 @@ export default async function GuidePage() {
           <div className="mt-10 space-y-10">
             {sections.map((section) => (
               <div key={section}>
-                <h2 className="font-display text-xl text-nebula-teal-400">
+                <h2 className="font-mono text-xl uppercase tracking-wide text-nebula-teal-400">
                   {section}
                 </h2>
                 <ul className="mt-3 divide-y divide-void-700">
@@ -54,7 +54,7 @@ export default async function GuidePage() {
                           className="group block"
                         >
                           <div className="flex items-center gap-2">
-                            <h3 className="font-display text-lg text-star-100 group-hover:text-nebula-teal-400">
+                            <h3 className="font-mono text-lg uppercase tracking-wide text-star-100 group-hover:text-nebula-teal-400">
                               {article.title}
                             </h3>
                             {article.difficulty && (

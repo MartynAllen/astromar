@@ -10,12 +10,12 @@ export default function PrivacyPage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
       <Breadcrumbs items={[{ name: "Privacy", path: "/privacy" }]} />
-      <h1 className="font-display text-4xl text-star-100">Privacy</h1>
+      <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Privacy</h1>
       <p className="mt-2 text-star-500">Kept short, because there isn&apos;t much to say.</p>
 
       <div className="mt-8 space-y-6 text-star-300">
         <section>
-          <h2 className="font-display text-xl text-star-100">Analytics</h2>
+          <h2 className="font-mono text-xl uppercase tracking-wide text-star-100">Analytics</h2>
           <p className="mt-2">
             Astromar uses Vercel Web Analytics to see roughly how many people visit and which
             pages they read. It&apos;s cookieless and doesn&apos;t track you individually or
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-xl text-star-100">Affiliate links</h2>
+          <h2 className="font-mono text-xl uppercase tracking-wide text-star-100">Affiliate links</h2>
           <p className="mt-2">
             Some pages link out to Amazon and other retailers (see the{" "}
             <a href="/disclosure" className="text-nebula-teal-400 hover:underline">
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="font-display text-xl text-star-100">Contact</h2>
+          <h2 className="font-mono text-xl uppercase tracking-wide text-star-100">Contact</h2>
           <p className="mt-2">
             No contact form here yet — social links will appear in the footer once
             they&apos;re set up.

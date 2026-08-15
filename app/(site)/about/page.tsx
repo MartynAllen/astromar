@@ -41,7 +41,7 @@ export default async function AboutPage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
       <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
-      <h1 className="font-display text-4xl text-star-100">About</h1>
+      <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">About</h1>
 
       {about?.heroImage?.asset && (
         <div className="mt-6 overflow-hidden border border-void-700">
@@ -63,7 +63,7 @@ export default async function AboutPage() {
 
       {about?.gear && about.gear.length > 0 && (
         <div className="mt-12">
-          <h2 className="font-display text-3xl text-star-100">The gear</h2>
+          <h2 className="font-mono text-3xl uppercase tracking-wide text-star-100">The gear</h2>
           <div className="mt-4">
             <AffiliateDisclosureBanner />
           </div>
@@ -113,7 +113,7 @@ export default async function AboutPage() {
                             </div>
                           )}
                           <div className="flex-1">
-                            <p className="font-display text-lg text-star-100">{item.name}</p>
+                            <p className="font-mono text-lg uppercase tracking-wide text-star-100">{item.name}</p>
                             {item.notes && (
                               <p className="mt-1 text-sm text-star-500">{item.notes}</p>
                             )}
@@ -145,7 +145,7 @@ export default async function AboutPage() {
       )}
 
       <div className="mt-12 border-t border-void-700 pt-8">
-        <h2 className="font-display text-3xl text-star-100">Support the site</h2>
+        <h2 className="font-mono text-3xl uppercase tracking-wide text-star-100">Support the site</h2>
         <p className="mt-3 text-star-500">
           Astromar doesn&apos;t run ads, and the odd affiliate link barely dents the cost
           of the gear above. If you&apos;ve enjoyed the photos or found a guide useful,

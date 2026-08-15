@@ -38,7 +38,7 @@ export default async function CalendarPage() {
       <PageHero photo={heroPhoto}>
         <div className="mx-auto w-full max-w-4xl px-6">
           <Breadcrumbs items={[{ name: "Calendar", path: "/calendar" }]} />
-          <h1 className="font-display text-4xl text-star-100">Astronomy Calendar</h1>
+          <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Astronomy Calendar</h1>
           <p className="mt-2 text-star-500">
             Optimal targets for tonight, and what&apos;s coming up in the sky.
           </p>

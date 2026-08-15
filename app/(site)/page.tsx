@@ -72,11 +72,11 @@ export default async function HomePage() {
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-nebula-teal-400">
             Field log · Astronomy &amp; Astrophotography
           </p>
-          <h1 className="mt-6 max-w-3xl font-display text-5xl leading-[1.05] text-star-100 sm:text-7xl">
+          <h1 className="mt-6 max-w-3xl font-mono text-5xl font-bold uppercase leading-[1.05] tracking-wide text-star-100 sm:text-7xl">
             Deep-sky images from a{" "}
             <span className="text-nebula-rose-400">very ordinary garden</span>.
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-relaxed text-star-500 sm:text-lg">
+          <p className="hero-resolve mt-6 max-w-xl text-base leading-relaxed text-star-500 sm:text-lg">
             Nebulae, galaxies and the moon, captured one stacked exposure at a
             time — plus the gear reviews, beginner&apos;s notes and research
             that come with it.
@@ -126,7 +126,7 @@ export default async function HomePage() {
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div className="flex-1">
-                  <h2 className={`font-display text-2xl text-star-100 ${teaser.color}`}>
+                  <h2 className={`font-mono text-2xl uppercase tracking-wide text-star-100 ${teaser.color}`}>
                     {teaser.title}
                   </h2>
                   <p className="mt-1.5 max-w-xl text-sm text-star-500">{teaser.body}</p>
@@ -145,7 +145,7 @@ export default async function HomePage() {
       {featured.length > 1 && (
         <section className="mx-auto max-w-6xl px-6 py-16">
           <div className="mb-6 flex items-baseline justify-between border-b border-void-700 pb-4">
-            <h2 className="font-display text-3xl text-star-100">Featured shots</h2>
+            <h2 className="font-mono text-3xl uppercase tracking-wide text-star-100">Featured shots</h2>
             <Link
               href="/gallery"
               className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400 hover:underline"

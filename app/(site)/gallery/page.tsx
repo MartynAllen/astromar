@@ -42,7 +42,7 @@ export default async function GalleryPage(props: PageProps<"/gallery">) {
       <PageHero photo={heroPhoto}>
         <div className="mx-auto w-full max-w-6xl px-6">
           <Breadcrumbs items={[{ name: "Gallery", path: "/gallery" }]} />
-          <h1 className="font-display text-4xl text-star-100">Gallery</h1>
+          <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Gallery</h1>
           <p className="mt-2 max-w-2xl text-star-500">
             Every image here started as raw stacked subs — tap any photo for
             exposure details.

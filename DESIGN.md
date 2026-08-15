@@ -22,11 +22,11 @@ colors:
   nebula-indigo-400: "#8fb2f5"
 typography:
   display:
-    fontFamily: "Instrument Serif, Georgia, \"Times New Roman\", serif"
+    fontFamily: "JetBrains Mono, ui-monospace, \"SFMono-Regular\", monospace"
     fontSize: "clamp(1.5rem, 4vw, 4.5rem)"
-    fontWeight: 400
+    fontWeight: 700
     lineHeight: 1.05
-    letterSpacing: "normal"
+    letterSpacing: "0.025em"
   body:
     fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1rem"
@@ -83,9 +83,9 @@ space-themed copy. The system was built as a deliberate reaction against the def
 visual grammar of AI-generated sites in 2025–26 — near-black background, rounded bordered
 cards, a Grotesk/Inter pairing, hover-reveals-color as the only interaction — which is
 tasteful but has no point of view. Astromar commits to a specific one instead: sharp
-corners, hairline rules, an oversized single-weight serif for headlines, and a monospace
-voice pushed far beyond its usual "code block" job into nav labels, buttons, badges, and
-data readouts throughout.
+corners, hairline rules, and a monospace voice that has fully taken over every heading,
+label, nav link, button, badge, and data readout on the site — there is no separate
+display typeface anymore, only mono at different weights and sizes.
 
 The real photos carry the vibrancy. Early passes buried them under near-opaque overlays
 and reduced the whole site to "dark template with a caption" — the exact failure this
@@ -95,18 +95,20 @@ restrained everywhere else: one deliberate accent per moment, not a wash of hue 
 surface.
 
 **Confirmed rejections:** rounded-corner "SaaS card" styling for containers; drop
-shadows/elevation as a depth cue; italic anywhere (see The Italic Rule — a font with no
-bold weight fake-bolds badly, so italic looked like the remaining lever, but on a
-delicate high-contrast serif it read as strained rather than confident; hierarchy is
-size and colour only, full stop); gradient text on headlines.
+shadows/elevation as a depth cue; italic anywhere (see The Italic Rule's history — retired
+twice before the whole serif it was applied to was retired too); gradient text on
+headlines; a separate display serif for headlines (see The Mono Takeover, below — tried,
+then deliberately reversed).
 
 **Key Characteristics:**
 - Sharp corners everywhere except pills/badges and one circular icon button — never a
   soft, ambiguous middle ground.
-- A single-weight display serif (Instrument Serif) that carries hierarchy through size
-  alone, never through fake-bolding a weight it doesn't have.
-- JetBrains Mono as a structural voice: nav, buttons, badges, index numbers, category
-  labels, shot-detail readouts — not just code.
+- One typeface family carrying every heading, label, and UI voice on the site — hierarchy
+  is built from size and weight (bold reserved for genuine header-level elements) inside
+  that single family, not from mixing a display face against a UI face.
+- JetBrains Mono as the structural voice: nav, buttons, badges, index numbers, category
+  labels, shot-detail readouts, and now every heading from the hero H1 down to card
+  titles — not just code.
 - A restrained core palette (rose + teal) with four single-shade section accents,
   applied sparingly rather than saturating every surface.
 - Real astrophotography as the dominant visual material, not decoration around text.
@@ -181,43 +183,84 @@ reasoning behind it.
 
 ## Typography
 
-**Display Font:** Instrument Serif (with Georgia, "Times New Roman", serif fallback)
+**Heading/Label/Mono Font:** JetBrains Mono (with ui-monospace, "SFMono-Regular" fallback)
 **Body Font:** IBM Plex Sans (with ui-sans-serif, system-ui fallback)
-**Label/Mono Font:** JetBrains Mono (with ui-monospace, "SFMono-Regular" fallback)
 
-**Character:** An engraved-instrument-plate serif for headlines, set against a plain
-engineering-heritage sans for reading copy and a mono voice that runs through nearly
-every piece of UI chrome. Instrument Serif ships in exactly one weight and no real bold
-cut, so hierarchy is built from size and colour alone — never from a font-weight
-utility, which the browser would fake-bold into something that doesn't match the
-family's real letterforms, and not from italic either (see The Italic Rule).
+**Character:** One mono voice carries the entire site now — every heading from the home
+hero down to a card title, every nav link, button, badge, and shot-detail readout. There
+is no separate display typeface. Hierarchy inside that one family comes from three levers
+only: size, weight (regular vs. bold), and colour — never italic (see The Italic Rule's
+history) and never a fake-bolded weight the family doesn't actually ship.
+
+### The Mono Takeover
+Every heading on the site used to set in Instrument Serif, an engraved-instrument-plate
+display serif contrasted deliberately against the mono UI voice — see git history before
+this section if that contrast needs reconstructing. It was retired in one pass, not
+narrowed gradually like the italic rule was: the "Astromar" wordmark had already moved
+from serif to bold spaced-caps mono after two rounds of just resizing the serif failed to
+fix a real narrowness/readability complaint, and once the wordmark read this much better
+in mono, keeping every other heading on a typeface capable of neither a real bold cut nor
+matching that same weight became the harder position to defend, not the safer one. So
+every `font-display` instance sitewide — home hero H1, every page H1, every H2/H3, every
+card and list-item title, PortableText prose headings, the mobile nav's link list, the
+about page's gear-tile names — moved to the same JetBrains Mono treatment as the wordmark,
+uppercase and letter-spaced, in one sweep rather than piecemeal.
+
+The one deliberate compromise: the wordmark itself uses `tracking-[0.15em]`, tuned for an
+eight-character brand name at a small fixed size. Applied literally to a full-sentence
+headline (the home hero) or a long dynamic title (a review or research-project name),
+that much spacing at large sizes would blow the text far wider than reads comfortably, so
+every other heading tier uses `tracking-wide` (0.025em) instead — enough to keep the
+"instrument plate" character without turning a sentence into something that wraps
+constantly or reads as shouting. Uppercase itself was kept everywhere, including on
+prose-length PortableText subheadings and dynamic content titles — accepted knowingly as
+a readability trade against a consistent, unmistakably "Astromar" typographic voice
+site-wide; if a specific long or CMS-authored title reads badly in practice, the fix is a
+per-instance size/tracking adjustment, not reintroducing a second typeface.
+
+Instrument Serif is no longer loaded at all (`app/layout.tsx`, `app/globals.css`'s
+`--font-display` token) — a font nothing renders with is dead weight on every page load,
+not a "just in case" reserve.
 
 ### Hierarchy
-- **Display / Hero** (400, `text-5xl` mobile → `text-7xl` desktop, `leading-[1.05]`): the
-  home page's headline only.
-- **Headline** (400, `text-4xl`): every other page's H1 (Gallery, Reviews, Guide,
-  Calendar, Research, About, article/review/photo titles).
-- **Title** (400, `text-3xl` / `text-2xl`): section headers within a page ("The gear",
-  "Featured shots", PortableText H2s) and list-item titles on the home page's teaser
-  list.
-- **Subtitle** (400, `text-xl` / `text-lg`): card and list-item titles — review titles,
-  guide article titles, research project titles, gear tile names, PhotoCard captions.
+- **Header** (JetBrains Mono **700**, uppercase, `tracking-wide`): every genuine
+  header-level element — the home hero H1 (`text-5xl` mobile → `text-7xl` desktop,
+  `leading-[1.05]`), every other page's H1 (Gallery, Reviews, Guide, Calendar, Research,
+  About, Privacy, Disclosure, article/review/photo detail titles), and the header/footer/
+  shutter-intro "Astromar" wordmark (`text-[22px]`, `tracking-[0.15em]` — see the
+  compromise above). Bold is reserved for this tier alone, so it still reads as "this is
+  a header" rather than just another mono label.
+- **Title** (JetBrains Mono 400, uppercase, `tracking-wide`, `text-3xl` / `text-2xl`):
+  section headers within a page ("The gear", "Featured shots", "Support the site",
+  PortableText H2s) and list-item titles on the home page's teaser list.
+- **Subtitle** (JetBrains Mono 400, uppercase, `tracking-wide`, `text-xl` / `text-lg` /
+  `text-base`): card and list-item titles — review titles, guide article titles, research
+  project titles, gear tile names, PhotoCard/PhotoDetail titles, EventCard titles, the
+  moon-phase widget's phase name, PortableText H3s, the mobile nav's link list (a
+  deliberate change from the old register-shift rule, which relied on the mobile menu
+  being the one place the retired serif still appeared — now everything is one voice, so
+  that contrast no longer exists and doesn't need to).
 - **Body** (IBM Plex Sans 400, `text-sm`–`text-lg`, `leading-relaxed` in prose):
   descriptions, article body copy. Prose columns cap around 65ch via `max-w-2xl`.
 - **Label** (JetBrains Mono 400, `text-xs` and up, `tracking-widest`, uppercase):
   navigation, buttons, badges, category labels, eyebrow lines, shot-detail readouts,
   list-index numbers. `text-xs` (12px) is the floor — the type ramp has no smaller
   step; a mechanical detector catches any stray `text-[11px]` or similar arbitrary
-  size that drifts below it.
+  size that drifts below it. The Header/Title/Subtitle tiers above sit at `tracking-wide`
+  rather than this tier's `tracking-widest` — real headline-length text needs less
+  proportional spacing than a short nav word does before it stops reading comfortably.
 
 ### Named Rules
-**The Italic Rule.** Italic is used nowhere on the site. It was tried twice and reversed
-twice: first on every heading (read as precious rather than confident), then narrowed to
-just the "Astromar" wordmark and the home hero's emphasised phrase — which still read as
-strain rather than intent once looked at critically, since Instrument Serif has no real
-bold weight to pair it against, so italic was the only lever being pulled and it showed.
-Hierarchy is built from size and colour alone, full stop. Don't reach for italic to mark
-something as special; reach for size, the rose/teal accent, or a mono label instead.
+**The Italic Rule.** Italic is used nowhere on any heading or label (a plain body-copy
+blockquote still gets normal `italic` styling — that's a different, conventional use, not
+a heading treatment). Heading italics specifically were tried twice and reversed twice:
+first on every heading, then narrowed to just the wordmark and the home hero's emphasised
+phrase, both of which still read as strain rather than intent, since Instrument Serif had
+no real bold weight to pair against — italic was the only lever being pulled and it
+showed. That whole typeface is retired now (see The Mono Takeover), so the rule's letter
+is moot, but the underlying principle carries forward unchanged: don't reach for italic to
+mark a heading as special; reach for size, weight, the rose/teal accent, or a mono label
+instead.
 
 **The Mono-Does-More Rule.** JetBrains Mono is not reserved for literal code. It's the
 system's "instrument readout" voice: anywhere the UI is labelling, counting, or reporting
@@ -414,8 +457,11 @@ partial-radius middle state anywhere in the system; introducing `rounded-md` or
 - **Desktop:** `divide-x divide-void-700` separated mono links, uppercase, `text-star-500`
   at rest, `text-nebula-teal-400` on hover — no background pill, no underline.
 - **Mobile:** a plain hamburger icon (no button background) opens a full-width dropdown;
-  links there use upright Instrument Serif at `text-xl`, not mono — a deliberate
-  register shift from "control panel" (desktop) to "table of contents" (mobile menu).
+  links there are mono at `text-xl`, uppercase, `tracking-wide` — the same Subtitle-tier
+  treatment as everything else post-Mono-Takeover. This used to be upright Instrument
+  Serif on purpose, a deliberate register shift from "control panel" (desktop) to "table
+  of contents" (mobile menu); that contrast relied on two different typefaces existing on
+  the site at all, so it went away with the serif, not as an oversight.
 - **Wordmark:** bold, spaced-caps JetBrains Mono — `font-mono text-[22px] font-bold
   uppercase tracking-[0.15em] text-star-100` (Header, Footer; `text-nebula-teal-400`
   and `text-3xl` in ShutterIntro, sized up for its full-screen hero context). This is
@@ -452,9 +498,13 @@ two CTAs).
 - **Do** use `border-void-700` as the default divider/border colour; reach for
   `border-void-600` only on interactive controls (inputs, secondary buttons, badges)
   that need to read as slightly more prominent.
-- **Do** keep JetBrains Mono uppercase and `tracking-widest` whenever it's labelling
-  something (nav, buttons, badges, index numbers) — that treatment is what signals
-  "instrument readout" rather than "this is a code snippet."
+- **Do** keep JetBrains Mono uppercase whenever it's labelling something — nav, buttons,
+  badges, index numbers, and every heading tier now use `tracking-widest` for short
+  labels/nav or `tracking-wide` for headings/titles (see Typography → Hierarchy); don't
+  mix the two within one tier.
+- **Do** reserve `font-bold` on mono headings for genuine header-level elements only (the
+  wordmark, the home hero H1, page H1s) — every H2/H3/card/subtitle title stays regular
+  weight, so bold still reads as "this is a header" rather than just another label.
 - **Do** use near-black text (`text-void-950`) on filled accent buttons, never white —
   it reads as an "instrument readout" and has measurably better contrast than white on
   these accent tones.
