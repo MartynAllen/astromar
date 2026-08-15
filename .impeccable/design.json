@@ -47,7 +47,7 @@
     "typographyMeta": {
       "display": { "displayName": "Display", "purpose": "Page headlines and the home hero only. Single weight — hierarchy is size, not boldness." },
       "body": { "displayName": "Body", "purpose": "Reading copy: descriptions, article prose, captions." },
-      "label": { "displayName": "Label / Mono", "purpose": "Nav, buttons, badges, index numbers, shot-detail readouts — the system's instrument-panel voice." }
+      "label": { "displayName": "Label / Mono", "purpose": "Nav, buttons, badges, index numbers, shot-detail readouts, and the Astromar wordmark (bold, spaced caps) — the system's instrument-panel voice." }
     },
     "shadows": [],
     "motion": [

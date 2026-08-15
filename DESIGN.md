@@ -416,12 +416,23 @@ partial-radius middle state anywhere in the system; introducing `rounded-md` or
 - **Mobile:** a plain hamburger icon (no button background) opens a full-width dropdown;
   links there use upright Instrument Serif at `text-xl`, not mono — a deliberate
   register shift from "control panel" (desktop) to "table of contents" (mobile menu).
-- **Wordmark:** upright Instrument Serif, `text-3xl`, no letter-spacing override
-  (`text-nebula-teal-400`/`text-star-100`; see The Italic Rule). Was `text-2xl` with
-  `tracking-tight` — negative tracking on a delicate high-contrast serif at a small
-  header size fought the letterforms rather than reading confident, so both the size
-  bump and dropping the tight tracking came out of the same review. The logo icon
-  (`Logo.tsx`) grew to `h-7 w-7` to stay proportionally paired with it.
+- **Wordmark:** bold, spaced-caps JetBrains Mono — `font-mono text-[22px] font-bold
+  uppercase tracking-[0.15em] text-star-100` (Header, Footer; `text-nebula-teal-400`
+  and `text-3xl` in ShutterIntro, sized up for its full-screen hero context). This is
+  the second attempt's replacement for a first attempt that only enlarged and
+  de-tightened the previous upright-Instrument-Serif wordmark (`text-2xl
+  tracking-tight` → `text-3xl`, no tracking override) — that pass fixed a real
+  narrowness problem but didn't address the actual complaint, which was the typeface
+  itself: Instrument Serif has no bold cut to lean on, so at wordmark size and weight
+  it kept reading thin next to the site's mono-heavy UI voice. Moving the brand name
+  itself into mono extends the existing Mono-Does-More instrument-readout voice to
+  the one place it hadn't reached yet, and gives the wordmark a genuine bold weight
+  (JetBrains Mono 700, loaded solely for this — see `app/layout.tsx`) instead of
+  fighting a single-weight serif. `Logo.tsx` was bolded and simplified alongside it
+  (crescent + aperture strokes 2.5→3.5, the fine 1.25px/80%-opacity facet crosshatch
+  removed — it read as a grey smear rather than facets at the icon's real display
+  size, and looked thin next to the new bold wordmark) and grew to `h-8 w-8` in the
+  header.
 
 ### Photo Hero (signature component)
 Every section index page (Gallery, Reviews, Guide, Calendar, Research) opens with a

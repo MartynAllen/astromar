@@ -19,9 +19,12 @@ const plexSans = IBM_Plex_Sans({
   subsets: ["latin"],
 });
 
+// 700 loaded solely for the "Astromar" wordmark — everywhere else mono
+// stays regular weight, so the one bold instance reads as the brand mark,
+// not just another label.
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
-  weight: "400",
+  weight: ["400", "700"],
   subsets: ["latin"],
 });
 
