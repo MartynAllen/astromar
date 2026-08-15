@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import BahtinovMaskGenerator from "@/components/guide/BahtinovMaskGenerator";
 import { getGuideArticleBySlug, getGuideSlugs } from "@/lib/sanity.queries";
 import { buildMetadata, articleJsonLd } from "@/lib/seo";
 
@@ -55,6 +56,12 @@ export default async function GuideArticlePage(props: PageProps<"/guide/[slug]">
       {article.summary && <p className="mt-3 text-star-500">{article.summary}</p>}
 
       <PortableTextContent value={article.body} />
+
+      {slug === "bahtinov-mask-focusing" && (
+        <div className="mt-12">
+          <BahtinovMaskGenerator />
+        </div>
+      )}
     </div>
   );
 }
