@@ -43,7 +43,13 @@ export default defineType({
       validation: (r) => r.required(),
       options: {
         hotspot: true,
-        metadata: ["blurhash", "lqip", "palette", "exif", "location"],
+        // "exif"/"location" deliberately excluded: Sanity's own asset
+        // pipeline would extract and store them from the uploaded file's
+        // EXIF (GPS coordinates included) on the public asset document,
+        // independent of and in addition to shotDetails — the exact same
+        // "public dataset" exposure already fixed once for shotDetails and
+        // siteSettings. Nothing in the app reads either key.
+        metadata: ["blurhash", "lqip", "palette"],
       },
     }),
     defineField({
