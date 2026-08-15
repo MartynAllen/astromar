@@ -10,9 +10,9 @@ colors:
   star-300: "#c7cbd9"
   star-500: "#8a90a6"
   star-700: "#565b6e"
-  nebula-rose-400: "#ec7fae"
-  nebula-rose-500: "#e0487f"
-  nebula-rose-700: "#9c2c53"
+  nebula-rose-400: "#e2543f"
+  nebula-rose-500: "#cc3a26"
+  nebula-rose-700: "#832316"
   nebula-teal-300: "#a8ecf5"
   nebula-teal-400: "#6fdcec"
   nebula-teal-500: "#35c4de"
@@ -95,8 +95,10 @@ restrained everywhere else: one deliberate accent per moment, not a wash of hue 
 surface.
 
 **Confirmed rejections:** rounded-corner "SaaS card" styling for containers; drop
-shadows/elevation as a depth cue; italic as a default heading state (reserved for exactly
-two things — see the Italic Rule); gradient text on headlines.
+shadows/elevation as a depth cue; italic anywhere (see The Italic Rule — a font with no
+bold weight fake-bolds badly, so italic looked like the remaining lever, but on a
+delicate high-contrast serif it read as strained rather than confident; hierarchy is
+size and colour only, full stop); gradient text on headlines.
 
 **Key Characteristics:**
 - Sharp corners everywhere except pills/badges and one circular icon button — never a
@@ -115,10 +117,16 @@ Near-black base with two photo-derived accents doing most of the work, plus four
 single-shade accents that each mark exactly one section of the site.
 
 ### Primary
-- **Nebula Rose** (`#ec7fae`): the primary accent — pulled from the real Pelican and Veil
-  nebula frames in the gallery, not chosen abstractly. Carries primary CTAs
-  ("View the gallery"), the Reviews section, the one italicised emphasis phrase in the
-  home hero, and the camera gear-category accent.
+- **Nebula Rose** (`#e2543f`): the primary accent. Originally tuned as a lighter pink
+  pulled from the Pelican/Veil frames; retuned to a deeper Hydrogen-alpha red after a
+  design review — still traceable to the same real photos (Hα emission is the classic
+  deep-red cast most of those targets actually process into), just a truer read of it
+  than the original pink. The Tailwind/CSS token keeps the `nebula-rose-*` name for
+  continuity — repointing 30+ files for a naming nicety wasn't worth it — so treat "rose"
+  as the token's technical name, not a literal colour description anymore. Carries
+  primary CTAs ("View the gallery"), the Reviews section, the emphasis phrase in the
+  home hero (colour only now — see The Italic Rule), and the camera gear-category
+  accent.
 
 ### Secondary
 - **Nebula Teal** (`#6fdcec`): the brand/navigation accent, retuned bluer than the
@@ -145,8 +153,13 @@ single-shade accents that each mark exactly one section of the site.
 - **Star 100** (`#f5f7fa`): primary text.
 - **Star 300** (`#c7cbd9`): secondary text and default link colour.
 - **Star 500** (`#8a90a6`): muted body copy, the most common text colour after Star 100.
-- **Star 700** (`#565b6e`): the faintest text — legal links, list-index numbers, bullet
-  glyphs in sub-item lists.
+- **Star 700** (`#565b6e`): reserved for genuinely decorative marks only — bullet glyphs
+  in sub-item lists, form-input placeholder text — never for text that is itself the
+  entire message. At ~2.9:1 against Void 950 it fails WCAG AA for normal text, so
+  anything a visitor actually needs to read (legal links, list-index numbers, empty-state
+  messages, captions) uses Star 500 or lighter instead. Legal links and list-index
+  numbers both started on Star 700 and were moved to Star 500 after a contrast review —
+  kept here as the reasoning, not a leftover to re-litigate.
 
 ### Named Rules
 **The One Accent Rule.** Never more than one accent colour is doing active work in a
@@ -174,9 +187,10 @@ reasoning behind it.
 
 **Character:** An engraved-instrument-plate serif for headlines, set against a plain
 engineering-heritage sans for reading copy and a mono voice that runs through nearly
-every piece of UI chrome. Instrument Serif ships in exactly one weight, so hierarchy is
-built from size and the italic cut — never from a font-weight utility, which the browser
-would fake-bold into something that doesn't match the family's real letterforms.
+every piece of UI chrome. Instrument Serif ships in exactly one weight and no real bold
+cut, so hierarchy is built from size and colour alone — never from a font-weight
+utility, which the browser would fake-bold into something that doesn't match the
+family's real letterforms, and not from italic either (see The Italic Rule).
 
 ### Hierarchy
 - **Display / Hero** (400, `text-5xl` mobile → `text-7xl` desktop, `leading-[1.05]`): the
@@ -190,17 +204,20 @@ would fake-bold into something that doesn't match the family's real letterforms.
   guide article titles, research project titles, gear tile names, PhotoCard captions.
 - **Body** (IBM Plex Sans 400, `text-sm`–`text-lg`, `leading-relaxed` in prose):
   descriptions, article body copy. Prose columns cap around 65ch via `max-w-2xl`.
-- **Label** (JetBrains Mono 400, `text-[11px]`–`text-xs`, `tracking-widest`,
-  uppercase): navigation, buttons, badges, category labels, eyebrow lines, shot-detail
-  readouts, list-index numbers.
+- **Label** (JetBrains Mono 400, `text-xs` and up, `tracking-widest`, uppercase):
+  navigation, buttons, badges, category labels, eyebrow lines, shot-detail readouts,
+  list-index numbers. `text-xs` (12px) is the floor — the type ramp has no smaller
+  step; a mechanical detector catches any stray `text-[11px]` or similar arbitrary
+  size that drifts below it.
 
 ### Named Rules
-**The Italic Rule.** Italic is reserved for exactly two things sitewide: the "Astromar"
-wordmark (header, footer, the shutter-intro animation) and the one emphasised phrase in
-the home hero ("*very ordinary garden*"). Every other heading — every H1, every H2, every
-card and list-item title — is upright. An earlier pass italicised every heading site-wide
-and it read as precious rather than confident; the fix was reserving italic until it
-meant something again.
+**The Italic Rule.** Italic is used nowhere on the site. It was tried twice and reversed
+twice: first on every heading (read as precious rather than confident), then narrowed to
+just the "Astromar" wordmark and the home hero's emphasised phrase — which still read as
+strain rather than intent once looked at critically, since Instrument Serif has no real
+bold weight to pair it against, so italic was the only lever being pulled and it showed.
+Hierarchy is built from size and colour alone, full stop. Don't reach for italic to mark
+something as special; reach for size, the rose/teal accent, or a mono label instead.
 
 **The Mono-Does-More Rule.** JetBrains Mono is not reserved for literal code. It's the
 system's "instrument readout" voice: anywhere the UI is labelling, counting, or reporting
@@ -229,9 +246,19 @@ more width than a reading-page container, it doesn't inherit one by default.
 List-style pages favour `divide-y divide-void-700` rows over card grids — the home page's
 section-teaser list and every index page's article/review list read as a single ruled
 list, not a wall of boxes. Grids are reserved for genuinely grid-shaped content: the
-Gallery's masonry (`columns-1 sm:columns-2 lg:columns-3`), the About page's gear tiles
-(`grid sm:grid-cols-2`, with the catch-all "Miscellaneous" tile spanning both columns
-since it holds more content than the others).
+Gallery's masonry (`columns-1 sm:columns-2 lg:columns-3`).
+
+The About page's gear tiles are deliberately not a grid — they're grouped into per-category
+clusters (Camera, Telescope, Accessories, Software; only categories with items render),
+each with its own mono category-colour header that now carries the label a per-tile badge
+used to repeat. Tiles inside a cluster use `flex flex-wrap` rather than fixed columns, with
+alternating tiles nudged down on `sm:` and up (`sm:mt-7` on every other one) so a
+same-category pair sits near each other without lining up in a rigid row — proximity marks
+the group, the stagger keeps it from reading as a spreadsheet. Gap is tight within a cluster
+(`gap-4`) and generous between clusters (`space-y-10`), the same proximity principle the
+divide-y lists use elsewhere. The catch-all "Miscellaneous" tile still spans full width
+within its cluster, since it holds more content than the others. Mobile drops the stagger
+entirely (`sm:`-gated) — full-width single-column stacking, no offset.
 
 Responsive behaviour is mobile-first Tailwind breakpoints throughout (`sm:`, `lg:`), with
 the header's full nav collapsing to a hamburger below `md:` — raised from the more typical
@@ -384,8 +411,8 @@ partial-radius middle state anywhere in the system; introducing `rounded-md` or
 - **Mobile:** a plain hamburger icon (no button background) opens a full-width dropdown;
   links there use upright Instrument Serif at `text-xl`, not mono — a deliberate
   register shift from "control panel" (desktop) to "table of contents" (mobile menu).
-- **Wordmark:** italic Instrument Serif, `text-nebula-teal-400`/`text-star-100`, the one
-  other place italic is allowed (see The Italic Rule).
+- **Wordmark:** upright Instrument Serif, `text-nebula-teal-400`/`text-star-100` (see
+  The Italic Rule).
 
 ### Photo Hero (signature component)
 Every section index page (Gallery, Reviews, Guide, Calendar, Research) opens with a
@@ -422,9 +449,7 @@ two CTAs).
 - **Don't** add `rounded-md` or `rounded-lg` to any container. If something needs to feel
   softer, that's a Departure-mode conversation, not a one-off radius value (see The Sharp
   Edge Rule).
-- **Don't** italicise a new heading by default. Italic means "the wordmark" or "the one
-  emphasis phrase" — nothing else, until a future direction change explicitly revisits
-  The Italic Rule.
+- **Don't** italicise anything. Tried twice, reversed twice — see The Italic Rule.
 - **Don't** add a drop shadow anywhere, including on hover. Depth comes from borders and
   the neutral-scale step between `void-950` and `void-900`, never elevation.
 - **Don't** darken a hero photo past the point it reads clearly as a photo. The site's

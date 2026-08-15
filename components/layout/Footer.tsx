@@ -19,7 +19,7 @@ export default async function Footer() {
           }
         >
           <div className="sm:pr-8">
-            <p className="font-display text-2xl italic text-star-100">{siteName}</p>
+            <p className="font-display text-2xl text-star-100">{siteName}</p>
             <p className="mt-2 max-w-xs text-sm text-star-500">{tagline}</p>
             <p className="mt-3 max-w-xs text-sm text-star-500">
               Enjoying the photos?{" "}
@@ -76,7 +76,7 @@ export default async function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-void-700 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-xs text-star-700">
+          <p className="font-mono text-xs text-star-500">
             © {new Date().getFullYear()} {siteName} — all photos are the author&apos;s own.
           </p>
           <ul className="flex gap-4">
@@ -84,7 +84,7 @@ export default async function Footer() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="font-mono text-xs text-star-700 hover:text-star-300"
+                  className="font-mono text-xs text-star-500 hover:text-star-300"
                 >
                   {link.label}
                 </Link>

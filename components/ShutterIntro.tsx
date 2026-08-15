@@ -84,7 +84,7 @@ export default function ShutterIntro() {
       </svg>
       <div className="shutter-wordmark absolute inset-0 flex flex-col items-center justify-center gap-3">
         <Logo className="h-12 w-12 text-nebula-teal-400" />
-        <span className="font-display text-3xl italic tracking-tight text-nebula-teal-400">
+        <span className="font-display text-3xl tracking-tight text-nebula-teal-400">
           Astromar
         </span>
       </div>

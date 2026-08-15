@@ -7,8 +7,8 @@
       "nebula-rose-400": {
         "role": "primary",
         "displayName": "Nebula Rose",
-        "canonical": "#ec7fae",
-        "tonalRamp": ["#f2a6c4", "#ec7fae", "#e0487f", "#c13868", "#9c2c53"]
+        "canonical": "#e2543f",
+        "tonalRamp": ["#f2a693", "#e2543f", "#cc3a26", "#a82d1d", "#832316"]
       },
       "nebula-teal-400": {
         "role": "secondary",
@@ -74,7 +74,7 @@
       "refersTo": "button-primary",
       "description": "The one 'act now' affordance — outlined at rest, fills solid on hover. Used for the main gallery CTA and affiliate links.",
       "html": "<a class=\"ds-btn-primary\" href=\"#\">View the gallery</a>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #ec7fae; background: transparent; color: #ec7fae; padding: 10px 20px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; text-decoration: none; transition: background-color 0.2s, color 0.2s; } .ds-btn-primary:hover, .ds-btn-primary:focus-visible { background: #ec7fae; color: #05060a; } .ds-btn-primary:focus-visible { outline: 2px solid #6fdcec; outline-offset: 2px; }"
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #e2543f; background: transparent; color: #e2543f; padding: 10px 20px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; text-decoration: none; transition: background-color 0.2s, color 0.2s; } .ds-btn-primary:hover, .ds-btn-primary:focus-visible { background: #e2543f; color: #05060a; } .ds-btn-primary:focus-visible { outline: 2px solid #6fdcec; outline-offset: 2px; }"
     },
     {
       "name": "Secondary Button",
@@ -122,7 +122,7 @@
     "rules": [
       { "name": "The One Accent Rule", "body": "Never more than one accent colour is doing active work in a single component at once. A card's border, label, and icon all share the same accent — they don't each pick a different one.", "section": "colors" },
       { "name": "The Section Colour Rule", "body": "Amber, green, and indigo each belong to exactly one section (Guide, Research, Calendar). Introducing a new top-level section should either reuse an existing colour from a related gear category or extend the scale deliberately, never borrow another section's colour.", "section": "colors" },
-      { "name": "The Italic Rule", "body": "Italic is reserved for exactly two things sitewide: the \"Astromar\" wordmark and the one emphasised phrase in the home hero. Every other heading is upright.", "section": "typography" },
+      { "name": "The Italic Rule", "body": "Italic is used nowhere on the site. Tried on every heading, then narrowed to just the wordmark and one hero phrase, then retired entirely once even that narrow use read as strained rather than confident on a face with no real bold weight to pair against. Hierarchy is size and colour only.", "section": "typography" },
       { "name": "The Mono-Does-More Rule", "body": "JetBrains Mono is not reserved for literal code. It's the system's \"instrument readout\" voice: anywhere the UI is labelling, counting, or reporting a value rather than writing prose, it's mono, uppercase, and letter-spaced.", "section": "typography" },
       { "name": "The Flat-By-Default Rule", "body": "No component gains a shadow at any state, including hover. Interactive feedback comes from border-colour and text-colour transitions or a background fill, never from elevation.", "section": "elevation" },
       { "name": "The Sharp Edge Rule", "body": "If it's a container it has zero border-radius. If it's a label or a control showing an on/off or selected state, it's a full pill. There is no partial-radius middle state anywhere in the system.", "section": "shapes" }

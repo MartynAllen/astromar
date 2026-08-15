@@ -93,7 +93,7 @@ export default function SkyChart({
         role="img"
         aria-label={`Sky chart: ${objects.length} object${objects.length === 1 ? "" : "s"} above ${USEFUL_ALTITUDE}°, positioned by compass direction and altitude, zenith at centre`}
       />
-      <p className="mt-2 font-mono text-xs text-star-700">
+      <p className="mt-2 font-mono text-xs text-star-500">
         Zenith at centre · horizon at edge
       </p>
     </div>

@@ -6,7 +6,7 @@ import AffiliateButton from "@/components/reviews/AffiliateButton";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import CategoryIcon from "@/components/about/CategoryIcon";
 import { urlFor } from "@/sanity/image";
-import { getAboutPage } from "@/lib/sanity.queries";
+import { getAboutPage, type GearItem } from "@/lib/sanity.queries";
 import { SUPPORT_URL } from "@/lib/navigation";
 
 export const revalidate = 60;
@@ -16,20 +16,24 @@ export const metadata: Metadata = {
   description: "Who's behind Astromar, and the gear used to make the images.",
 };
 
-const CATEGORY_LABEL: Record<string, string> = {
+type GearCategory = GearItem["category"];
+
+// What you point, what you mount it on, what else the session needs.
+const CATEGORY_ORDER: GearCategory[] = ["camera", "telescope", "accessory", "software"];
+
+const CATEGORY_LABEL: Record<GearCategory, string> = {
   telescope: "Telescope",
   camera: "Camera",
   accessory: "Accessories",
   software: "Software",
 };
 
-const CATEGORY_COLOR: Record<string, string> = {
+const CATEGORY_COLOR: Record<GearCategory, string> = {
   telescope: "text-nebula-teal-400 border-l-nebula-teal-400",
   camera: "text-nebula-rose-400 border-l-nebula-rose-400",
   accessory: "text-nebula-amber-400 border-l-nebula-amber-400",
   software: "text-nebula-indigo-400 border-l-nebula-indigo-400",
 };
-const DEFAULT_COLOR = "text-star-500 border-l-void-700";
 
 export default async function AboutPage() {
   const about = await getAboutPage();
@@ -63,56 +67,70 @@ export default async function AboutPage() {
           <div className="mt-4">
             <AffiliateDisclosureBanner />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {about.gear.map((item, i) => {
-              const color = CATEGORY_COLOR[item.category] ?? DEFAULT_COLOR;
-              const spanFull = item.items && item.items.length > 0;
+          <div className="mt-8 space-y-10">
+            {CATEGORY_ORDER.filter((category) =>
+              about.gear!.some((item) => item.category === category),
+            ).map((category) => {
+              const items = about.gear!.filter((item) => item.category === category);
+              const color = CATEGORY_COLOR[category];
+              const [textColor] = color.split(" ");
               return (
-                <div
-                  key={`${item.name}-${i}`}
-                  className={`flex items-start gap-4 border border-l-2 border-void-700 bg-void-900 p-4 ${color} ${spanFull ? "sm:col-span-2" : ""}`}
-                >
-                  {item.image?.asset ? (
-                    <Image
-                      src={urlFor(item.image).width(160).height(160).url()}
-                      alt={item.name}
-                      width={72}
-                      height={72}
-                      className="h-[72px] w-[72px] flex-none border border-void-700 object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-[72px] w-[72px] flex-none items-center justify-center border border-void-700">
-                      <CategoryIcon
-                        category={item.category}
-                        className="h-8 w-8"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="font-mono text-xs uppercase tracking-wider">
-                      {CATEGORY_LABEL[item.category] ?? item.category}
-                    </p>
-                    <p className="mt-0.5 font-display text-lg text-star-100">
-                      {item.name}
-                    </p>
-                    {item.notes && (
-                      <p className="mt-1 text-sm text-star-500">{item.notes}</p>
-                    )}
-                    {item.items && item.items.length > 0 && (
-                      <ul className="mt-2 space-y-1 text-sm text-star-300">
-                        {item.items.map((sub) => (
-                          <li key={sub} className="flex gap-2">
-                            <span className="text-star-700">·</span>
-                            {sub}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {item.affiliateLink && (
-                      <div className="mt-3">
-                        <AffiliateButton link={item.affiliateLink} />
-                      </div>
-                    )}
+                <div key={category}>
+                  <p className={`font-mono text-xs uppercase tracking-widest ${textColor}`}>
+                    {CATEGORY_LABEL[category]}
+                  </p>
+                  {/* Grouped as a loose cluster, not a grid — tight within a
+                      category, generous between them, with a slight stagger
+                      on alternating tiles so it reads like related stars
+                      sitting near each other rather than a spreadsheet. */}
+                  <div className="mt-3 flex flex-wrap items-start gap-4">
+                    {items.map((item, i) => {
+                      const spanFull = Boolean(item.items && item.items.length > 0);
+                      const stagger = !spanFull && items.length > 1 && i % 2 === 1;
+                      return (
+                        <div
+                          key={`${item.name}-${i}`}
+                          className={`flex items-start gap-4 border border-l-2 border-void-700 bg-void-900 p-4 ${color} ${
+                            spanFull ? "w-full" : "w-full sm:w-[calc(50%-0.5rem)]"
+                          } ${stagger ? "sm:mt-7" : ""}`}
+                        >
+                          {item.image?.asset ? (
+                            <Image
+                              src={urlFor(item.image).width(160).height(160).url()}
+                              alt={item.name}
+                              width={72}
+                              height={72}
+                              className="h-[72px] w-[72px] flex-none border border-void-700 object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-[72px] w-[72px] flex-none items-center justify-center border border-void-700">
+                              <CategoryIcon category={item.category} className="h-8 w-8" />
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <p className="font-display text-lg text-star-100">{item.name}</p>
+                            {item.notes && (
+                              <p className="mt-1 text-sm text-star-500">{item.notes}</p>
+                            )}
+                            {item.items && item.items.length > 0 && (
+                              <ul className="mt-2 space-y-1 text-sm text-star-300">
+                                {item.items.map((sub) => (
+                                  <li key={sub} className="flex gap-2">
+                                    <span className="text-star-700">·</span>
+                                    {sub}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                            {item.affiliateLink && (
+                              <div className="mt-3">
+                                <AffiliateButton link={item.affiliateLink} />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );

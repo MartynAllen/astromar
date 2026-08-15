@@ -195,7 +195,7 @@ export default function VisibilityFinder() {
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {hour.best.length === 0 ? (
-                        <span className="text-sm text-star-700">Nothing well-placed</span>
+                        <span className="text-sm text-star-500">Nothing well-placed</span>
                       ) : (
                         hour.best.map((v) => (
                           <div
@@ -221,7 +221,7 @@ export default function VisibilityFinder() {
             </>
           )}
 
-          <p className="mt-4 text-xs text-star-700">
+          <p className="mt-4 text-xs text-star-500">
             Times shown in your browser&apos;s local timezone. Altitude filtered to 25°+
             above the horizon.
           </p>

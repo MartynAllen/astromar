@@ -58,7 +58,7 @@ export default async function GuidePage() {
                               {article.title}
                             </h3>
                             {article.difficulty && (
-                              <span className="rounded-full border border-void-600 px-2 py-0.5 text-[11px] text-star-500">
+                              <span className="rounded-full border border-void-600 px-2 py-0.5 text-xs text-star-500">
                                 {article.difficulty}
                               </span>
                             )}

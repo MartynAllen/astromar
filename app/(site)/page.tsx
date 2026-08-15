@@ -74,7 +74,7 @@ export default async function HomePage() {
           </p>
           <h1 className="mt-6 max-w-3xl font-display text-5xl leading-[1.05] text-star-100 sm:text-7xl">
             Deep-sky images from a{" "}
-            <span className="italic text-nebula-rose-400">very ordinary garden</span>.
+            <span className="text-nebula-rose-400">very ordinary garden</span>.
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-star-500 sm:text-lg">
             Nebulae, galaxies and the moon, captured one stacked exposure at a

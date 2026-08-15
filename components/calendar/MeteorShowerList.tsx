@@ -16,7 +16,7 @@ export default function MeteorShowerList() {
         {upcoming.map(({ shower, peak }) => (
           <li key={shower.name} className="flex items-baseline justify-between gap-4 py-2.5">
             <div>
-              <p className="text-sm font-medium text-star-100">{shower.name}</p>
+              <p className="text-sm text-star-100">{shower.name}</p>
               <p className="text-xs text-star-500">Radiant: {shower.radiant} · up to {shower.zhr}/hr</p>
             </div>
             <span className="font-mono text-sm text-star-300">{formatDate(peak)}</span>

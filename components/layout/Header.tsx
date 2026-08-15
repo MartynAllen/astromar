@@ -9,7 +9,7 @@ export default function Header() {
       <div className="relative mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2.5 text-nebula-teal-400">
           <Logo className="h-6 w-6" />
-          <span className="font-display text-2xl italic tracking-tight text-star-100">
+          <span className="font-display text-2xl tracking-tight text-star-100">
             Astromar
           </span>
         </Link>

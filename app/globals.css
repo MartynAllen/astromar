@@ -14,13 +14,21 @@
   --color-star-500: #8a90a6;
   --color-star-700: #565b6e;
 
-  /* Nebula rose — primary accent, pulled from real Pelican/Veil nebula frames.
-     Contrast vs #05060A verified: 300=10.6:1 400=7.9:1 500=5.2:1 600=3.9:1 (fails AA body text). */
-  --color-nebula-rose-300: #f2a6c4;
-  --color-nebula-rose-400: #ec7fae;
-  --color-nebula-rose-500: #e0487f;
-  --color-nebula-rose-600: #c13868;
-  --color-nebula-rose-700: #9c2c53;
+  /* Nebula rose — primary accent. Retuned from pink/magenta toward a deep
+     Hydrogen-alpha red: still traceable to real photos (Ha emission is the
+     classic deep-red cast in most of the nebula frames, not the lighter
+     pink the original tuning leaned on), just truer to how those targets
+     actually process. Token names kept as "rose" for continuity — every
+     component references nebula-rose-*, and renaming would touch 30+
+     files for a naming nicety alone.
+     Contrast vs #05060A verified: 300=10.27:1 400=5.38:1 500=4.05:1
+     600=2.95:1 (fails AA body text, border/icon/large-text only, same
+     restriction the original tuning already carried). */
+  --color-nebula-rose-300: #f2a693;
+  --color-nebula-rose-400: #e2543f;
+  --color-nebula-rose-500: #cc3a26;
+  --color-nebula-rose-600: #a82d1d;
+  --color-nebula-rose-700: #832316;
 
   /* Nebula teal — secondary accent, retuned to match the logo mark's cyan
      (bluer, less green than the original East Veil-derived teal) so the

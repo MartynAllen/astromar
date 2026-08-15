@@ -15,12 +15,13 @@ const instrumentSerif = Instrument_Serif({
 
 const plexSans = IBM_Plex_Sans({
   variable: "--font-plex-sans",
-  weight: ["400", "500", "600"],
+  weight: "400",
   subsets: ["latin"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
+  weight: "400",
   subsets: ["latin"],
 });
 
