@@ -22,7 +22,6 @@ export interface ShotDetails {
   isMosaic?: boolean;
   captureDate?: string;
   telescope?: string;
-  captureLocation?: { lat: number; lng: number };
   raDec?: { ra?: number; dec?: number };
 }
 
@@ -54,7 +53,6 @@ export interface SiteSettings {
   siteName: string;
   tagline?: string;
   logo?: SanityImageSource;
-  homeObservingLocation?: { lat: number; lng: number };
   socialLinks?: { platform: string; url: string }[];
   defaultSeo?: {
     metaTitle?: string;
@@ -126,7 +124,7 @@ export async function getPhotoBySlug(
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   return client.fetch(
     /* groq */ `*[_type == "siteSettings"][0]{
-      siteName, tagline, logo, homeObservingLocation, socialLinks, defaultSeo
+      siteName, tagline, logo, socialLinks, defaultSeo
     }`,
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },

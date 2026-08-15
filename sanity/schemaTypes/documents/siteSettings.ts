@@ -16,13 +16,13 @@ export default defineType({
     }),
     defineField({ name: "tagline", title: "Tagline", type: "string" }),
     defineField({ name: "logo", title: "Logo", type: "image" }),
-    defineField({
-      name: "homeObservingLocation",
-      title: "Home observing location",
-      type: "geopoint",
-      description:
-        "Default capture location for new photos, and the reference point for the calendar's moon rise/set times.",
-    }),
+    // No home-location field on purpose: this dataset is on Sanity's free
+    // public tier, so anything stored here is readable by anyone querying
+    // the API directly, no auth required. Nothing in the app actually needs
+    // a real home coordinate — the sky reconstruction uses a fixed, already
+    // rounded public point (lib/astro/starPositions.ts), and the visibility
+    // finder takes a location per search, never stored. See shotDetails.ts
+    // for the same fix applied to per-photo capture coordinates.
     defineField({
       name: "socialLinks",
       title: "Social links",

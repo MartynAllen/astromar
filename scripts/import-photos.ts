@@ -99,15 +99,15 @@ async function importOne(dir: string, filename: string) {
       filter: resolved.filter,
       isMosaic: resolved.isMosaic,
       captureDate: resolved.captureDate,
-      ...(resolved.latitude !== undefined && resolved.longitude !== undefined
-        ? {
-            captureLocation: {
-              _type: "geopoint",
-              lat: resolved.latitude,
-              lng: resolved.longitude,
-            },
-          }
-        : {}),
+      // Deliberately not stored: resolved.latitude/longitude are the real
+      // home GPS coordinates baked into the EXIF/FITS header by the capture
+      // device. Nothing in the app renders them (SkyBackdrop uses a fixed,
+      // already-public approximate location instead) — but this dataset is
+      // on Sanity's free "public" tier, so any field written here is
+      // readable by anyone querying the API directly, with no token,
+      // completely bypassing whatever the frontend chooses not to show.
+      // Storing them at all was the actual leak; not storing them is the
+      // fix, not restricting who reads the field.
     },
     sourceFilename: filename,
     publishedAt: new Date().toISOString(),

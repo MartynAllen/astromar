@@ -50,9 +50,11 @@ export default function ShotDetailsPanel({ details }: { details?: ShotDetails })
       <Row label="Filter" value={details.filter} />
       <Row label="Mosaic" value={details.isMosaic ? "Yes" : undefined} />
       <Row label="Telescope" value={details.telescope} />
-      {/* captureLocation is intentionally not rendered — it's your approximate
-          home address, embedded by the Seestar app itself. Kept in Sanity for
-          your own reference (e.g. the calendar's rise/set math), not shown publicly. */}
+      {/* No capture-location row: the schema no longer stores it at all.
+          It used to be embedded (real home GPS from the capture device's
+          EXIF) but simply not rendered here — except this dataset is on
+          Sanity's free public tier, so "not rendered" never meant "not
+          exposed." Not storing it is the actual fix; see shotDetails.ts. */}
     </div>
   );
 }

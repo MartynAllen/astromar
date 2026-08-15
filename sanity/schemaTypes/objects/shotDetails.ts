@@ -60,11 +60,12 @@ export default defineType({
       type: "string",
       initialValue: "ZWO Seestar S50",
     }),
-    defineField({
-      name: "captureLocation",
-      title: "Capture location",
-      type: "geopoint",
-    }),
+    // No captureLocation field on purpose: this dataset is on Sanity's free
+    // "public" tier, so any field stored here is readable by anyone who
+    // queries the API directly — no token, no auth, completely bypassing
+    // whatever the frontend chooses not to render. A real home GPS
+    // coordinate must never be written here, full stop; not stored is the
+    // only safe state, "stored but unrendered" already leaked once.
     defineField({
       name: "raDec",
       title: "RA / Dec",
