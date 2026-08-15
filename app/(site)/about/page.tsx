@@ -79,10 +79,13 @@ export default async function AboutPage() {
                   <p className={`font-mono text-xs uppercase tracking-widest ${textColor}`}>
                     {CATEGORY_LABEL[category]}
                   </p>
-                  {/* Grouped as a loose cluster, not a grid — tight within a
-                      category, generous between them, with a slight stagger
-                      on alternating tiles so it reads like related stars
-                      sitting near each other rather than a spreadsheet. */}
+                  {/* Grouped as a loose cluster, not a grid — tiles size to
+                      their own content (not a forced 50/50 split, which left
+                      short tiles bloated with dead space) so they can sit
+                      genuinely close together, tight within a category and
+                      generous between categories, with a slight stagger on
+                      alternating tiles so it reads like related stars near
+                      each other rather than a spreadsheet. */}
                   <div className="mt-3 flex flex-wrap items-start gap-4">
                     {items.map((item, i) => {
                       const spanFull = Boolean(item.items && item.items.length > 0);
@@ -91,7 +94,9 @@ export default async function AboutPage() {
                         <div
                           key={`${item.name}-${i}`}
                           className={`flex items-start gap-4 border border-l-2 border-void-700 bg-void-900 p-4 ${color} ${
-                            spanFull ? "w-full" : "w-full sm:w-[calc(50%-0.5rem)]"
+                            spanFull
+                              ? "w-full"
+                              : "w-full sm:w-auto sm:min-w-[260px] sm:max-w-[288px]"
                           } ${stagger ? "sm:mt-7" : ""}`}
                         >
                           {item.image?.asset ? (

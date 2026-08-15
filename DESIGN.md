@@ -251,14 +251,19 @@ Gallery's masonry (`columns-1 sm:columns-2 lg:columns-3`).
 The About page's gear tiles are deliberately not a grid — they're grouped into per-category
 clusters (Camera, Telescope, Accessories, Software; only categories with items render),
 each with its own mono category-colour header that now carries the label a per-tile badge
-used to repeat. Tiles inside a cluster use `flex flex-wrap` rather than fixed columns, with
-alternating tiles nudged down on `sm:` and up (`sm:mt-7` on every other one) so a
-same-category pair sits near each other without lining up in a rigid row — proximity marks
-the group, the stagger keeps it from reading as a spreadsheet. Gap is tight within a cluster
-(`gap-4`) and generous between clusters (`space-y-10`), the same proximity principle the
-divide-y lists use elsewhere. The catch-all "Miscellaneous" tile still spans full width
-within its cluster, since it holds more content than the others. Mobile drops the stagger
-entirely (`sm:`-gated) — full-width single-column stacking, no offset.
+used to repeat. Tiles inside a cluster use `flex flex-wrap` rather than fixed columns, sized
+to content within a `sm:min-w-[260px] sm:max-w-[288px]` band — not a straight
+`sm:w-[calc(50%-...)]` split, which was tried first and left short-content tiles stretched
+with dead internal padding, reading as broken rather than clustered; the fixed band is
+narrow enough that two tiles genuinely sit side by side inside the page's `max-w-2xl`
+column instead of wrapping to separate rows. Alternating tiles nudge down on `sm:`
+(`sm:mt-7` on every other one) so a same-category pair sits near each other without lining
+up in a rigid row — proximity marks the group, the stagger keeps it from reading as a
+spreadsheet. Gap is tight within a cluster (`gap-4`) and generous between clusters
+(`space-y-10`), the same proximity principle the divide-y lists use elsewhere. The catch-all
+"Miscellaneous" tile still spans full width within its cluster, since it holds more content
+than the others. Mobile drops both the width band and the stagger entirely (`sm:`-gated) —
+full-width single-column stacking, no offset.
 
 Responsive behaviour is mobile-first Tailwind breakpoints throughout (`sm:`, `lg:`), with
 the header's full nav collapsing to a hamburger below `md:` — raised from the more typical
@@ -411,8 +416,12 @@ partial-radius middle state anywhere in the system; introducing `rounded-md` or
 - **Mobile:** a plain hamburger icon (no button background) opens a full-width dropdown;
   links there use upright Instrument Serif at `text-xl`, not mono — a deliberate
   register shift from "control panel" (desktop) to "table of contents" (mobile menu).
-- **Wordmark:** upright Instrument Serif, `text-nebula-teal-400`/`text-star-100` (see
-  The Italic Rule).
+- **Wordmark:** upright Instrument Serif, `text-3xl`, no letter-spacing override
+  (`text-nebula-teal-400`/`text-star-100`; see The Italic Rule). Was `text-2xl` with
+  `tracking-tight` — negative tracking on a delicate high-contrast serif at a small
+  header size fought the letterforms rather than reading confident, so both the size
+  bump and dropping the tight tracking came out of the same review. The logo icon
+  (`Logo.tsx`) grew to `h-7 w-7` to stay proportionally paired with it.
 
 ### Photo Hero (signature component)
 Every section index page (Gallery, Reviews, Guide, Calendar, Research) opens with a

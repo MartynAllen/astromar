@@ -7,11 +7,9 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-void-700 bg-void-950/85 backdrop-blur">
       <div className="relative mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2.5 text-nebula-teal-400">
-          <Logo className="h-6 w-6" />
-          <span className="font-display text-2xl tracking-tight text-star-100">
-            Astromar
-          </span>
+        <Link href="/" className="flex items-center gap-3 text-nebula-teal-400">
+          <Logo className="h-7 w-7" />
+          <span className="font-display text-3xl text-star-100">Astromar</span>
         </Link>
 
         <nav className="hidden md:block">

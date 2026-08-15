@@ -19,7 +19,7 @@ export default async function Footer() {
           }
         >
           <div className="sm:pr-8">
-            <p className="font-display text-2xl text-star-100">{siteName}</p>
+            <p className="font-display text-3xl text-star-100">{siteName}</p>
             <p className="mt-2 max-w-xs text-sm text-star-500">{tagline}</p>
             <p className="mt-3 max-w-xs text-sm text-star-500">
               Enjoying the photos?{" "}
