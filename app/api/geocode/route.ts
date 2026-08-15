@@ -17,6 +17,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Missing query" }, { status: 400 });
   }
 
+  // A place name never needs to be long; capping it keeps this route from
+  // being usable as a general-purpose proxy for oversized requests against
+  // Nominatim's free, rate-limited service.
+  if (query.length > 100) {
+    return NextResponse.json({ error: "Query too long" }, { status: 400 });
+  }
+
   const url = new URL("https://nominatim.openstreetmap.org/search");
   url.searchParams.set("q", query);
   url.searchParams.set("format", "jsonv2");
@@ -24,6 +31,9 @@ export async function GET(request: Request) {
 
   const res = await fetch(url, {
     headers: { "User-Agent": "Astromar (astromar.co.uk) sky-visibility-finder" },
+    // Place names don't change; caching identical queries keeps repeat
+    // lookups off Nominatim's 1 req/sec usage-policy limit entirely.
+    next: { revalidate: 86400 },
   });
 
   if (!res.ok) {
