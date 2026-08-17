@@ -156,12 +156,21 @@ export interface ReviewSummary {
   publishedAt?: string;
 }
 
+export interface ReviewGalleryImage {
+  image: SanityImageWithDimensions;
+  alt: string;
+  caption?: string;
+  creditText?: string;
+  creditUrl?: string;
+}
+
 export interface ReviewDetail extends ReviewSummary {
   affiliateLinks?: AffiliateLink[];
   pros?: string[];
   cons?: string[];
   verdict?: string;
   body?: unknown[];
+  galleryImages?: ReviewGalleryImage[];
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
@@ -197,7 +206,10 @@ export async function getReviewBySlug(
     /* groq */ `*[_type == "reviewPost" && slug.current == $slug][0]{
       _id, title, slug, productName, productType, rating, publishedAt,
       affiliateLinks, pros, cons, verdict, body, seo,
-      "productImage": productImage{..., "dimensions": asset->metadata.dimensions}
+      "productImage": productImage{..., "dimensions": asset->metadata.dimensions},
+      "galleryImages": galleryImages[]{
+        ..., "image": image{..., "dimensions": asset->metadata.dimensions}
+      }
     }`,
     { slug },
     { next: { revalidate: REVALIDATE_SECONDS } },

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import RatingStars from "@/components/reviews/RatingStars";
 import AffiliateButton from "@/components/reviews/AffiliateButton";
 import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
+import ReviewPhotoGallery from "@/components/reviews/ReviewPhotoGallery";
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
@@ -137,6 +138,8 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
       )}
 
       <PortableTextContent value={review.body} />
+
+      {review.galleryImages && <ReviewPhotoGallery photos={review.galleryImages} />}
     </div>
   );
 }

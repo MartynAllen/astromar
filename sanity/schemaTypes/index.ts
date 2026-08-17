@@ -13,6 +13,7 @@ import seo from "./objects/seo";
 import affiliateLink from "./objects/affiliateLink";
 import gearItem from "./objects/gearItem";
 import bodyImage from "./objects/bodyImage";
+import reviewGalleryImage from "./objects/reviewGalleryImage";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -30,5 +31,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     affiliateLink,
     gearItem,
     bodyImage,
+    reviewGalleryImage,
   ],
 };

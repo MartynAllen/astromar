@@ -55,6 +55,14 @@ export default defineType({
       ],
     }),
     defineField({
+      name: "galleryImages",
+      title: "Photo gallery",
+      type: "array",
+      of: [{ type: "reviewGalleryImage" }],
+      description:
+        "Optional — extra photos to complement the review (setup shots, detail shots, etc.). Leave empty and this section won't appear on the page at all.",
+    }),
+    defineField({
       name: "rating",
       title: "Rating (out of 5)",
       type: "number",
