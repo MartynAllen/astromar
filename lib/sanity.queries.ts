@@ -164,6 +164,14 @@ export interface ReviewGalleryImage {
   creditUrl?: string;
 }
 
+export interface PrintableAccessory {
+  name: string;
+  url: string;
+  designerCredit?: string;
+  notes?: string;
+  relatedGuideHref?: string;
+}
+
 export interface ReviewDetail extends ReviewSummary {
   affiliateLinks?: AffiliateLink[];
   pros?: string[];
@@ -171,6 +179,7 @@ export interface ReviewDetail extends ReviewSummary {
   verdict?: string;
   body?: unknown[];
   galleryImages?: ReviewGalleryImage[];
+  printableAccessories?: PrintableAccessory[];
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
@@ -205,7 +214,7 @@ export async function getReviewBySlug(
   return client.fetch(
     /* groq */ `*[_type == "reviewPost" && slug.current == $slug][0]{
       _id, title, slug, productName, productType, rating, publishedAt,
-      affiliateLinks, pros, cons, verdict, body, seo,
+      affiliateLinks, pros, cons, verdict, body, printableAccessories, seo,
       "productImage": productImage{..., "dimensions": asset->metadata.dimensions},
       "galleryImages": galleryImages[]{
         ..., "image": image{..., "dimensions": asset->metadata.dimensions}

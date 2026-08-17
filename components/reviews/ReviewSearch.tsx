@@ -1,0 +1,87 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import RatingStars from "@/components/reviews/RatingStars";
+import { urlFor } from "@/sanity/image";
+import type { ReviewSummary } from "@/lib/sanity.queries";
+
+function matches(review: ReviewSummary, query: string) {
+  const haystack = [review.title, review.productName, review.productType, review.verdict]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(query.toLowerCase());
+}
+
+export default function ReviewSearch({ reviews }: { reviews: ReviewSummary[] }) {
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(
+    () => (query.trim() ? reviews.filter((r) => matches(r, query.trim())) : reviews),
+    [reviews, query],
+  );
+
+  return (
+    <div>
+      <label className="block">
+        <span className="sr-only">Search reviews</span>
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search reviews — product, type…"
+          className="w-full border border-void-700 bg-void-950 px-4 py-2.5 text-star-100 placeholder:text-star-600 focus:border-nebula-rose-400 focus:outline-none"
+        />
+      </label>
+
+      {filtered.length === 0 ? (
+        <p className="mt-16 text-center text-star-500">
+          No reviews match &ldquo;{query}&rdquo;.
+        </p>
+      ) : (
+        <ul className="mt-6 space-y-4">
+          {filtered.map((review) => (
+            <li key={review._id}>
+              <Link
+                href={`/reviews/${review.slug.current}`}
+                className="group flex gap-4 border border-void-700 border-l-2 border-l-nebula-rose-400 bg-void-900 p-5 transition-colors hover:border-void-600"
+              >
+                {review.productImage?.asset ? (
+                  <Image
+                    src={urlFor(review.productImage).width(160).height(160).url()}
+                    alt={review.productName}
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 flex-none border border-void-700 object-cover"
+                  />
+                ) : (
+                  <div className="flex h-20 w-20 flex-none flex-col items-center justify-center border border-void-700 bg-void-950">
+                    <RatingStars rating={review.rating} />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-mono text-xl uppercase tracking-wide text-star-100 group-hover:text-nebula-rose-400">
+                    {review.title}
+                  </h2>
+                  <p className="text-sm text-star-500">{review.productType}</p>
+                  {review.productImage?.asset && (
+                    <div className="mt-1">
+                      <RatingStars rating={review.rating} />
+                    </div>
+                  )}
+                  {review.verdict && (
+                    <p className="mt-3 border-l-2 border-nebula-rose-500 pl-3 text-sm text-star-100">
+                      {review.verdict}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

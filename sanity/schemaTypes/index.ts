@@ -14,6 +14,7 @@ import affiliateLink from "./objects/affiliateLink";
 import gearItem from "./objects/gearItem";
 import bodyImage from "./objects/bodyImage";
 import reviewGalleryImage from "./objects/reviewGalleryImage";
+import printableAccessory from "./objects/printableAccessory";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -32,5 +33,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     gearItem,
     bodyImage,
     reviewGalleryImage,
+    printableAccessory,
   ],
 };

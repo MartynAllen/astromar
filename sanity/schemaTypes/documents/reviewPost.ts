@@ -63,6 +63,14 @@ export default defineType({
         "Optional — extra photos to complement the review (setup shots, detail shots, etc.). Leave empty and this section won't appear on the page at all.",
     }),
     defineField({
+      name: "printableAccessories",
+      title: "3D-printable accessories",
+      type: "array",
+      of: [{ type: "printableAccessory" }],
+      description:
+        "Optional — links to 3D-printable add-ons for this product. Leave empty and this section won't appear.",
+    }),
+    defineField({
       name: "rating",
       title: "Rating (out of 5)",
       type: "number",

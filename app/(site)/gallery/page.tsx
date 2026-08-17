@@ -1,8 +1,7 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import PhotoGrid from "@/components/gallery/PhotoGrid";
 import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import GallerySearch from "@/components/gallery/GallerySearch";
 import {
   getAllPhotos,
   getHeroPhoto,
@@ -16,13 +15,12 @@ export const metadata: Metadata = {
   description: "Deep-sky, lunar and wide-field astrophotography.",
 };
 
-const CATEGORIES: { label: string; value: PhotoCategory | undefined }[] = [
-  { label: "All", value: undefined },
-  { label: "Deep Sky", value: "deep-sky" },
-  { label: "Lunar", value: "lunar" },
-  { label: "Planetary", value: "planetary" },
-  { label: "Wide Field", value: "wide-field" },
-  { label: "Gear", value: "gear" },
+const VALID_CATEGORIES: PhotoCategory[] = [
+  "deep-sky",
+  "lunar",
+  "planetary",
+  "wide-field",
+  "gear",
 ];
 
 export default async function GalleryPage(props: PageProps<"/gallery">) {
@@ -31,9 +29,9 @@ export default async function GalleryPage(props: PageProps<"/gallery">) {
     typeof searchParams.category === "string"
       ? searchParams.category
       : undefined;
-  const category = CATEGORIES.find((c) => c.value === rawCategory)?.value;
+  const category = VALID_CATEGORIES.find((c) => c === rawCategory);
   const [photos, heroPhoto] = await Promise.all([
-    getAllPhotos(category),
+    getAllPhotos(),
     getHeroPhoto(1),
   ]);
 
@@ -51,29 +49,7 @@ export default async function GalleryPage(props: PageProps<"/gallery">) {
       </PageHero>
 
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
-            const isActive = c.value === category;
-            const href = c.value ? `/gallery?category=${c.value}` : "/gallery";
-            return (
-              <Link
-                key={c.label}
-                href={href}
-                className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
-                  isActive
-                    ? "border-nebula-teal-500 bg-nebula-teal-500/10 text-nebula-teal-400"
-                    : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
-                }`}
-              >
-                {c.label}
-              </Link>
-            );
-          })}
-        </div>
-
-        <div className="mt-8">
-          <PhotoGrid photos={photos} />
-        </div>
+        <GallerySearch photos={photos} initialCategory={category} />
       </div>
     </>
   );

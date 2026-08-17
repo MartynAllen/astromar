@@ -1,10 +1,7 @@
-import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
-import RatingStars from "@/components/reviews/RatingStars";
 import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-import { urlFor } from "@/sanity/image";
+import ReviewSearch from "@/components/reviews/ReviewSearch";
 import { getAllReviews, getHeroPhoto } from "@/lib/sanity.queries";
 
 export const revalidate = 60;
@@ -40,51 +37,9 @@ export default async function ReviewsPage() {
             No reviews published yet.
           </p>
         ) : (
-          <ul className="mt-10 space-y-4">
-            {reviews.map((review) => (
-              <li key={review._id}>
-                <Link
-                  href={`/reviews/${review.slug.current}`}
-                  className="group flex gap-4 border border-void-700 border-l-2 border-l-nebula-rose-400 bg-void-900 p-5 transition-colors hover:border-void-600"
-                >
-                  {review.productImage?.asset ? (
-                    <Image
-                      src={urlFor(review.productImage)
-                        .width(160)
-                        .height(160)
-                        .url()}
-                      alt={review.productName}
-                      width={80}
-                      height={80}
-                      className="h-20 w-20 flex-none border border-void-700 object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-20 w-20 flex-none flex-col items-center justify-center border border-void-700 bg-void-950">
-                      <RatingStars rating={review.rating} />
-                    </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <h2 className="font-mono text-xl uppercase tracking-wide text-star-100 group-hover:text-nebula-rose-400">
-                      {review.title}
-                    </h2>
-                    <p className="text-sm text-star-500">
-                      {review.productType}
-                    </p>
-                    {review.productImage?.asset && (
-                      <div className="mt-1">
-                        <RatingStars rating={review.rating} />
-                      </div>
-                    )}
-                    {review.verdict && (
-                      <p className="mt-3 border-l-2 border-nebula-rose-500 pl-3 text-sm text-star-100">
-                        {review.verdict}
-                      </p>
-                    )}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-10">
+            <ReviewSearch reviews={reviews} />
+          </div>
         )}
       </div>
     </>
