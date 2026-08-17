@@ -137,13 +137,19 @@ export interface AffiliateLink {
   url: string;
 }
 
+export interface ReviewProductImage extends SanityImageWithDimensions {
+  /** Required attribution for anything not the author's own photo. */
+  creditText?: string;
+  creditUrl?: string;
+}
+
 export interface ReviewSummary {
   _id: string;
   title: string;
   slug: SanitySlug;
   productName: string;
   productType?: string;
-  productImage?: SanityImageWithDimensions;
+  productImage?: ReviewProductImage;
   rating: number;
   verdict?: string;
   publishedAt?: string;

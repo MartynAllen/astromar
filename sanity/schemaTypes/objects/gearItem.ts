@@ -21,7 +21,15 @@ export default defineType({
       },
       validation: (r) => r.required(),
     }),
-    defineField({ name: "image", title: "Image", type: "image" }),
+    defineField({
+      name: "image",
+      title: "Image",
+      type: "image",
+      // exif/location deliberately excluded — see astroPhoto.ts mainImage
+      // for why: this dataset is on Sanity's free public tier, so anything
+      // extracted here is readable by anyone querying the API directly.
+      options: { hotspot: true, metadata: ["blurhash", "lqip", "palette"] },
+    }),
     defineField({ name: "notes", title: "Notes", type: "text", rows: 2 }),
     defineField({
       name: "items",

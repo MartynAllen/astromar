@@ -23,6 +23,8 @@ export default defineType({
       title: "Social share image",
       type: "image",
       description: "Falls back to the document's main image if left blank.",
+      // exif/location deliberately excluded — see astroPhoto.ts mainImage.
+      options: { metadata: ["blurhash", "lqip", "palette"] },
     }),
   ],
   options: { collapsible: true, collapsed: true },

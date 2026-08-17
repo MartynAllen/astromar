@@ -62,9 +62,39 @@ Down the left side you'll see:
 2. Fill in product name, type, rating, pros/cons, verdict, and the main
    review body (this is rich text — you can bold, add links, add images
    inline)
-3. **Affiliate links**: add one row per retailer (label + URL) — this is
-   what actually earns anything, so double-check the URL
+3. **Affiliate links**: see the dedicated section just below — same
+   process, just add one row per retailer
 4. Publish
+
+### Adding an Amazon affiliate link
+
+This works the same way in two places: a **review's** Affiliate links list
+(can hold several — e.g. body + kit lens), and a single **Affiliate link**
+field on any gear item on the About page.
+
+**Your Associates tag is `astromar-21`** — every link needs it, or you
+don't earn anything from it.
+
+1. Find the product on **amazon.co.uk** and open its product page
+2. Get the **ASIN** — either the code in the URL right after `/dp/`
+   (`amazon.co.uk/.../dp/`**`B01M65KNA2`**`/...`), or under "Product
+   information" further down the page
+3. Build the link by hand — it's always this shape:
+   ```
+   https://www.amazon.co.uk/dp/ASIN?tag=astromar-21
+   ```
+   e.g. `https://www.amazon.co.uk/dp/B01M65KNA2?tag=astromar-21`. You
+   don't need SiteStripe or Amazon's own link generator — any product URL
+   plus your tag is already a valid affiliate link.
+4. Paste it into Studio:
+   - **On a review** → Affiliate links → **+** → Retailer `Amazon`,
+     Button label (whatever you want the button to say — "Buy on
+     Amazon" is the default), URL = the link from step 3
+   - **On a gear item** → open the item under About Page → The Gear →
+     scroll to **Affiliate link** → same three fields
+5. Publish. The affiliate disclosure banner on both pages is already
+   unconditional — you don't need to add or check anything else for it
+   to be legally covered.
 
 ### Editing text on an existing page
 

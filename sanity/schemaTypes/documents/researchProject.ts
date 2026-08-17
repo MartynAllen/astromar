@@ -52,7 +52,8 @@ export default defineType({
       name: "coverImage",
       title: "Cover image",
       type: "image",
-      options: { hotspot: true },
+      // exif/location deliberately excluded — see astroPhoto.ts mainImage.
+      options: { hotspot: true, metadata: ["blurhash", "lqip", "palette"] },
     }),
     defineField({
       name: "repoUrl",

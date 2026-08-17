@@ -15,7 +15,13 @@ export default defineType({
       validation: (r) => r.required(),
     }),
     defineField({ name: "tagline", title: "Tagline", type: "string" }),
-    defineField({ name: "logo", title: "Logo", type: "image" }),
+    defineField({
+      name: "logo",
+      title: "Logo",
+      type: "image",
+      // exif/location deliberately excluded — see astroPhoto.ts mainImage.
+      options: { metadata: ["blurhash", "lqip", "palette"] },
+    }),
     // No home-location field on purpose: this dataset is on Sanity's free
     // public tier, so anything stored here is readable by anyone querying
     // the API directly, no auth required. Nothing in the app actually needs

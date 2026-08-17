@@ -7,7 +7,13 @@ export default defineType({
   type: "document",
   icon: UserIcon,
   fields: [
-    defineField({ name: "heroImage", title: "Hero image", type: "image" }),
+    defineField({
+      name: "heroImage",
+      title: "Hero image",
+      type: "image",
+      // exif/location deliberately excluded — see astroPhoto.ts mainImage.
+      options: { hotspot: true, metadata: ["blurhash", "lqip", "palette"] },
+    }),
     defineField({
       name: "bio",
       title: "Bio",

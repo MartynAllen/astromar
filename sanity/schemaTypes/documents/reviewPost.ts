@@ -32,7 +32,28 @@ export default defineType({
       type: "string",
       description: 'Free text, e.g. "Telescope", "Filter", "Imaging software"',
     }),
-    defineField({ name: "productImage", title: "Product image", type: "image" }),
+    defineField({
+      name: "productImage",
+      title: "Product image",
+      type: "image",
+      // exif/location deliberately excluded — see astroPhoto.ts mainImage.
+      options: { hotspot: true, metadata: ["blurhash", "lqip", "palette"] },
+      fields: [
+        defineField({
+          name: "creditText",
+          title: "Photo credit",
+          type: "string",
+          description:
+            'Required for anything not your own photo — e.g. "Jacek Halicki / Wikimedia Commons, CC BY-SA 4.0". Shown under the image on the review page.',
+        }),
+        defineField({
+          name: "creditUrl",
+          title: "Credit link",
+          type: "url",
+          description: "Usually the license page (e.g. the CC BY-SA deed) or the source page.",
+        }),
+      ],
+    }),
     defineField({
       name: "rating",
       title: "Rating (out of 5)",

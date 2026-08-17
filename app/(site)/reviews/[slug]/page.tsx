@@ -57,13 +57,32 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
 
       <div className="flex items-start gap-5">
         {review.productImage?.asset && (
-          <Image
-            src={urlFor(review.productImage).width(240).height(240).url()}
-            alt={review.productName}
-            width={120}
-            height={120}
-            className="h-[120px] w-[120px] flex-none border border-void-700 object-cover"
-          />
+          <div className="flex-none">
+            <Image
+              src={urlFor(review.productImage).width(240).height(240).url()}
+              alt={review.productName}
+              width={120}
+              height={120}
+              className="h-[120px] w-[120px] border border-void-700 object-cover"
+            />
+            {review.productImage.creditText && (
+              <p className="mt-1 w-[120px] text-[10px] leading-tight text-star-500">
+                Photo:{" "}
+                {review.productImage.creditUrl ? (
+                  <a
+                    href={review.productImage.creditUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-void-600 hover:text-nebula-teal-400"
+                  >
+                    {review.productImage.creditText}
+                  </a>
+                ) : (
+                  review.productImage.creditText
+                )}
+              </p>
+            )}
+          </div>
         )}
         <div>
           <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{review.title}</h1>

@@ -9,7 +9,8 @@ export default defineType({
       name: "image",
       title: "Image",
       type: "image",
-      options: { hotspot: true },
+      // exif/location deliberately excluded — see astroPhoto.ts mainImage.
+      options: { hotspot: true, metadata: ["blurhash", "lqip", "palette"] },
       validation: (r) => r.required(),
     }),
     defineField({
