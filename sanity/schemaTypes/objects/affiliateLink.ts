@@ -24,6 +24,14 @@ export default defineType({
       type: "url",
       validation: (r) => r.required().uri({ scheme: ["http", "https"] }),
     }),
+    defineField({
+      name: "priceComparisonNote",
+      title: "Price comparison note",
+      type: "text",
+      rows: 2,
+      description:
+        'Optional transparency note shown under the button, e.g. "Also worth checking Facebook Marketplace or MPB to compare prices."',
+    }),
   ],
   preview: {
     select: { title: "label", subtitle: "url" },

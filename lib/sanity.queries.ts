@@ -135,6 +135,7 @@ export interface AffiliateLink {
   retailer?: string;
   label: string;
   url: string;
+  priceComparisonNote?: string;
 }
 
 export interface ReviewProductImage extends SanityImageWithDimensions {
