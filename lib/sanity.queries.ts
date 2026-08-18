@@ -168,6 +168,7 @@ export interface PrintableAccessory {
 export interface RecommendedAccessory {
   name: string;
   description?: string;
+  compatibilityNote?: string;
   affiliateLink: AffiliateLink;
 }
 

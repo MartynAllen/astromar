@@ -23,6 +23,9 @@ export default function RecommendedAccessories({
             {accessory.description && (
               <p className="mt-1.5 text-sm text-star-300">{accessory.description}</p>
             )}
+            {accessory.compatibilityNote && (
+              <p className="mt-1.5 text-xs text-star-600">{accessory.compatibilityNote}</p>
+            )}
             <div className="mt-3">
               <AffiliateButton link={accessory.affiliateLink} />
             </div>
