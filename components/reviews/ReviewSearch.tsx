@@ -36,7 +36,7 @@ export default function ReviewSearch({ reviews }: { reviews: ReviewSummary[] }) 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search reviews — product, type…"
-          className="w-full border border-void-700 bg-void-950 px-4 py-2.5 text-star-100 placeholder:text-star-600 focus:border-nebula-rose-400 focus:outline-none"
+          className="w-full border border-void-600 bg-void-950 px-3 py-2 text-sm text-star-100 placeholder:text-star-700 focus:border-nebula-teal-500"
         />
       </label>
 

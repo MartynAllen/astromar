@@ -26,12 +26,12 @@ export default function PrintableAccessories({
             {accessory.designerCredit && (
               <p className="mt-1.5 text-xs text-star-600">{accessory.designerCredit}</p>
             )}
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
               <a
                 href={accessory.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400 underline decoration-nebula-teal-700 underline-offset-2 hover:text-nebula-teal-300"
+                className="inline-flex items-center gap-2 border border-nebula-teal-400 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-nebula-teal-400 transition-colors hover:bg-nebula-teal-400 hover:text-void-950"
               >
                 View print files ↗
               </a>

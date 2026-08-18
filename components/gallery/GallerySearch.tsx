@@ -63,7 +63,7 @@ export default function GallerySearch({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search — target, telescope, filter…"
-            className="w-full border border-void-700 bg-void-950 px-4 py-2 text-star-100 placeholder:text-star-600 focus:border-nebula-teal-400 focus:outline-none"
+            className="w-full border border-void-600 bg-void-950 px-3 py-2 text-sm text-star-100 placeholder:text-star-700 focus:border-nebula-teal-500"
           />
         </label>
         <div className="flex flex-wrap gap-2">

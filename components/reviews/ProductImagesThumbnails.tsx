@@ -44,7 +44,7 @@ export default function ProductImagesThumbnails({ images }: { images: ReviewGall
                 alt={photo.alt}
                 width={THUMB_SIZE}
                 height={THUMB_SIZE}
-                className="border-2 border-void-950 bg-void-900 object-cover shadow-lg shadow-void-950/60 outline outline-1 outline-void-700 transition-transform duration-200 group-hover:scale-[1.04]"
+                className="border-2 border-void-950 bg-void-900 object-cover outline outline-1 outline-void-700 transition-transform duration-200 group-hover:scale-[1.04]"
                 style={{ width: THUMB_SIZE, height: THUMB_SIZE }}
               />
             </button>

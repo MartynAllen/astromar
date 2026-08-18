@@ -56,11 +56,11 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
 
       <AffiliateDisclosureBanner />
 
-      <div className="flex items-start gap-5">
+      <div className="flex flex-col items-start gap-5 sm:flex-row">
         {review.productImages && review.productImages.length > 0 && (
           <ProductImagesThumbnails images={review.productImages} />
         )}
-        <div>
+        <div className="min-w-0">
           <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{review.title}</h1>
           <p className="mt-1 text-star-500">{review.productType}</p>
           <div className="mt-2 text-lg">
