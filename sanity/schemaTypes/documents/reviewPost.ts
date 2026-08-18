@@ -49,6 +49,14 @@ export default defineType({
         "Optional — extra photos to complement the review (setup shots, detail shots, etc.). Leave empty and this section won't appear on the page at all.",
     }),
     defineField({
+      name: "recommendedAccessories",
+      title: "Recommended accessories",
+      type: "array",
+      of: [{ type: "recommendedAccessory" }],
+      description:
+        "Optional — store-bought accessories worth pairing with this product, each with its own affiliate link. Leave empty and this section won't appear.",
+    }),
+    defineField({
       name: "printableAccessories",
       title: "3D-printable accessories",
       type: "array",

@@ -15,6 +15,7 @@ import gearItem from "./objects/gearItem";
 import bodyImage from "./objects/bodyImage";
 import reviewGalleryImage from "./objects/reviewGalleryImage";
 import printableAccessory from "./objects/printableAccessory";
+import recommendedAccessory from "./objects/recommendedAccessory";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -34,5 +35,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     bodyImage,
     reviewGalleryImage,
     printableAccessory,
+    recommendedAccessory,
   ],
 };

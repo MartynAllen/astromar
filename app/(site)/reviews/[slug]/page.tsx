@@ -5,6 +5,7 @@ import AffiliateButton from "@/components/reviews/AffiliateButton";
 import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
 import ReviewPhotoGallery from "@/components/reviews/ReviewPhotoGallery";
 import PrintableAccessories from "@/components/reviews/PrintableAccessories";
+import RecommendedAccessories from "@/components/reviews/RecommendedAccessories";
 import ProductImagesThumbnails from "@/components/reviews/ProductImagesThumbnails";
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
@@ -113,6 +114,10 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
       )}
 
       <PortableTextContent value={review.body} />
+
+      {review.recommendedAccessories && (
+        <RecommendedAccessories accessories={review.recommendedAccessories} />
+      )}
 
       {review.printableAccessories && (
         <PrintableAccessories accessories={review.printableAccessories} />
