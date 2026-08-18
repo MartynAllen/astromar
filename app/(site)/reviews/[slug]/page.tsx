@@ -1,15 +1,14 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import type { Metadata } from "next";
 import RatingStars from "@/components/reviews/RatingStars";
 import AffiliateButton from "@/components/reviews/AffiliateButton";
 import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
 import ReviewPhotoGallery from "@/components/reviews/ReviewPhotoGallery";
 import PrintableAccessories from "@/components/reviews/PrintableAccessories";
+import ProductImageThumbnail from "@/components/reviews/ProductImageThumbnail";
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-import { urlFor } from "@/sanity/image";
 import { getReviewBySlug, getReviewSlugs } from "@/lib/sanity.queries";
 import { buildMetadata, reviewJsonLd } from "@/lib/seo";
 
@@ -59,32 +58,7 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
 
       <div className="flex items-start gap-5">
         {review.productImage?.asset && (
-          <div className="flex-none">
-            <Image
-              src={urlFor(review.productImage).width(240).height(240).url()}
-              alt={review.productName}
-              width={120}
-              height={120}
-              className="h-[120px] w-[120px] border border-void-700 object-cover"
-            />
-            {review.productImage.creditText && (
-              <p className="mt-1 w-[120px] text-[10px] leading-tight text-star-500">
-                Photo:{" "}
-                {review.productImage.creditUrl ? (
-                  <a
-                    href={review.productImage.creditUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline decoration-void-600 hover:text-nebula-teal-400"
-                  >
-                    {review.productImage.creditText}
-                  </a>
-                ) : (
-                  review.productImage.creditText
-                )}
-              </p>
-            )}
-          </div>
+          <ProductImageThumbnail image={review.productImage} alt={review.productName} />
         )}
         <div>
           <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{review.title}</h1>
