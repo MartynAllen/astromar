@@ -138,19 +138,13 @@ export interface AffiliateLink {
   priceComparisonNote?: string;
 }
 
-export interface ReviewProductImage extends SanityImageWithDimensions {
-  /** Required attribution for anything not the author's own photo. */
-  creditText?: string;
-  creditUrl?: string;
-}
-
 export interface ReviewSummary {
   _id: string;
   title: string;
   slug: SanitySlug;
   productName: string;
   productType?: string;
-  productImage?: ReviewProductImage;
+  productImages?: ReviewGalleryImage[];
   rating: number;
   verdict?: string;
   publishedAt?: string;
@@ -189,7 +183,9 @@ export interface ReviewDetail extends ReviewSummary {
 
 const reviewSummaryProjection = /* groq */ `{
   _id, title, slug, productName, productType, rating, verdict, publishedAt,
-  "productImage": productImage{..., "dimensions": asset->metadata.dimensions}
+  "productImages": productImages[]{
+    ..., "image": image{..., "dimensions": asset->metadata.dimensions}
+  }
 }`;
 
 export async function getAllReviews(): Promise<ReviewSummary[]> {
@@ -215,7 +211,9 @@ export async function getReviewBySlug(
     /* groq */ `*[_type == "reviewPost" && slug.current == $slug][0]{
       _id, title, slug, productName, productType, rating, publishedAt,
       affiliateLinks, pros, cons, verdict, body, printableAccessories, seo,
-      "productImage": productImage{..., "dimensions": asset->metadata.dimensions},
+      "productImages": productImages[]{
+        ..., "image": image{..., "dimensions": asset->metadata.dimensions}
+      },
       "galleryImages": galleryImages[]{
         ..., "image": image{..., "dimensions": asset->metadata.dimensions}
       }

@@ -33,26 +33,12 @@ export default defineType({
       description: 'Free text, e.g. "Telescope", "Filter", "Imaging software"',
     }),
     defineField({
-      name: "productImage",
-      title: "Product image",
-      type: "image",
-      // exif/location deliberately excluded — see astroPhoto.ts mainImage.
-      options: { hotspot: true, metadata: ["blurhash", "lqip", "palette"] },
-      fields: [
-        defineField({
-          name: "creditText",
-          title: "Photo credit",
-          type: "string",
-          description:
-            'Required for anything not your own photo — e.g. "Jacek Halicki / Wikimedia Commons, CC BY-SA 4.0". Shown under the image on the review page.',
-        }),
-        defineField({
-          name: "creditUrl",
-          title: "Credit link",
-          type: "url",
-          description: "Usually the license page (e.g. the CC BY-SA deed) or the source page.",
-        }),
-      ],
+      name: "productImages",
+      title: "Product photos",
+      type: "array",
+      of: [{ type: "reviewGalleryImage" }],
+      description:
+        "One or more photos of the product itself. The first photo is used as the review's thumbnail and social-share image. Each one is expandable on the review page.",
     }),
     defineField({
       name: "galleryImages",
@@ -110,7 +96,12 @@ export default defineType({
     defineField({ name: "seo", title: "SEO", type: "seo" }),
   ],
   preview: {
-    select: { title: "title", subtitle: "productName", rating: "rating", media: "productImage" },
+    select: {
+      title: "title",
+      subtitle: "productName",
+      rating: "rating",
+      media: "productImages.0.image",
+    },
     prepare({ title, subtitle, rating, media }) {
       return {
         title,

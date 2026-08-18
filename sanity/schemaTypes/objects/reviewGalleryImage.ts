@@ -25,7 +25,7 @@ export default defineType({
       name: "creditText",
       title: "Photo credit",
       type: "string",
-      description: "Only needed if this isn't your own photo — see productImage for the format.",
+      description: "Only needed if this isn't your own photo — see productImages for the format.",
     }),
     defineField({ name: "creditUrl", title: "Credit link", type: "url" }),
   ],

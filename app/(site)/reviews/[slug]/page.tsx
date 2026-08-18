@@ -5,7 +5,7 @@ import AffiliateButton from "@/components/reviews/AffiliateButton";
 import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
 import ReviewPhotoGallery from "@/components/reviews/ReviewPhotoGallery";
 import PrintableAccessories from "@/components/reviews/PrintableAccessories";
-import ProductImageThumbnail from "@/components/reviews/ProductImageThumbnail";
+import ProductImagesThumbnails from "@/components/reviews/ProductImagesThumbnails";
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
@@ -27,7 +27,7 @@ export async function generateMetadata(props: PageProps<"/reviews/[slug]">): Pro
     title: review.seo?.metaTitle || review.title,
     description: review.seo?.metaDescription || review.verdict,
     path: `/reviews/${slug}`,
-    image: review.seo?.ogImage || review.productImage,
+    image: review.seo?.ogImage || review.productImages?.[0]?.image,
   });
 }
 
@@ -57,8 +57,8 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
       <AffiliateDisclosureBanner />
 
       <div className="flex items-start gap-5">
-        {review.productImage?.asset && (
-          <ProductImageThumbnail image={review.productImage} alt={review.productName} />
+        {review.productImages && review.productImages.length > 0 && (
+          <ProductImagesThumbnails images={review.productImages} />
         )}
         <div>
           <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{review.title}</h1>

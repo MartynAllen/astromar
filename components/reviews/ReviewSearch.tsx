@@ -18,6 +18,10 @@ function matches(review: ReviewSummary, query: string) {
 export default function ReviewSearch({ reviews }: { reviews: ReviewSummary[] }) {
   const [query, setQuery] = useState("");
 
+  function coverImage(review: ReviewSummary) {
+    return review.productImages?.[0]?.image;
+  }
+
   const filtered = useMemo(
     () => (query.trim() ? reviews.filter((r) => matches(r, query.trim())) : reviews),
     [reviews, query],
@@ -48,9 +52,9 @@ export default function ReviewSearch({ reviews }: { reviews: ReviewSummary[] }) 
                 href={`/reviews/${review.slug.current}`}
                 className="group flex gap-4 border border-void-700 border-l-2 border-l-nebula-rose-400 bg-void-900 p-5 transition-colors hover:border-void-600"
               >
-                {review.productImage?.asset ? (
+                {coverImage(review)?.asset ? (
                   <Image
-                    src={urlFor(review.productImage).width(160).height(160).url()}
+                    src={urlFor(coverImage(review)!).width(160).height(160).url()}
                     alt={review.productName}
                     width={80}
                     height={80}
@@ -66,7 +70,7 @@ export default function ReviewSearch({ reviews }: { reviews: ReviewSummary[] }) 
                     {review.title}
                   </h2>
                   <p className="text-sm text-star-500">{review.productType}</p>
-                  {review.productImage?.asset && (
+                  {coverImage(review)?.asset && (
                     <div className="mt-1">
                       <RatingStars rating={review.rating} />
                     </div>
