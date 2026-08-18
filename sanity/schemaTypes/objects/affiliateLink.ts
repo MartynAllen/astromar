@@ -6,15 +6,10 @@ export default defineType({
   type: "object",
   fields: [
     defineField({
-      name: "retailer",
-      title: "Retailer",
-      type: "string",
-      initialValue: "Amazon",
-    }),
-    defineField({
       name: "label",
       title: "Button label",
       type: "string",
+      description: 'Include the retailer by name, e.g. "Buy on Amazon" or "Buy on First Light Optics" — this is the only place it\'s shown.',
       initialValue: "Buy on Amazon",
       validation: (r) => r.required(),
     }),

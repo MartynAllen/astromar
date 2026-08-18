@@ -132,7 +132,6 @@ export async function getSiteSettings(): Promise<SiteSettings | null> {
 }
 
 export interface AffiliateLink {
-  retailer?: string;
   label: string;
   url: string;
   priceComparisonNote?: string;
