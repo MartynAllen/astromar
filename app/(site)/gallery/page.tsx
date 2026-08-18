@@ -1,12 +1,9 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import GallerySearch from "@/components/gallery/GallerySearch";
-import {
-  getAllPhotos,
-  getHeroPhoto,
-  type PhotoCategory,
-} from "@/lib/sanity.queries";
+import { getAllPhotos, getHeroPhoto } from "@/lib/sanity.queries";
 
 export const revalidate = 60;
 
@@ -15,25 +12,8 @@ export const metadata: Metadata = {
   description: "Deep-sky, lunar and wide-field astrophotography.",
 };
 
-const VALID_CATEGORIES: PhotoCategory[] = [
-  "deep-sky",
-  "lunar",
-  "planetary",
-  "wide-field",
-  "gear",
-];
-
-export default async function GalleryPage(props: PageProps<"/gallery">) {
-  const searchParams = await props.searchParams;
-  const rawCategory =
-    typeof searchParams.category === "string"
-      ? searchParams.category
-      : undefined;
-  const category = VALID_CATEGORIES.find((c) => c === rawCategory);
-  const [photos, heroPhoto] = await Promise.all([
-    getAllPhotos(),
-    getHeroPhoto(1),
-  ]);
+export default async function GalleryPage() {
+  const [photos, heroPhoto] = await Promise.all([getAllPhotos(), getHeroPhoto(1)]);
 
   return (
     <>
@@ -49,7 +29,9 @@ export default async function GalleryPage(props: PageProps<"/gallery">) {
       </PageHero>
 
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <GallerySearch photos={photos} initialCategory={category} />
+        <Suspense>
+          <GallerySearch photos={photos} />
+        </Suspense>
       </div>
     </>
   );

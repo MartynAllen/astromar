@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PhotoGrid from "./PhotoGrid";
 import type { AstroPhotoSummary, PhotoCategory } from "@/lib/sanity.queries";
 
@@ -13,6 +13,16 @@ const CATEGORIES: { label: string; value: PhotoCategory | undefined }[] = [
   { label: "Wide Field", value: "wide-field" },
   { label: "Gear", value: "gear" },
 ];
+
+// Read client-side rather than as a server prop — the whole point is to
+// keep /gallery itself static (see page.tsx); reading searchParams on the
+// server would opt the entire route out of static generation just to seed
+// this one default.
+function useInitialCategory(): PhotoCategory | undefined {
+  const searchParams = useSearchParams();
+  const raw = searchParams.get("category");
+  return CATEGORIES.find((c) => c.value === raw)?.value;
+}
 
 function matches(photo: AstroPhotoSummary, query: string) {
   const haystack = [
@@ -29,14 +39,9 @@ function matches(photo: AstroPhotoSummary, query: string) {
   return haystack.includes(query.toLowerCase());
 }
 
-export default function GallerySearch({
-  photos,
-  initialCategory,
-}: {
-  photos: AstroPhotoSummary[];
-  initialCategory?: PhotoCategory;
-}) {
+export default function GallerySearch({ photos }: { photos: AstroPhotoSummary[] }) {
   const router = useRouter();
+  const initialCategory = useInitialCategory();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<PhotoCategory | undefined>(initialCategory);
 
