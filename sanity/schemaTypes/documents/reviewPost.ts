@@ -68,6 +68,10 @@ export default defineType({
       name: "rating",
       title: "Rating (out of 5)",
       type: "number",
+      description: "Half-point increments allowed, e.g. 4.5.",
+      options: {
+        list: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5],
+      },
       validation: (r) => r.required().min(1).max(5),
     }),
     defineField({
@@ -111,9 +115,12 @@ export default defineType({
       media: "productImages.0.image",
     },
     prepare({ title, subtitle, rating, media }) {
+      const stars = rating
+        ? `${"★".repeat(Math.floor(rating))}${rating % 1 !== 0 ? "⯨" : ""}${"☆".repeat(Math.floor(5 - rating))}`
+        : undefined;
       return {
         title,
-        subtitle: rating ? `${subtitle} · ${"★".repeat(rating)}${"☆".repeat(5 - rating)}` : subtitle,
+        subtitle: stars ? `${subtitle} · ${stars} (${rating})` : subtitle,
         media,
       };
     },
