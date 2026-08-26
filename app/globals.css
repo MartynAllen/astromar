@@ -175,12 +175,24 @@ body {
    signal over many subs. CSS-only scroll-driven animation; without
    browser support for view-timeline the @supports block simply never
    applies, so photos render at full clarity by default — this is
-   enhancement, not a required state. */
+   enhancement, not a required state.
+
+   The range is a fixed pixel distance, not a percentage of the entry
+   phase — percentages resolve against each photo's own height, and the
+   gallery's masonry columns (PhotoGrid.tsx's `columns-*`) mean cards sit
+   at very different heights. A % range made a 150px-tall card resolve
+   almost instantly while a 460px-tall card next to it stayed hazy for
+   three times the scroll distance — most noticeable at the very top of
+   the page, where whichever column's first card happened to straddle
+   the fold looked stuck mid-blur while its neighbors were already
+   crisp. A fixed distance clears every card after the same amount of
+   scrolling regardless of height, so any resolving-at-rest state stays
+   confined to a narrow, consistent band right at the fold. */
 @supports (animation-timeline: view()) {
   .stack-reveal {
     animation: stack-reveal linear both;
     animation-timeline: view();
-    animation-range: entry 0% entry 65%;
+    animation-range: entry 0px entry 140px;
   }
 }
 
