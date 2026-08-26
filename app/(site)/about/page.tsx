@@ -44,7 +44,7 @@ export default async function AboutPage() {
   const shopUrl = settings?.shopUrl;
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-14">
+    <div className="mx-auto max-w-6xl px-6 py-14">
       <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
       <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">About</h1>
 
