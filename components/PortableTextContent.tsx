@@ -93,7 +93,7 @@ const components: PortableTextComponents = {
 export default function PortableTextContent({ value }: { value: unknown }) {
   if (!value) return null;
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="max-w-2xl">
       <PortableText value={value as never} components={components} />
     </div>
   );
