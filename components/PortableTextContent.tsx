@@ -56,6 +56,33 @@ const components: PortableTextComponents = {
         )}
       </figure>
     ),
+    bodyImageRow: ({ value }) => {
+      const images: { image: Parameters<typeof urlFor>[0]; alt?: string; caption?: string }[] =
+        value?.images ?? [];
+      return (
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+          {images.map((item, i) => (
+            <figure key={i} className="min-w-0 flex-1">
+              <span className="block overflow-hidden border border-void-700">
+                <Image
+                  src={urlFor(item.image).width(600).url()}
+                  alt={item.alt ?? ""}
+                  width={600}
+                  height={400}
+                  sizes="(min-width: 640px) 220px, 100vw"
+                  className="h-auto w-full"
+                />
+              </span>
+              {item.caption && (
+                <figcaption className="mt-2 text-center text-sm text-star-500">
+                  {item.caption}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+        </div>
+      );
+    },
     code: ({ value }) => (
       <div className="mt-6 overflow-hidden border border-void-700 bg-void-900">
         {(value?.filename || value?.language) && (

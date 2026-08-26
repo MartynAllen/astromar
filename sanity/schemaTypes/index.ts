@@ -14,6 +14,7 @@ import seo from "./objects/seo";
 import affiliateLink from "./objects/affiliateLink";
 import gearItem from "./objects/gearItem";
 import bodyImage from "./objects/bodyImage";
+import bodyImageRow from "./objects/bodyImageRow";
 import reviewGalleryImage from "./objects/reviewGalleryImage";
 import printableAccessory from "./objects/printableAccessory";
 import recommendedAccessory from "./objects/recommendedAccessory";
@@ -35,6 +36,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     affiliateLink,
     gearItem,
     bodyImage,
+    bodyImageRow,
     reviewGalleryImage,
     printableAccessory,
     recommendedAccessory,

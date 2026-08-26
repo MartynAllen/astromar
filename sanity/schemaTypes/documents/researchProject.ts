@@ -67,6 +67,7 @@ export default defineType({
       of: [
         { type: "block" },
         { type: "bodyImage" },
+        { type: "bodyImageRow" },
         { type: "code", options: { withFilename: true } },
       ],
     }),

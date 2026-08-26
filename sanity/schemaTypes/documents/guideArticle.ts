@@ -44,7 +44,12 @@ export default defineType({
       name: "body",
       title: "Body",
       type: "array",
-      of: [{ type: "block" }, { type: "bodyImage" }, { type: "code", options: { withFilename: true } }],
+      of: [
+        { type: "block" },
+        { type: "bodyImage" },
+        { type: "bodyImageRow" },
+        { type: "code", options: { withFilename: true } },
+      ],
     }),
     defineField({
       name: "publishedAt",
