@@ -22,6 +22,7 @@ export interface ShotDetails {
   isMosaic?: boolean;
   captureDate?: string;
   telescope?: string;
+  gain?: number;
   raDec?: { ra?: number; dec?: number };
 }
 

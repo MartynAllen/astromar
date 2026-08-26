@@ -47,6 +47,7 @@ export default function ShotDetailsPanel({ details }: { details?: ShotDetails })
         }
       />
       <Row label="Total integration" value={totalFormatted} />
+      <Row label="ISO / Gain" value={details.gain} />
       <Row label="Filter" value={details.filter} />
       <Row label="Mosaic" value={details.isMosaic ? "Yes" : undefined} />
       <Row label="Telescope" value={details.telescope} />

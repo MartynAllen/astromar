@@ -43,6 +43,12 @@ export default defineType({
       fieldset: "exposure",
     }),
     defineField({
+      name: "gain",
+      title: "ISO / Gain",
+      type: "number",
+      fieldset: "exposure",
+    }),
+    defineField({
       name: "isMosaic",
       title: "Mosaic",
       type: "boolean",
