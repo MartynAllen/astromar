@@ -21,6 +21,7 @@ const BASELINE_SECURITY_HEADERS = [
 const PUBLIC_SITE_CSP = [
   "default-src 'self'",
   "img-src 'self' https://cdn.sanity.io data:",
+  "media-src 'self' https://cdn.sanity.io",
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",

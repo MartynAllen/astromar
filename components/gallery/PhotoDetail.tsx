@@ -6,18 +6,30 @@ import type { AstroPhotoDetail } from "@/lib/sanity.queries";
 
 export default function PhotoDetail({ photo }: { photo: AstroPhotoDetail }) {
   const dims = photo.mainImage.dimensions;
+  const posterUrl = urlFor(photo.mainImage).width(1600).url();
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
       <div className="overflow-hidden border border-void-700 bg-void-900">
-        <Image
-          src={urlFor(photo.mainImage).width(1600).url()}
-          alt={photo.caption || photo.title}
-          width={dims?.width ?? 1600}
-          height={dims?.height ?? 1000}
-          sizes="(min-width: 1024px) 65vw, 100vw"
-          priority
-          className="h-auto w-full"
-        />
+        {photo.videoUrl ? (
+          <video
+            src={photo.videoUrl}
+            poster={posterUrl}
+            controls
+            playsInline
+            className="h-auto w-full"
+          />
+        ) : (
+          <Image
+            src={posterUrl}
+            alt={photo.caption || photo.title}
+            width={dims?.width ?? 1600}
+            height={dims?.height ?? 1000}
+            sizes="(min-width: 1024px) 65vw, 100vw"
+            priority
+            className="h-auto w-full"
+          />
+        )}
       </div>
 
       <div>

@@ -53,6 +53,14 @@ export default defineType({
       },
     }),
     defineField({
+      name: "video",
+      title: "Video",
+      type: "file",
+      options: { accept: "video/*" },
+      description:
+        "Optional — a short clip to play on this photo's detail page (mainImage above is used as its poster frame). Stored directly in Sanity, same as any other asset, not a separate hosting service.",
+    }),
+    defineField({
       name: "category",
       title: "Category",
       type: "string",

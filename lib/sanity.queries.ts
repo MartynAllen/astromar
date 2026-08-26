@@ -43,6 +43,7 @@ export interface AstroPhotoSummary {
 export interface AstroPhotoDetail extends AstroPhotoSummary {
   story?: unknown[];
   gearNotes?: string;
+  videoUrl?: string;
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
@@ -116,7 +117,8 @@ export async function getPhotoBySlug(
   return client.fetch(
     /* groq */ `*[_type == "astroPhoto" && slug.current == $slug][0]{
       _id, title, slug, category, caption, featured, shotDetails, story, gearNotes, seo,
-      "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions}
+      "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions},
+      "videoUrl": video.asset->url
     }`,
     { slug },
     { next: { revalidate: REVALIDATE_SECONDS } },
