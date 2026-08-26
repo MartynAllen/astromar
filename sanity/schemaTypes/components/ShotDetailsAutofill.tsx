@@ -56,9 +56,9 @@ export default function ShotDetailsAutofill(props: ObjectInputProps) {
   }, [client, mainImage, props]);
 
   return (
-    <Stack space={3}>
+    <Stack gap={3}>
       <Card padding={3} radius={2} tone="primary" border>
-        <Stack space={3}>
+        <Stack gap={3}>
           <Text size={1}>
             Reads the uploaded file&apos;s original filename against Astromar&apos;s
             Seestar naming convention and pre-fills the fields below. Everything
