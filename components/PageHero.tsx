@@ -39,12 +39,18 @@ export default function PageHero({
     <div className={`relative overflow-hidden border-b border-void-700 ${className}`}>
       {photo?.mainImage?.asset && (
         <Image
-          src={urlFor(photo.mainImage)
-            .width(1920)
-            .height(800)
-            .fit("crop")
-            .orientation(imageRotate ?? 0)
-            .url()}
+          src={
+            imageRotate
+              ? // Skip Sanity's own pre-crop for a rotated hero — .height(800)
+                // .fit("crop") throws away most of the image before the
+                // browser ever sees it, leaving little room for
+                // imagePosition to find a calmer window. Hand over the
+                // full (rotated) square instead and let CSS object-cover
+                // + imagePosition do all the cropping against the real
+                // rendered box.
+                urlFor(photo.mainImage).width(1920).orientation(imageRotate).url()
+              : urlFor(photo.mainImage).width(1920).height(800).fit("crop").url()
+          }
           alt=""
           fill
           priority
