@@ -44,7 +44,7 @@ export default async function AboutPage() {
   const shopUrl = settings?.shopUrl;
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-14">
+    <div className="mx-auto max-w-4xl px-6 py-14">
       <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
       <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">About</h1>
 
@@ -88,13 +88,12 @@ export default async function AboutPage() {
                       their own content (not a forced 50/50 split, which left
                       short tiles bloated with dead space) so they can sit
                       genuinely close together, tight within a category and
-                      generous between categories, with a slight stagger on
-                      alternating tiles so it reads like related stars near
-                      each other rather than a spreadsheet. */}
+                      generous between categories. Tops stay aligned within
+                      a row (an earlier alternating-stagger treatment read as
+                      misaligned rather than intentional, so it's gone). */}
                   <div className="mt-3 flex flex-wrap items-start gap-4">
                     {items.map((item, i) => {
                       const spanFull = Boolean(item.items && item.items.length > 0);
-                      const stagger = !spanFull && items.length > 1 && i % 2 === 1;
                       return (
                         <div
                           key={`${item.name}-${i}`}
@@ -102,7 +101,7 @@ export default async function AboutPage() {
                             spanFull
                               ? "w-full"
                               : "w-full sm:w-auto sm:min-w-[260px] sm:max-w-[288px]"
-                          } ${stagger ? "sm:mt-7" : ""}`}
+                          }`}
                         >
                           {item.image?.asset ? (
                             <Image
