@@ -6,7 +6,7 @@ import EventCard from "@/components/calendar/EventCard";
 import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import JsonLd from "@/components/seo/JsonLd";
-import { getUpcomingCalendarEvents, getHeroPhoto } from "@/lib/sanity.queries";
+import { getUpcomingCalendarEvents, getPhotoBySlug } from "@/lib/sanity.queries";
 import { eventJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default async function CalendarPage() {
   const [events, heroPhoto] = await Promise.all([
     getUpcomingCalendarEvents(),
-    getHeroPhoto(5),
+    getPhotoBySlug("east-veil-nebula-2026-08-22"),
   ]);
 
   return (
