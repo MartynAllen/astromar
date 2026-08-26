@@ -19,6 +19,7 @@ export default function PageHero({
   className = "h-64 sm:h-80",
   children,
   imageRotate,
+  imagePosition = "object-center",
 }: {
   photo: AstroPhotoSummary | null;
   className?: string;
@@ -27,6 +28,10 @@ export default function PageHero({
    * touching the underlying asset — the photo stays in its correct
    * orientation everywhere else it's used (gallery tile, detail page). */
   imageRotate?: 90 | 180 | 270;
+  /** Tailwind object-position class. The default center crop can land
+   * squarely on the busiest part of a photo (see the Calendar hero) —
+   * override to bias the crop toward a calmer region instead. */
+  imagePosition?: string;
 }) {
   const captureDate = formatCaptureDate(photo?.shotDetails?.captureDate);
 
@@ -44,7 +49,7 @@ export default function PageHero({
           fill
           priority
           sizes="100vw"
-          className="object-cover"
+          className={`object-cover ${imagePosition}`}
         />
       )}
       <div className="absolute inset-0 bg-void-950/20" />
