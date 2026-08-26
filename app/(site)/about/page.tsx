@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import PortableTextContent from "@/components/PortableTextContent";
 import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
@@ -173,14 +174,12 @@ export default async function AboutPage() {
             Buy me a coffee
           </a>
           {shopUrl && (
-            <a
+            <Link
               href={shopUrl}
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 border border-nebula-rose-400 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950"
             >
               Shop Prints
-            </a>
+            </Link>
           )}
         </div>
       </div>

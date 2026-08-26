@@ -35,14 +35,12 @@ export default async function Header() {
           </nav>
 
           {shopUrl && (
-            <a
+            <Link
               href={shopUrl}
-              target="_blank"
-              rel="noopener noreferrer"
               className="hidden items-center gap-2 border border-nebula-rose-400 px-4 py-2 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950 md:inline-flex"
             >
               Shop Prints
-            </a>
+            </Link>
           )}
 
           <MobileNav shopUrl={shopUrl} />

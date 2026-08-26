@@ -37,6 +37,18 @@ export default function PrivacyPage() {
         </section>
 
         <section>
+          <h2 className="font-mono text-xl uppercase tracking-wide text-star-100">Print orders</h2>
+          <p className="mt-2">
+            Buying a print sends your name, delivery address and email to Stripe (to take
+            payment) and Prodigi (to print and ship it) — that&apos;s the whole reason those
+            details are needed. Astromar itself never stores them: everything here runs on a
+            public content database with no private storage behind it, so the only safe place
+            for anything like that is with the two services actually handling the order, not
+            here.
+          </p>
+        </section>
+
+        <section>
           <h2 className="font-mono text-xl uppercase tracking-wide text-star-100">Contact</h2>
           <p className="mt-2">
             No contact form here yet — social links will appear in the footer once

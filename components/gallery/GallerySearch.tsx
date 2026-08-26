@@ -24,6 +24,11 @@ function useInitialCategory(): PhotoCategory | undefined {
   return CATEGORIES.find((c) => c.value === raw)?.value;
 }
 
+function useInitialPrintsOnly(): boolean {
+  const searchParams = useSearchParams();
+  return searchParams.get("prints") === "true";
+}
+
 function matches(photo: AstroPhotoSummary, query: string) {
   const haystack = [
     photo.title,
@@ -42,20 +47,37 @@ function matches(photo: AstroPhotoSummary, query: string) {
 export default function GallerySearch({ photos }: { photos: AstroPhotoSummary[] }) {
   const router = useRouter();
   const initialCategory = useInitialCategory();
+  const initialPrintsOnly = useInitialPrintsOnly();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<PhotoCategory | undefined>(initialCategory);
+  const [printsOnly, setPrintsOnly] = useState(initialPrintsOnly);
 
   const filtered = useMemo(() => {
     return photos.filter((photo) => {
       if (category && photo.category !== category) return false;
+      if (printsOnly && !photo.availableAsPrint) return false;
       if (query.trim() && !matches(photo, query.trim())) return false;
       return true;
     });
-  }, [photos, category, query]);
+  }, [photos, category, printsOnly, query]);
+
+  function updateUrl(nextCategory: PhotoCategory | undefined, nextPrintsOnly: boolean) {
+    const params = new URLSearchParams();
+    if (nextCategory) params.set("category", nextCategory);
+    if (nextPrintsOnly) params.set("prints", "true");
+    const qs = params.toString();
+    router.replace(qs ? `/gallery?${qs}` : "/gallery", { scroll: false });
+  }
 
   function selectCategory(value: PhotoCategory | undefined) {
     setCategory(value);
-    router.replace(value ? `/gallery?category=${value}` : "/gallery", { scroll: false });
+    updateUrl(value, printsOnly);
+  }
+
+  function togglePrintsOnly() {
+    const next = !printsOnly;
+    setPrintsOnly(next);
+    updateUrl(category, next);
   }
 
   return (
@@ -89,6 +111,17 @@ export default function GallerySearch({ photos }: { photos: AstroPhotoSummary[] 
               </button>
             );
           })}
+          <button
+            type="button"
+            onClick={togglePrintsOnly}
+            className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
+              printsOnly
+                ? "border-nebula-rose-500 bg-nebula-rose-500/10 text-nebula-rose-400"
+                : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
+            }`}
+          >
+            Prints Only
+          </button>
         </div>
       </div>
 

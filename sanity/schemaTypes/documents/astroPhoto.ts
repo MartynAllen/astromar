@@ -103,6 +103,13 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: "availableAsPrint",
+      title: "Available as a print",
+      type: "boolean",
+      initialValue: false,
+      description: "Turns on the print/buy panel on this photo's detail page.",
+    }),
+    defineField({
       name: "publishedAt",
       title: "Published at",
       type: "datetime",

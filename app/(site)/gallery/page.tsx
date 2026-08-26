@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
@@ -39,14 +40,12 @@ export default async function GalleryPage() {
             <p className="text-sm text-star-300">
               Like what you see? Prints of these shots are available to buy.
             </p>
-            <a
-              href={shopUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/gallery?prints=true"
               className="inline-flex flex-none items-center gap-2 border border-nebula-rose-400 px-4 py-2 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950"
             >
               Shop Prints
-            </a>
+            </Link>
           </div>
         )}
         <Suspense>

@@ -38,14 +38,12 @@ export default async function Footer() {
             {shopUrl && (
               <p className="mt-2 max-w-xs text-sm text-star-500">
                 Prefer a print?{" "}
-                <a
+                <Link
                   href={shopUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="text-nebula-rose-400 hover:text-nebula-rose-300 hover:underline"
                 >
                   Shop prints →
-                </a>
+                </Link>
               </p>
             )}
           </div>

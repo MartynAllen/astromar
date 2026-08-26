@@ -44,15 +44,13 @@ export default function MobileNav({ shopUrl }: { shopUrl?: string }) {
       {open && (
         <nav className="absolute inset-x-0 top-20 border-t border-void-700 bg-void-950 px-6 py-4 backdrop-blur">
           {shopUrl && (
-            <a
+            <Link
               href={shopUrl}
-              target="_blank"
-              rel="noopener noreferrer"
               onClick={() => setOpen(false)}
               className="mb-4 flex items-center justify-center gap-2 border border-nebula-rose-400 px-4 py-3 font-mono text-sm uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950"
             >
               Shop Prints
-            </a>
+            </Link>
           )}
           <ul className="flex flex-col divide-y divide-void-700">
             {NAV_LINKS.map((link) => (

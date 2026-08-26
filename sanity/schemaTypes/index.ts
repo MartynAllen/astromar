@@ -7,6 +7,7 @@ import calendarEvent from "./documents/calendarEvent";
 import researchProject from "./documents/researchProject";
 import siteSettings from "./documents/siteSettings";
 import aboutPage from "./documents/aboutPage";
+import printProduct from "./documents/printProduct";
 
 import shotDetails from "./objects/shotDetails";
 import seo from "./objects/seo";
@@ -27,6 +28,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     researchProject,
     siteSettings,
     aboutPage,
+    printProduct,
     // Objects
     shotDetails,
     seo,

@@ -37,6 +37,7 @@ export interface AstroPhotoSummary {
   category: PhotoCategory;
   caption?: string;
   featured?: boolean;
+  availableAsPrint?: boolean;
   shotDetails?: ShotDetails;
 }
 
@@ -65,7 +66,7 @@ export interface SiteSettings {
 }
 
 const photoSummaryProjection = /* groq */ `{
-  _id, title, slug, category, caption, featured, shotDetails,
+  _id, title, slug, category, caption, featured, availableAsPrint, shotDetails,
   "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions}
 }`;
 
@@ -116,11 +117,29 @@ export async function getPhotoBySlug(
 ): Promise<AstroPhotoDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "astroPhoto" && slug.current == $slug][0]{
-      _id, title, slug, category, caption, featured, shotDetails, story, gearNotes, seo,
+      _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, seo,
       "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions},
       "videoUrl": video.asset->url
     }`,
     { slug },
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export interface PrintProduct {
+  _id: string;
+  title: string;
+  sku: string;
+  priceGBP: number;
+  description?: string;
+}
+
+export async function getPrintProducts(): Promise<PrintProduct[]> {
+  return client.fetch(
+    /* groq */ `*[_type == "printProduct" && active == true] | order(sortOrder asc, priceGBP asc) {
+      _id, title, sku, priceGBP, description
+    }`,
+    {},
     { next: { revalidate: REVALIDATE_SECONDS } },
   );
 }

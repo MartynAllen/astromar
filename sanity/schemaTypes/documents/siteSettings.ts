@@ -57,11 +57,10 @@ export default defineType({
     }),
     defineField({
       name: "shopUrl",
-      title: "Print shop URL",
-      type: "url",
+      title: "Print shop link",
+      type: "string",
       description:
-        'Etsy print shop link (fulfilled via Prodigi). Leave empty and every "Shop Prints" link/button sitewide stays hidden — nothing shows until this is set.',
-      validation: (r) => r.uri({ scheme: ["http", "https"] }),
+        'Where every "Shop Prints" link/button sitewide points — usually an internal path like "/gallery" once the print shop is live, but any absolute URL works too. Leave empty and those links/buttons stay hidden entirely.',
     }),
   ],
   preview: {
