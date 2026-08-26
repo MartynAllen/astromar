@@ -3,7 +3,7 @@ import Link from "next/link";
 import PhotoCard from "@/components/gallery/PhotoCard";
 import { urlFor } from "@/sanity/image";
 import { getFeaturedPhotos } from "@/lib/sanity.queries";
-import { formatShotSummary } from "@/lib/astro/shotDetails";
+import { formatCaptureDate, formatShotSummary } from "@/lib/astro/shotDetails";
 
 export const revalidate = 60;
 
@@ -40,6 +40,7 @@ export default async function HomePage() {
   const heroSummary = heroPhoto?.shotDetails
     ? formatShotSummary(heroPhoto.shotDetails)
     : undefined;
+  const heroCaptureDate = formatCaptureDate(heroPhoto?.shotDetails?.captureDate);
 
   return (
     <>
@@ -64,7 +65,8 @@ export default async function HomePage() {
             href={`/gallery/${heroPhoto.slug.current}`}
             className="absolute right-4 top-4 z-10 bg-void-950/50 px-2 py-1 font-mono text-xs text-star-300 backdrop-blur-sm transition-colors hover:text-nebula-teal-400 sm:right-6 sm:top-6"
           >
-            {heroPhoto.title} →
+            {heroPhoto.title}
+            {heroCaptureDate && ` — ${heroCaptureDate}`} →
           </Link>
         )}
 

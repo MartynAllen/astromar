@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/sanity/image";
+import { formatCaptureDate } from "@/lib/astro/shotDetails";
 import type { AstroPhotoSummary } from "@/lib/sanity.queries";
 
 function CornerMarks() {
@@ -22,6 +23,8 @@ export default function PageHero({
   className?: string;
   children: React.ReactNode;
 }) {
+  const captureDate = formatCaptureDate(photo?.shotDetails?.captureDate);
+
   return (
     <div className={`relative overflow-hidden border-b border-void-700 ${className}`}>
       {photo?.mainImage?.asset && (
@@ -43,7 +46,8 @@ export default function PageHero({
           href={`/gallery/${photo.slug.current}`}
           className="absolute right-4 top-4 z-10 bg-void-950/50 px-2 py-1 font-mono text-xs text-star-300 backdrop-blur-sm transition-colors hover:text-nebula-teal-400"
         >
-          {photo.title} →
+          {photo.title}
+          {captureDate && ` — ${captureDate}`} →
         </Link>
       )}
     </div>

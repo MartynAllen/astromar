@@ -1,5 +1,6 @@
 import {
   computeTotalIntegrationSeconds,
+  formatCaptureDate,
   formatIntegrationTime,
 } from "@/lib/astro/shotDetails";
 import type { ShotDetails } from "@/lib/sanity.queries";
@@ -22,14 +23,7 @@ export default function ShotDetailsPanel({ details }: { details?: ShotDetails })
     details.subExposureSeconds,
   );
   const totalFormatted = formatIntegrationTime(totalSeconds);
-  const captureDate = details.captureDate
-    ? new Date(details.captureDate).toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        timeZone: "UTC",
-      })
-    : undefined;
+  const captureDate = formatCaptureDate(details.captureDate);
 
   return (
     <div className="border border-void-700 bg-void-900 p-4">

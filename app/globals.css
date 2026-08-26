@@ -170,54 +170,10 @@ body {
   }
 }
 
-/* Stacking reveal — gallery photos resolve into focus as they enter the
-   viewport, echoing how a real stacked exposure actually accumulates
-   signal over many subs. CSS-only scroll-driven animation; without
-   browser support for view-timeline the @supports block simply never
-   applies, so photos render at full clarity by default — this is
-   enhancement, not a required state.
-
-   The range is a fixed pixel distance, not a percentage of the entry
-   phase — percentages resolve against each photo's own height, and the
-   gallery's masonry columns (PhotoGrid.tsx's `columns-*`) mean cards sit
-   at very different heights. A % range made a 150px-tall card resolve
-   almost instantly while a 460px-tall card next to it stayed hazy for
-   three times the scroll distance — most noticeable at the very top of
-   the page, where whichever column's first card happened to straddle
-   the fold looked stuck mid-blur while its neighbors were already
-   crisp. A fixed distance clears every card after the same amount of
-   scrolling regardless of height, so any resolving-at-rest state stays
-   confined to a narrow, consistent band right at the fold. */
-@supports (animation-timeline: view()) {
-  .stack-reveal {
-    animation: stack-reveal linear both;
-    animation-timeline: view();
-    animation-range: entry 0px entry 140px;
-  }
-}
-
-@keyframes stack-reveal {
-  from {
-    filter: blur(8px) brightness(0.35);
-    transform: scale(0.98);
-  }
-  to {
-    filter: blur(0) brightness(1);
-    transform: scale(1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stack-reveal {
-    animation: none !important;
-  }
-}
-
 /* Hero paragraph resolve — the subhead settles into focus a beat after
-   load, the same "signal resolving out of blur" language as the gallery's
-   stack-reveal above, but played once on mount rather than on scroll since
-   this block is already on-screen at load. Delayed to start as the
-   shutter-open aperture is mid-reveal rather than racing it. */
+   load, a "signal resolving out of blur" effect played once on mount.
+   Delayed to start as the shutter-open aperture is mid-reveal rather
+   than racing it. */
 @keyframes hero-resolve {
   from {
     opacity: 0;

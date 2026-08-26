@@ -14,6 +14,17 @@ export function formatIntegrationTime(totalSeconds?: number): string | undefined
   return `${hours.toFixed(1)} hr`;
 }
 
+/** e.g. "23 August 2026" — the site's one date format for capture dates. */
+export function formatCaptureDate(captureDate?: string): string | undefined {
+  if (!captureDate) return undefined;
+  return new Date(captureDate).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export interface ShotSummaryInput {
   subCount?: number;
   subExposureSeconds?: number;
