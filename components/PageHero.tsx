@@ -18,10 +18,15 @@ export default function PageHero({
   photo,
   className = "h-64 sm:h-80",
   children,
+  imageRotate,
 }: {
   photo: AstroPhotoSummary | null;
   className?: string;
   children: React.ReactNode;
+  /** Rotates just this hero's crop (via Sanity's `or` param) without
+   * touching the underlying asset — the photo stays in its correct
+   * orientation everywhere else it's used (gallery tile, detail page). */
+  imageRotate?: 90 | 180 | 270;
 }) {
   const captureDate = formatCaptureDate(photo?.shotDetails?.captureDate);
 
@@ -29,7 +34,12 @@ export default function PageHero({
     <div className={`relative overflow-hidden border-b border-void-700 ${className}`}>
       {photo?.mainImage?.asset && (
         <Image
-          src={urlFor(photo.mainImage).width(1920).height(800).fit("crop").url()}
+          src={urlFor(photo.mainImage)
+            .width(1920)
+            .height(800)
+            .fit("crop")
+            .orientation(imageRotate ?? 0)
+            .url()}
           alt=""
           fill
           priority
