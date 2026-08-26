@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { NAV_LINKS } from "@/lib/navigation";
+import { getSiteSettings } from "@/lib/sanity.queries";
 import Logo from "@/components/Logo";
 import MobileNav from "./MobileNav";
 
-export default function Header() {
+export default async function Header() {
+  const settings = await getSiteSettings().catch(() => null);
+  const shopUrl = settings?.shopUrl;
+
   return (
     <header className="sticky top-0 z-40 border-b border-void-700 bg-void-950/85 backdrop-blur">
       <div className="relative mx-auto flex h-20 max-w-6xl items-center justify-between px-6">
@@ -14,22 +18,35 @@ export default function Header() {
           </span>
         </Link>
 
-        <nav className="hidden md:block">
-          <ul className="flex items-center divide-x divide-void-700">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href} className="px-4 lg:px-5">
-                <Link
-                  href={link.href}
-                  className="font-mono text-xs uppercase tracking-widest text-star-500 transition-colors hover:text-nebula-teal-400"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        <div className="flex items-center gap-5">
+          <nav className="hidden md:block">
+            <ul className="flex items-center divide-x divide-void-700">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href} className="px-4 lg:px-5">
+                  <Link
+                    href={link.href}
+                    className="font-mono text-xs uppercase tracking-widest text-star-500 transition-colors hover:text-nebula-teal-400"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-        <MobileNav />
+          {shopUrl && (
+            <a
+              href={shopUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden items-center gap-2 border border-nebula-rose-400 px-4 py-2 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950 md:inline-flex"
+            >
+              Shop Prints
+            </a>
+          )}
+
+          <MobileNav shopUrl={shopUrl} />
+        </div>
       </div>
     </header>
   );

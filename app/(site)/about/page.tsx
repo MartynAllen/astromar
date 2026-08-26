@@ -6,7 +6,7 @@ import AffiliateButton from "@/components/reviews/AffiliateButton";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import CategoryIcon from "@/components/about/CategoryIcon";
 import { urlFor } from "@/sanity/image";
-import { getAboutPage, type GearItem } from "@/lib/sanity.queries";
+import { getAboutPage, getSiteSettings, type GearItem } from "@/lib/sanity.queries";
 import { SUPPORT_URL } from "@/lib/navigation";
 
 export const revalidate = 60;
@@ -36,7 +36,11 @@ const CATEGORY_COLOR: Record<GearCategory, string> = {
 };
 
 export default async function AboutPage() {
-  const about = await getAboutPage();
+  const [about, settings] = await Promise.all([
+    getAboutPage(),
+    getSiteSettings().catch(() => null),
+  ]);
+  const shopUrl = settings?.shopUrl;
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
@@ -152,15 +156,33 @@ export default async function AboutPage() {
           you&apos;re welcome to buy me a coffee — it goes straight back into camera
           gear, clear-sky trips, and the very late nights that make these images happen.
           Never expected, always genuinely appreciated.
+          {shopUrl && (
+            <>
+              {" "}Prefer something physical? Prints of these shots are also available
+              to buy.
+            </>
+          )}
         </p>
-        <a
-          href={SUPPORT_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 inline-flex items-center gap-2 border border-void-600 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-star-300 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
-        >
-          Buy me a coffee
-        </a>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <a
+            href={SUPPORT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 border border-void-600 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-star-300 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+          >
+            Buy me a coffee
+          </a>
+          {shopUrl && (
+            <a
+              href={shopUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 border border-nebula-rose-400 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950"
+            >
+              Shop Prints
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

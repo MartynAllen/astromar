@@ -55,6 +55,14 @@ export default defineType({
       type: "seo",
       description: "Fallback for any page that doesn't set its own SEO fields.",
     }),
+    defineField({
+      name: "shopUrl",
+      title: "Print shop URL",
+      type: "url",
+      description:
+        'Etsy print shop link (fulfilled via Prodigi). Leave empty and every "Shop Prints" link/button sitewide stays hidden — nothing shows until this is set.',
+      validation: (r) => r.uri({ scheme: ["http", "https"] }),
+    }),
   ],
   preview: {
     prepare() {

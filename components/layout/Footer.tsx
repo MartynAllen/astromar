@@ -7,6 +7,7 @@ export default async function Footer() {
   const siteName = settings?.siteName ?? "Astromar";
   const tagline = settings?.tagline ?? "Astronomy and astrophotography from a garden setup.";
   const hasSocial = Boolean(settings?.socialLinks && settings.socialLinks.length > 0);
+  const shopUrl = settings?.shopUrl;
 
   return (
     <footer className="border-t border-void-700 bg-void-900/40">
@@ -34,6 +35,19 @@ export default async function Footer() {
                 Buy me a coffee →
               </a>
             </p>
+            {shopUrl && (
+              <p className="mt-2 max-w-xs text-sm text-star-500">
+                Prefer a print?{" "}
+                <a
+                  href={shopUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-nebula-rose-400 hover:text-nebula-rose-300 hover:underline"
+                >
+                  Shop prints →
+                </a>
+              </p>
+            )}
           </div>
 
           <div className="sm:px-8">

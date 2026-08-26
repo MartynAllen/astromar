@@ -54,6 +54,7 @@ export interface SiteSettings {
   tagline?: string;
   logo?: SanityImageSource;
   socialLinks?: { platform: string; url: string }[];
+  shopUrl?: string;
   defaultSeo?: {
     metaTitle?: string;
     metaDescription?: string;
@@ -124,7 +125,7 @@ export async function getPhotoBySlug(
 export async function getSiteSettings(): Promise<SiteSettings | null> {
   return client.fetch(
     /* groq */ `*[_type == "siteSettings"][0]{
-      siteName, tagline, logo, socialLinks, defaultSeo
+      siteName, tagline, logo, socialLinks, shopUrl, defaultSeo
     }`,
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },
