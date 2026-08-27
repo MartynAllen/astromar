@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import PhotoDetail from "@/components/gallery/PhotoDetail";
+import CheckoutStatusBanner from "@/components/gallery/CheckoutStatusBanner";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-import { getPhotoBySlug, getPhotoSlugs } from "@/lib/sanity.queries";
+import { getPhotoBySlug, getPhotoSlugs, getPrintProducts } from "@/lib/sanity.queries";
 import { buildMetadata, imageObjectJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
@@ -30,6 +32,8 @@ export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
   const photo = await getPhotoBySlug(slug);
   if (!photo) notFound();
 
+  const printProducts = photo.availableAsPrint ? await getPrintProducts() : undefined;
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
       <JsonLd
@@ -47,7 +51,10 @@ export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
           { name: photo.title, path: `/gallery/${slug}` },
         ]}
       />
-      <PhotoDetail photo={photo} />
+      <Suspense>
+        <CheckoutStatusBanner />
+      </Suspense>
+      <PhotoDetail photo={photo} printProducts={printProducts} />
     </div>
   );
 }

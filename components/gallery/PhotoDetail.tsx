@@ -1,10 +1,17 @@
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
 import ShotDetailsPanel from "./ShotDetailsPanel";
+import BuyPrintPanel from "./BuyPrintPanel";
 import PortableTextContent from "@/components/PortableTextContent";
-import type { AstroPhotoDetail } from "@/lib/sanity.queries";
+import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
 
-export default function PhotoDetail({ photo }: { photo: AstroPhotoDetail }) {
+export default function PhotoDetail({
+  photo,
+  printProducts,
+}: {
+  photo: AstroPhotoDetail;
+  printProducts?: PrintProduct[];
+}) {
   const dims = photo.mainImage.dimensions;
   const posterUrl = urlFor(photo.mainImage).width(1600).url();
 
@@ -38,6 +45,9 @@ export default function PhotoDetail({ photo }: { photo: AstroPhotoDetail }) {
         <div className="mt-4">
           <ShotDetailsPanel details={photo.shotDetails} />
         </div>
+        {photo.availableAsPrint && printProducts && printProducts.length > 0 && (
+          <BuyPrintPanel photoSlug={photo.slug.current} products={printProducts} />
+        )}
         {photo.gearNotes && (
           <p className="mt-4 text-sm text-star-500">
             <span className="text-star-300">Gear notes: </span>
