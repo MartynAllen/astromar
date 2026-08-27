@@ -166,11 +166,25 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   // not fail silently — write the failure where it's visible in the Stripe
   // Dashboard, return 500 so Stripe auto-retries for ~3 days, and fire one
   // alert (best-effort — its own failure must never mask this 500).
+  //
+  // The full Prodigi error (result.error) is kept only in the PaymentIntent
+  // metadata below — that's the one channel meant for this level of detail,
+  // visible only to the account owner in the Stripe Dashboard. The alert
+  // and the response back to Stripe deliberately stay generic: Prodigi's
+  // validation errors can echo submitted field values back (e.g. a bad
+  // postcode), and neither the alert channel nor Stripe's own webhook log
+  // needs that level of detail to be useful — a PaymentIntent ID is enough
+  // to look the rest up.
   await stripe.paymentIntents.update(paymentIntentId, {
     metadata: { ...paymentIntent.metadata, prodigiStatus: "failed", prodigiError: result.error.slice(0, 450) },
   });
-  await sendAlert(`⚠️ Astromar print order ${session.id} paid but Prodigi order failed: ${result.error}`);
-  return NextResponse.json({ error: result.error }, { status: 500 });
+  await sendAlert(
+    `⚠️ Astromar print order paid but Prodigi order failed — check PaymentIntent ${paymentIntentId} in the Stripe Dashboard for details.`,
+  );
+  return NextResponse.json(
+    { error: "Prodigi order failed — see PaymentIntent metadata for details" },
+    { status: 500 },
+  );
 }
 
 export async function POST(request: Request) {
