@@ -1,8 +1,7 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-import StatusBadge from "@/components/research/StatusBadge";
+import ResearchProjectCard from "@/components/research/ResearchProjectCard";
 import { getAllResearchProjects, getHeroPhoto } from "@/lib/sanity.queries";
 
 export const revalidate = 60;
@@ -18,6 +17,14 @@ export default async function ResearchPage() {
     getAllResearchProjects(),
     getHeroPhoto(6),
   ]);
+
+  // Two honest buckets rather than three statuses flattened into one list:
+  // "Idea" is proposed-but-not-started; "In progress" and "Complete" both
+  // mean real work has actually happened, so they share a section — the
+  // per-card StatusBadge still shows which of the two it is. Order within
+  // each bucket is preserved from the query (publishedAt desc).
+  const ideas = projects.filter((project) => project.status === "Idea");
+  const log = projects.filter((project) => project.status !== "Idea");
 
   return (
     <>
@@ -39,40 +46,55 @@ export default async function ResearchPage() {
             No research projects posted yet.
           </p>
         ) : (
-          <ul className="mt-2 space-y-4">
-            {projects.map((project) => (
-              <li key={project._id}>
-                <Link
-                  href={`/research/${project.slug.current}`}
-                  className="group block border border-void-700 border-l-2 border-l-nebula-green-400 bg-void-900 p-5 transition-colors hover:border-void-600"
-                >
-                  <div className="flex items-center gap-3">
-                    <h2 className="font-mono text-xl uppercase tracking-wide text-star-100 group-hover:text-nebula-green-400">
-                      {project.title}
-                    </h2>
-                    <StatusBadge status={project.status} />
-                  </div>
-                  {project.summary && (
-                    <p className="mt-1.5 text-sm text-star-500">
-                      {project.summary}
-                    </p>
-                  )}
-                  {project.techniques && project.techniques.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {project.techniques.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded-full border border-nebula-green-400/30 px-2.5 py-0.5 font-mono text-xs text-nebula-green-400"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-12">
+            <section>
+              <div className="mb-4 border-b border-void-700 pb-3">
+                <h2 className="font-mono text-2xl uppercase tracking-wide text-star-100">
+                  Ideas
+                </h2>
+                <p className="mt-1 text-sm text-star-500">
+                  Proposed, not started — real questions worth pointing Python
+                  at, with nothing to show yet.
+                </p>
+              </div>
+              {ideas.length > 0 ? (
+                <ul className="space-y-4">
+                  {ideas.map((project) => (
+                    <ResearchProjectCard key={project._id} project={project} />
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-star-500">
+                  Nothing queued right now — see what&apos;s already moved
+                  into the log below.
+                </p>
+              )}
+            </section>
+
+            <section>
+              <div className="mb-4 border-b border-void-700 pb-3">
+                <h2 className="font-mono text-2xl uppercase tracking-wide text-star-100">
+                  Research Log
+                </h2>
+                <p className="mt-1 text-sm text-star-500">
+                  Work that&apos;s actually underway or finished, in the order
+                  it happened.
+                </p>
+              </div>
+              {log.length > 0 ? (
+                <ul className="space-y-4">
+                  {log.map((project) => (
+                    <ResearchProjectCard key={project._id} project={project} />
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-star-500">
+                  Nothing&apos;s moved off the idea stage yet — see what&apos;s
+                  queued above.
+                </p>
+              )}
+            </section>
+          </div>
         )}
       </div>
     </>
