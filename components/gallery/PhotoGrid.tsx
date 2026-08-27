@@ -4,9 +4,11 @@ import type { AstroPhotoSummary } from "@/lib/sanity.queries";
 export default function PhotoGrid({
   photos,
   fromPriceGBP,
+  showShotSummary,
 }: {
   photos: AstroPhotoSummary[];
   fromPriceGBP?: number;
+  showShotSummary?: boolean;
 }) {
   if (photos.length === 0) {
     return (
@@ -19,7 +21,12 @@ export default function PhotoGrid({
   return (
     <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 xl:columns-4">
       {photos.map((photo) => (
-        <PhotoCard key={photo._id} photo={photo} fromPriceGBP={fromPriceGBP} />
+        <PhotoCard
+          key={photo._id}
+          photo={photo}
+          fromPriceGBP={fromPriceGBP}
+          showShotSummary={showShotSummary}
+        />
       ))}
     </div>
   );

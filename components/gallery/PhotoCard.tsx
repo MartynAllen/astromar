@@ -1,23 +1,34 @@
 import Image from "next/image";
 import Link from "next/link";
 import { urlFor } from "@/sanity/image";
-import { formatCaptureDate } from "@/lib/astro/shotDetails";
+import { formatCaptureDate, formatShotSummary } from "@/lib/astro/shotDetails";
 import type { AstroPhotoSummary } from "@/lib/sanity.queries";
 
 export default function PhotoCard({
   photo,
   fromPriceGBP,
+  showShotSummary,
 }: {
   photo: AstroPhotoSummary;
   /** Cheapest active print size, in pence. Pass this from any page that
    * already fetches the print catalog so the "buy this" signal is visible
    * while browsing, not just after switching on a filter. */
   fromPriceGBP?: number;
+  /** Adds a mono instrument-readout line (subs × exposure · integration ·
+   * filter) below the capture date — the real EXIF-verified data that's the
+   * site's actual differentiator, per PRODUCT.md. Opt-in per page rather
+   * than sitewide: the plain gallery/homepage grid stays at its established
+   * density, and only /prints — where that proof is doing real work toward
+   * a purchase decision — turns it on. Silently omitted for single-exposure
+   * shots (aurora, star trails) that have no sub/exposure data to show. */
+  showShotSummary?: boolean;
 }) {
   const dims = photo.mainImage.dimensions;
   const width = dims?.width ?? 1200;
   const height = dims?.height ?? 800;
   const captureDate = formatCaptureDate(photo.shotDetails?.captureDate);
+  const shotSummary =
+    showShotSummary && photo.shotDetails ? formatShotSummary(photo.shotDetails) : undefined;
   const showPrintBadge = photo.availableAsPrint && typeof fromPriceGBP === "number";
 
   return (
@@ -42,6 +53,7 @@ export default function PhotoCard({
       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-void-950/90 via-void-950/50 to-transparent p-3 pt-8">
         <p className="font-mono text-lg uppercase tracking-wide text-star-100">{photo.title}</p>
         {captureDate && <p className="text-xs italic text-star-500">{captureDate}</p>}
+        {shotSummary && <p className="font-mono text-xs text-star-500">{shotSummary}</p>}
       </div>
     </Link>
   );

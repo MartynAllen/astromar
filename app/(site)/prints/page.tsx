@@ -84,7 +84,7 @@ export default async function PrintsPage() {
         </div>
 
         {photos.length > 0 ? (
-          <PhotoGrid photos={photos} fromPriceGBP={fromPriceGBP} />
+          <PhotoGrid photos={photos} fromPriceGBP={fromPriceGBP} showShotSummary />
         ) : (
           <p className="py-16 text-center text-star-500">
             Nothing&apos;s available as a print just yet — check back soon.
