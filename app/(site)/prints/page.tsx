@@ -19,7 +19,17 @@ export default async function PrintsPage() {
     getPrintablePhotos(),
     getPrintProducts().catch(() => []),
   ]);
-  const heroPhoto = photos[0] ?? null;
+  // Pinned to the same shot as the homepage hero — Andromeda reads stronger
+  // full-bleed than whichever photo happens to be newest (the previous
+  // mechanical pick landed on a flatter, dimmer frame). Falls back to the
+  // newest featured-and-printable photo, then the newest printable photo at
+  // all, so the page still has a sensible hero if Andromeda is ever pulled
+  // from the print catalog.
+  const heroPhoto =
+    photos.find((p) => p.slug.current === "andromeda-galaxy-2026-08-12") ??
+    photos.find((p) => p.featured) ??
+    photos[0] ??
+    null;
   const fromPriceGBP = cheapestPrintPriceGBP(printProducts);
 
   return (

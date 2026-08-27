@@ -35,12 +35,12 @@ export default function PhotoCard({
         className="h-auto w-full transition-transform duration-300 group-hover:scale-[1.03]"
       />
       {showPrintBadge && (
-        <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 border border-nebula-rose-400/80 bg-void-950/80 px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-nebula-rose-300 backdrop-blur-sm">
+        <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full border border-nebula-rose-400/80 bg-void-950/80 px-3 py-1 font-mono text-xs uppercase tracking-widest text-nebula-rose-300 backdrop-blur-sm">
           Prints from £{Math.round(fromPriceGBP / 100)}
         </span>
       )}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-void-950/90 via-void-950/50 to-transparent p-3 pt-8">
-        <p className="text-lg text-star-100">{photo.title}</p>
+        <p className="font-mono text-lg uppercase tracking-wide text-star-100">{photo.title}</p>
         {captureDate && <p className="text-xs italic text-star-500">{captureDate}</p>}
       </div>
     </Link>
