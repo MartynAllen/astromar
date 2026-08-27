@@ -15,10 +15,21 @@ export const metadata: Metadata = {
 };
 
 export default async function PrintsPage() {
-  const [photos, printProducts] = await Promise.all([
+  // A plain .catch(() => []) previously collapsed a genuine fetch failure
+  // into the exact same shape as "no sizes configured" — every price badge
+  // and the hero's "From £X" line would vanish with no indication anything
+  // was wrong. Track the failure explicitly so the page can say so.
+  const [photos, printProductsResult] = await Promise.all([
     getPrintablePhotos(),
-    getPrintProducts().catch(() => []),
+    getPrintProducts()
+      .then((data) => ({ ok: true as const, data }))
+      .catch((err) => {
+        console.error("getPrintProducts failed on /prints:", err);
+        return { ok: false as const, data: [] as Awaited<ReturnType<typeof getPrintProducts>> };
+      }),
   ]);
+  const printProducts = printProductsResult.data;
+  const catalogUnavailable = !printProductsResult.ok;
   // Pinned to the same shot as the homepage hero — Andromeda reads stronger
   // full-bleed than whichever photo happens to be newest (the previous
   // mechanical pick landed on a flatter, dimmer frame). Falls back to the
@@ -82,6 +93,14 @@ export default async function PrintsPage() {
             </p>
           </div>
         </div>
+
+        {catalogUnavailable && (
+          <p className="mb-10 border border-void-600 bg-void-900 px-5 py-4 text-sm text-star-500">
+            Pricing is temporarily unavailable — the photos below are still
+            real, current work, sizes and prices just can&apos;t be shown
+            right now. Check back shortly.
+          </p>
+        )}
 
         {photos.length > 0 ? (
           <PhotoGrid photos={photos} fromPriceGBP={fromPriceGBP} showShotSummary />

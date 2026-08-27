@@ -32,7 +32,20 @@ export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
   const photo = await getPhotoBySlug(slug);
   if (!photo) notFound();
 
-  const printProducts = photo.availableAsPrint ? await getPrintProducts() : undefined;
+  // getPrintProducts() previously had no .catch() here — a transient Sanity
+  // failure would take down the whole photo page (not just the buy panel)
+  // for every print-eligible photo. Now it degrades to a visible notice in
+  // PhotoDetail instead of crashing the route.
+  let printProducts: Awaited<ReturnType<typeof getPrintProducts>> | undefined;
+  let printCatalogUnavailable = false;
+  if (photo.availableAsPrint) {
+    try {
+      printProducts = await getPrintProducts();
+    } catch (err) {
+      console.error("getPrintProducts failed on photo page:", err);
+      printCatalogUnavailable = true;
+    }
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
@@ -54,7 +67,11 @@ export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
       <Suspense>
         <CheckoutStatusBanner />
       </Suspense>
-      <PhotoDetail photo={photo} printProducts={printProducts} />
+      <PhotoDetail
+        photo={photo}
+        printProducts={printProducts}
+        printCatalogUnavailable={printCatalogUnavailable}
+      />
     </div>
   );
 }

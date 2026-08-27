@@ -8,9 +8,16 @@ import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
 export default function PhotoDetail({
   photo,
   printProducts,
+  printCatalogUnavailable,
 }: {
   photo: AstroPhotoDetail;
   printProducts?: PrintProduct[];
+  /** True only when fetching the print catalog itself threw — distinct from
+   * printProducts being empty because no sizes are configured yet. Renders
+   * a visible notice in place of the buy panel instead of the panel just
+   * silently not appearing, which otherwise reads as "this photo stopped
+   * being for sale" rather than "pricing failed to load." */
+  printCatalogUnavailable?: boolean;
 }) {
   const dims = photo.mainImage.dimensions;
   const posterUrl = urlFor(photo.mainImage).width(1600).url();
@@ -45,9 +52,15 @@ export default function PhotoDetail({
         {/* Buy panel sits above the technical EXIF details — someone who
             lands straight on this page (social, search) should see "you can
             own this" before a table of exposure specs. */}
-        {photo.availableAsPrint && printProducts && printProducts.length > 0 && (
-          <BuyPrintPanel photo={photo} products={printProducts} />
+        {photo.availableAsPrint && printCatalogUnavailable && (
+          <p className="mt-4 border border-void-600 bg-void-900 px-4 py-3 text-sm text-star-500">
+            Pricing is temporarily unavailable — check back shortly.
+          </p>
         )}
+        {photo.availableAsPrint &&
+          !printCatalogUnavailable &&
+          printProducts &&
+          printProducts.length > 0 && <BuyPrintPanel photo={photo} products={printProducts} />}
         <div className="mt-4">
           <ShotDetailsPanel details={photo.shotDetails} />
         </div>
