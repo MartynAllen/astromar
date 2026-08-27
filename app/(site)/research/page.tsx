@@ -22,7 +22,10 @@ export default async function ResearchPage() {
   // "Idea" is proposed-but-not-started; "In progress" and "Complete" both
   // mean real work has actually happened, so they share a section — the
   // per-card StatusBadge still shows which of the two it is. Order within
-  // each bucket is preserved from the query (publishedAt desc).
+  // each bucket is preserved from the query (publishedAt desc). Research
+  // Log leads, Ideas follows — finished/underway work should dominate the
+  // page, even though the log happens to be empty until something moves
+  // off "Idea" for the first time.
   const ideas = projects.filter((project) => project.status === "Idea");
   const log = projects.filter((project) => project.status !== "Idea");
 
@@ -50,30 +53,6 @@ export default async function ResearchPage() {
             <section>
               <div className="mb-4 border-b border-void-700 pb-3">
                 <h2 className="font-mono text-2xl uppercase tracking-wide text-star-100">
-                  Ideas
-                </h2>
-                <p className="mt-1 text-sm text-star-500">
-                  Proposed, not started — real questions worth pointing Python
-                  at, with nothing to show yet.
-                </p>
-              </div>
-              {ideas.length > 0 ? (
-                <ul className="space-y-4">
-                  {ideas.map((project) => (
-                    <ResearchProjectCard key={project._id} project={project} />
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-star-500">
-                  Nothing queued right now — see what&apos;s already moved
-                  into the log below.
-                </p>
-              )}
-            </section>
-
-            <section>
-              <div className="mb-4 border-b border-void-700 pb-3">
-                <h2 className="font-mono text-2xl uppercase tracking-wide text-star-100">
                   Research Log
                 </h2>
                 <p className="mt-1 text-sm text-star-500">
@@ -90,7 +69,31 @@ export default async function ResearchPage() {
               ) : (
                 <p className="text-sm text-star-500">
                   Nothing&apos;s moved off the idea stage yet — see what&apos;s
-                  queued above.
+                  queued below.
+                </p>
+              )}
+            </section>
+
+            <section>
+              <div className="mb-4 border-b border-void-700 pb-3">
+                <h2 className="font-mono text-2xl uppercase tracking-wide text-star-100">
+                  Ideas
+                </h2>
+                <p className="mt-1 text-sm text-star-500">
+                  Proposed, not started — real questions worth pointing Python
+                  at, with nothing to show yet.
+                </p>
+              </div>
+              {ideas.length > 0 ? (
+                <ul className="space-y-4">
+                  {ideas.map((project) => (
+                    <ResearchProjectCard key={project._id} project={project} />
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-star-500">
+                  Nothing queued right now — see what&apos;s already moved
+                  into the log above.
                 </p>
               )}
             </section>
