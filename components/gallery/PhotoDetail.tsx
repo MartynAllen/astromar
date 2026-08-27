@@ -46,7 +46,7 @@ export default function PhotoDetail({
           <ShotDetailsPanel details={photo.shotDetails} />
         </div>
         {photo.availableAsPrint && printProducts && printProducts.length > 0 && (
-          <BuyPrintPanel photoSlug={photo.slug.current} products={printProducts} />
+          <BuyPrintPanel photo={photo} products={printProducts} />
         )}
         {photo.gearNotes && (
           <p className="mt-4 text-sm text-star-500">

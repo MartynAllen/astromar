@@ -129,15 +129,17 @@ export async function getPhotoBySlug(
 export interface PrintProduct {
   _id: string;
   title: string;
-  sku: string;
-  priceGBP: number;
+  unframedSku: string;
+  unframedPriceGBP: number;
+  framedSku?: string;
+  framingAddonPriceGBP?: number;
   description?: string;
 }
 
 export async function getPrintProducts(): Promise<PrintProduct[]> {
   return client.fetch(
-    /* groq */ `*[_type == "printProduct" && active == true] | order(sortOrder asc, priceGBP asc) {
-      _id, title, sku, priceGBP, description
+    /* groq */ `*[_type == "printProduct" && active == true] | order(sortOrder asc, unframedPriceGBP asc) {
+      _id, title, unframedSku, unframedPriceGBP, framedSku, framingAddonPriceGBP, description
     }`,
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },

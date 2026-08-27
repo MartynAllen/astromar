@@ -62,17 +62,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { photoSlug, sku } = (body ?? {}) as { photoSlug?: unknown; sku?: unknown };
+  const { photoSlug, printProductId, framed } = (body ?? {}) as {
+    photoSlug?: unknown;
+    printProductId?: unknown;
+    framed?: unknown;
+  };
 
   if (
     typeof photoSlug !== "string" ||
-    typeof sku !== "string" ||
+    typeof printProductId !== "string" ||
     photoSlug.length === 0 ||
-    sku.length === 0 ||
+    printProductId.length === 0 ||
     photoSlug.length > 200 ||
-    sku.length > 100
+    printProductId.length > 200 ||
+    typeof framed !== "boolean"
   ) {
-    return NextResponse.json({ error: "Missing or invalid photoSlug/sku" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing or invalid photoSlug/printProductId/framed" },
+      { status: 400 },
+    );
   }
 
   const photo = await getPhotoBySlug(photoSlug);
@@ -81,9 +89,30 @@ export async function POST(request: Request) {
   }
 
   const products = await getPrintProducts();
-  const product = products.find((p) => p.sku === sku);
+  const product = products.find((p) => p._id === printProductId);
   if (!product) {
     return NextResponse.json({ error: "Unknown print product" }, { status: 400 });
+  }
+
+  // Never trust a client-supplied sku or price — both are derived here from
+  // the size + framed flag, against the product doc just re-fetched above.
+  let sku: string;
+  let priceGBP: number;
+  let productLabel: string;
+  if (framed) {
+    if (!product.framedSku || !product.framingAddonPriceGBP) {
+      return NextResponse.json(
+        { error: "Framing isn't available for this size" },
+        { status: 400 },
+      );
+    }
+    sku = product.framedSku;
+    priceGBP = product.unframedPriceGBP + product.framingAddonPriceGBP;
+    productLabel = `${product.title} (Framed)`;
+  } else {
+    sku = product.unframedSku;
+    priceGBP = product.unframedPriceGBP;
+    productLabel = product.title;
   }
 
   // Sanity can't upscale past the original — this just asks for as large as
@@ -97,16 +126,16 @@ export async function POST(request: Request) {
         {
           price_data: {
             currency: "gbp",
-            unit_amount: product.priceGBP,
+            unit_amount: priceGBP,
             product_data: {
-              name: `${photo.title} — ${product.title}`,
+              name: `${photo.title} — ${productLabel}`,
               images: [imageUrl],
             },
           },
           quantity: 1,
         },
       ],
-      // v1 scope: GB shipping only. Each printProduct.priceGBP bakes in an
+      // v1 scope: GB shipping only. Each printProduct price bakes in an
       // estimated UK shipping cost; international needs a live per-destination
       // Prodigi quote, deliberately deferred rather than silently mispriced.
       shipping_address_collection: { allowed_countries: ["GB"] },
@@ -114,7 +143,7 @@ export async function POST(request: Request) {
         metadata: {
           photoId: photo._id,
           photoSlug,
-          sku: product.sku,
+          sku,
           imageUrl,
           prodigiStatus: "pending",
         },

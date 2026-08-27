@@ -1,27 +1,124 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { PrintProduct } from "@/lib/sanity.queries";
+import Image from "next/image";
+import { urlFor } from "@/sanity/image";
+import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
 
 function formatGBP(pence: number) {
   return `£${(pence / 100).toFixed(2)}`;
 }
 
+function QuickViewModal({
+  photo,
+  product,
+  framed,
+  onClose,
+}: {
+  photo: AstroPhotoDetail;
+  product: PrintProduct;
+  framed: boolean;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [onClose]);
+
+  const previewUrl = urlFor(photo.mainImage).width(900).url();
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-950/95 p-6 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Preview — ${photo.title}, ${product.title}${framed ? ", framed" : ""}`}
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close preview"
+        className="fixed right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-void-600 bg-void-900 text-star-100 hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        </svg>
+      </button>
+
+      <div
+        className="flex max-w-lg flex-col items-center"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Approximate preview only — a CSS mat/frame treatment, not a real
+            product photo, so it's built from what's already on hand rather
+            than needing external mockup assets. Border width is scaled
+            roughly toward the print's own aspect ratio, not exact. */}
+        <div
+          className={
+            framed
+              ? "bg-void-950 p-4 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]"
+              : ""
+          }
+          style={framed ? { border: "14px solid #0a0a0a" } : undefined}
+        >
+          <Image
+            src={previewUrl}
+            alt={photo.caption || photo.title}
+            width={900}
+            height={900}
+            className={`h-auto max-h-[70vh] w-auto ${framed ? "border border-void-800" : "border border-void-700"}`}
+          />
+        </div>
+        <p className="mt-4 text-center text-sm text-star-500">
+          {photo.title} — {product.title}
+          {framed ? ", framed (black)" : ""}
+        </p>
+        <p className="mt-1 text-center text-xs text-star-700">
+          Approximate preview — actual framing, mat and colour may vary slightly.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function BuyPrintPanel({
-  photoSlug,
+  photo,
   products,
 }: {
-  photoSlug: string;
+  photo: AstroPhotoDetail;
   products: PrintProduct[];
 }) {
-  const [selectedSku, setSelectedSku] = useState(products[0]?.sku);
+  const [selectedId, setSelectedId] = useState(products[0]?._id);
+  const [framed, setFramed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   if (products.length === 0) return null;
 
-  const selected = products.find((p) => p.sku === selectedSku);
+  const selected = products.find((p) => p._id === selectedId);
+  const canFrame = Boolean(selected?.framedSku && selected?.framingAddonPriceGBP);
+  const totalGBP = selected
+    ? selected.unframedPriceGBP + (framed && canFrame ? (selected.framingAddonPriceGBP ?? 0) : 0)
+    : 0;
+
+  function selectProduct(id: string) {
+    setSelectedId(id);
+    // A size that can't be framed shouldn't silently keep "framed" checked
+    // for the next selection.
+    const next = products.find((p) => p._id === id);
+    if (!next?.framedSku || !next?.framingAddonPriceGBP) setFramed(false);
+  }
 
   async function handleBuy() {
     if (!selected) return;
@@ -31,7 +128,11 @@ export default function BuyPrintPanel({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ photoSlug, sku: selected.sku }),
+        body: JSON.stringify({
+          photoSlug: photo.slug.current,
+          printProductId: selected._id,
+          framed: framed && canFrame,
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) {
@@ -58,19 +159,19 @@ export default function BuyPrintPanel({
 
       <div className="mt-3 flex flex-wrap gap-2">
         {products.map((product) => {
-          const isActive = product.sku === selectedSku;
+          const isActive = product._id === selectedId;
           return (
             <button
-              key={product.sku}
+              key={product._id}
               type="button"
-              onClick={() => setSelectedSku(product.sku)}
+              onClick={() => selectProduct(product._id)}
               className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
                 isActive
                   ? "border-nebula-rose-500 bg-nebula-rose-500/10 text-nebula-rose-400"
                   : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
               }`}
             >
-              {product.title} — {formatGBP(product.priceGBP)}
+              {product.title} — {formatGBP(product.unframedPriceGBP)}
             </button>
           );
         })}
@@ -80,24 +181,42 @@ export default function BuyPrintPanel({
         <p className="mt-2 text-sm text-star-500">{selected.description}</p>
       )}
 
+      {canFrame && (
+        <label className="mt-3 flex items-center gap-2 text-sm text-star-300">
+          <input
+            type="checkbox"
+            checked={framed}
+            onChange={(e) => setFramed(e.target.checked)}
+            className="h-4 w-4 accent-nebula-rose-500"
+          />
+          Add framing (black) — +{formatGBP(selected!.framingAddonPriceGBP ?? 0)}
+        </label>
+      )}
+
       {error && (
         <p className="mt-3 text-sm text-nebula-rose-400" role="alert">
           {error}
         </p>
       )}
 
-      <button
-        type="button"
-        onClick={handleBuy}
-        disabled={loading || !selected}
-        className="mt-3 flex w-full items-center justify-center gap-2 border border-nebula-rose-400 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-nebula-rose-400"
-      >
-        {loading
-          ? "Redirecting to checkout…"
-          : selected
-            ? `Buy print — ${formatGBP(selected.priceGBP)}`
-            : "Buy print"}
-      </button>
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          onClick={() => setPreviewOpen(true)}
+          disabled={!selected}
+          className="flex items-center justify-center gap-2 border border-void-600 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-star-300 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Quick view
+        </button>
+        <button
+          type="button"
+          onClick={handleBuy}
+          disabled={loading || !selected}
+          className="flex flex-1 items-center justify-center gap-2 border border-nebula-rose-400 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-nebula-rose-400"
+        >
+          {loading ? "Redirecting to checkout…" : `Buy print — ${formatGBP(totalGBP)}`}
+        </button>
+      </div>
 
       <p className="mt-3 text-xs text-star-700">
         Made to order and shipped within the UK.{" "}
@@ -105,6 +224,15 @@ export default function BuyPrintPanel({
           Shipping &amp; returns
         </Link>
       </p>
+
+      {previewOpen && selected && (
+        <QuickViewModal
+          photo={photo}
+          product={selected}
+          framed={framed && canFrame}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
     </div>
   );
 }
