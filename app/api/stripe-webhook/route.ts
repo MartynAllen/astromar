@@ -65,6 +65,12 @@ async function placeProdigiOrder(params: {
             copies: 1,
             sizing: "fillPrintArea",
             assets: [{ printArea: "default", url: params.imageUrl }],
+            // Prodigi's Classic Framed Print line (GLOBAL-CFPM-*) requires a
+            // frame color attribute — confirmed via a real sandbox order
+            // that came back 400 ValidationFailed/MissingRequiredAttributes
+            // without it. v1 launches black-only per the plan (frame color
+            // isn't yet a choice printProduct or the buy panel exposes).
+            ...(params.sku.includes("CFPM") ? { attributes: { color: "black" } } : {}),
           },
         ],
       }),
