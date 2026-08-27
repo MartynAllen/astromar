@@ -47,7 +47,13 @@ export default async function HomePage() {
     getPrintProducts().catch(() => []),
   ]);
   const fromPriceGBP = cheapestPrintPriceGBP(printProducts);
-  const heroPhoto = featured[0];
+  // Hero is pinned to a specific shot rather than "whichever featured photo
+  // is newest" — Andromeda reads better full-bleed than the newer square
+  // frames, which suit the grid below instead. Falls back to the newest
+  // featured photo if that one's ever unfeatured.
+  const heroPhoto =
+    featured.find((p) => p.slug.current === "andromeda-galaxy-2026-08-12") ?? featured[0];
+  const gridPhotos = featured.filter((p) => p._id !== heroPhoto?._id);
   const heroSummary = heroPhoto?.shotDetails
     ? formatShotSummary(heroPhoto.shotDetails)
     : undefined;
@@ -155,7 +161,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {featured.length > 1 && (
+      {gridPhotos.length > 0 && (
         <section className="mx-auto max-w-6xl px-6 py-16">
           <div className="mb-6 flex items-baseline justify-between border-b border-void-700 pb-4">
             <h2 className="font-mono text-3xl uppercase tracking-wide text-star-100">Featured shots</h2>
@@ -167,7 +173,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-            {featured.slice(1).map((photo) => (
+            {gridPhotos.map((photo) => (
               <PhotoCard key={photo._id} photo={photo} fromPriceGBP={fromPriceGBP} />
             ))}
           </div>
