@@ -104,6 +104,16 @@ export async function getAllPhotos(
   );
 }
 
+// Powers the dedicated /prints landing page — only ever the curated,
+// opted-in subset, newest first so recent work leads.
+export async function getPrintablePhotos(): Promise<AstroPhotoSummary[]> {
+  return client.fetch(
+    /* groq */ `*[_type == "astroPhoto" && availableAsPrint == true] | order(shotDetails.captureDate desc) ${photoSummaryProjection}`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
 export async function getPhotoSlugs(): Promise<string[]> {
   return client.fetch(
     /* groq */ `*[_type == "astroPhoto" && defined(slug.current)].slug.current`,

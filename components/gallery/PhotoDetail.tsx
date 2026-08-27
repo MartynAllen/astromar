@@ -42,12 +42,15 @@ export default function PhotoDetail({
       <div>
         <h1 className="font-mono text-3xl font-bold uppercase tracking-wide text-star-100">{photo.title}</h1>
         {photo.caption && <p className="mt-2 text-star-500">{photo.caption}</p>}
-        <div className="mt-4">
-          <ShotDetailsPanel details={photo.shotDetails} />
-        </div>
+        {/* Buy panel sits above the technical EXIF details — someone who
+            lands straight on this page (social, search) should see "you can
+            own this" before a table of exposure specs. */}
         {photo.availableAsPrint && printProducts && printProducts.length > 0 && (
           <BuyPrintPanel photo={photo} products={printProducts} />
         )}
+        <div className="mt-4">
+          <ShotDetailsPanel details={photo.shotDetails} />
+        </div>
         {photo.gearNotes && (
           <p className="mt-4 text-sm text-star-500">
             <span className="text-star-300">Gear notes: </span>

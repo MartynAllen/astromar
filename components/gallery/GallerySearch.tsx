@@ -44,7 +44,13 @@ function matches(photo: AstroPhotoSummary, query: string) {
   return haystack.includes(query.toLowerCase());
 }
 
-export default function GallerySearch({ photos }: { photos: AstroPhotoSummary[] }) {
+export default function GallerySearch({
+  photos,
+  fromPriceGBP,
+}: {
+  photos: AstroPhotoSummary[];
+  fromPriceGBP?: number;
+}) {
   const router = useRouter();
   const initialCategory = useInitialCategory();
   const initialPrintsOnly = useInitialPrintsOnly();
@@ -132,7 +138,7 @@ export default function GallerySearch({ photos }: { photos: AstroPhotoSummary[] 
       )}
 
       <div className="mt-6">
-        <PhotoGrid photos={filtered} />
+        <PhotoGrid photos={filtered} fromPriceGBP={fromPriceGBP} />
       </div>
     </div>
   );

@@ -4,11 +4,21 @@ import { urlFor } from "@/sanity/image";
 import { formatCaptureDate } from "@/lib/astro/shotDetails";
 import type { AstroPhotoSummary } from "@/lib/sanity.queries";
 
-export default function PhotoCard({ photo }: { photo: AstroPhotoSummary }) {
+export default function PhotoCard({
+  photo,
+  fromPriceGBP,
+}: {
+  photo: AstroPhotoSummary;
+  /** Cheapest active print size, in pence. Pass this from any page that
+   * already fetches the print catalog so the "buy this" signal is visible
+   * while browsing, not just after switching on a filter. */
+  fromPriceGBP?: number;
+}) {
   const dims = photo.mainImage.dimensions;
   const width = dims?.width ?? 1200;
   const height = dims?.height ?? 800;
   const captureDate = formatCaptureDate(photo.shotDetails?.captureDate);
+  const showPrintBadge = photo.availableAsPrint && typeof fromPriceGBP === "number";
 
   return (
     <Link
@@ -24,6 +34,11 @@ export default function PhotoCard({ photo }: { photo: AstroPhotoSummary }) {
         sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 100vw"
         className="h-auto w-full transition-transform duration-300 group-hover:scale-[1.03]"
       />
+      {showPrintBadge && (
+        <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 border border-nebula-rose-400/80 bg-void-950/80 px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-nebula-rose-300 backdrop-blur-sm">
+          Prints from £{Math.round(fromPriceGBP / 100)}
+        </span>
+      )}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-void-950/90 via-void-950/50 to-transparent p-3 pt-8">
         <p className="text-lg text-star-100">{photo.title}</p>
         {captureDate && <p className="text-xs italic text-star-500">{captureDate}</p>}

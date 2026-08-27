@@ -2,17 +2,24 @@ import Image from "next/image";
 import Link from "next/link";
 import PhotoCard from "@/components/gallery/PhotoCard";
 import { urlFor } from "@/sanity/image";
-import { getFeaturedPhotos } from "@/lib/sanity.queries";
+import { getFeaturedPhotos, getPrintProducts } from "@/lib/sanity.queries";
+import { cheapestPrintPriceGBP } from "@/lib/print";
 import { formatCaptureDate, formatShotSummary } from "@/lib/astro/shotDetails";
 
 export const revalidate = 60;
 
 const SECTION_TEASERS = [
   {
+    href: "/prints",
+    title: "Prints",
+    body: "Fine-art prints of these shots, made to order and shipped UK-wide — framed or unframed.",
+    color: "group-hover:text-nebula-rose-400",
+  },
+  {
     href: "/reviews",
     title: "Gear Reviews",
     body: "Honest write-ups on the telescopes, filters and software actually used to make these images.",
-    color: "group-hover:text-nebula-rose-400",
+    color: "group-hover:text-nebula-violet-400",
   },
   {
     href: "/guide",
@@ -35,7 +42,11 @@ const SECTION_TEASERS = [
 ];
 
 export default async function HomePage() {
-  const featured = await getFeaturedPhotos();
+  const [featured, printProducts] = await Promise.all([
+    getFeaturedPhotos(),
+    getPrintProducts().catch(() => []),
+  ]);
+  const fromPriceGBP = cheapestPrintPriceGBP(printProducts);
   const heroPhoto = featured[0];
   const heroSummary = heroPhoto?.shotDetails
     ? formatShotSummary(heroPhoto.shotDetails)
@@ -157,7 +168,7 @@ export default async function HomePage() {
           </div>
           <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
             {featured.slice(1).map((photo) => (
-              <PhotoCard key={photo._id} photo={photo} />
+              <PhotoCard key={photo._id} photo={photo} fromPriceGBP={fromPriceGBP} />
             ))}
           </div>
         </section>
