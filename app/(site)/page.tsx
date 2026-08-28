@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import PhotoCard from "@/components/gallery/PhotoCard";
-import { urlFor } from "@/sanity/image";
+import { heroCropUrl } from "@/sanity/image";
 import { getFeaturedPhotos, getPrintProducts } from "@/lib/sanity.queries";
 import { cheapestPrintPriceGBP } from "@/lib/print";
 import { formatCaptureDate, formatShotSummary } from "@/lib/astro/shotDetails";
@@ -64,16 +64,7 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         {heroPhoto?.mainImage?.asset && (
           <Image
-            // A deliberate hotspot (set in Studio for real art direction)
-            // always wins via crop("focalpoint"). Otherwise crop("bottom")
-            // anchors to the bottom edge so mainImage's watermark survives
-            // this forced-aspect crop instead of getting cropped away.
-            src={urlFor(heroPhoto.mainImage)
-              .width(2400)
-              .height(1400)
-              .fit("crop")
-              .crop(heroPhoto.mainImage.hotspot ? "focalpoint" : "bottom")
-              .url()}
+            src={heroCropUrl(heroPhoto.mainImage, 2400, 1400)}
             alt=""
             fill
             priority
