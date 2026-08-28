@@ -24,6 +24,7 @@ export async function generateMetadata(props: PageProps<"/gallery/[slug]">): Pro
     description: photo.seo?.metaDescription || photo.caption,
     path: `/gallery/${slug}`,
     image: photo.seo?.ogImage || photo.mainImage,
+    cropBottom: true,
   });
 }
 

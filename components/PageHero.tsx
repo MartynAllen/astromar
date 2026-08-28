@@ -49,7 +49,9 @@ export default function PageHero({
                 // + imagePosition do all the cropping against the real
                 // rendered box.
                 urlFor(photo.mainImage).width(1920).orientation(imageRotate).url()
-              : urlFor(photo.mainImage).width(1920).height(800).fit("crop").url()
+              : // crop("bottom") keeps mainImage's watermark (bottom-right
+                // corner) intact through this forced-aspect crop.
+                urlFor(photo.mainImage).width(1920).height(800).fit("crop").crop("bottom").url()
           }
           alt=""
           fill

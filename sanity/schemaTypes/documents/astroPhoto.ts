@@ -38,8 +38,10 @@ export default defineType({
     }),
     defineField({
       name: "mainImage",
-      title: "Image",
+      title: "Image (watermarked, public)",
       type: "image",
+      description:
+        "What visitors actually see everywhere on the site — the import script bakes the watermark into this copy automatically. The clean original lives separately in Print master below, for print orders only.",
       validation: (r) => r.required(),
       options: {
         hotspot: true,
@@ -51,6 +53,14 @@ export default defineType({
         // siteSettings. Nothing in the app reads either key.
         metadata: ["blurhash", "lqip", "palette"],
       },
+    }),
+    defineField({
+      name: "printMasterImage",
+      title: "Print master (unwatermarked)",
+      type: "image",
+      description:
+        "The clean, unwatermarked original — used only for Prodigi print orders, never rendered anywhere on the public site. mainImage above carries the watermark and is what visitors actually see. Populated automatically by the import script; only touch this manually if you know what you're doing.",
+      options: { metadata: ["blurhash"] },
     }),
     defineField({
       name: "video",

@@ -64,7 +64,10 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         {heroPhoto?.mainImage?.asset && (
           <Image
-            src={urlFor(heroPhoto.mainImage).width(2400).height(1400).fit("crop").url()}
+            // crop("bottom") anchors the crop to the bottom edge so the
+            // watermark baked into mainImage's bottom-right corner survives
+            // this forced-aspect crop instead of getting cropped away.
+            src={urlFor(heroPhoto.mainImage).width(2400).height(1400).fit("crop").crop("bottom").url()}
             alt=""
             fill
             priority

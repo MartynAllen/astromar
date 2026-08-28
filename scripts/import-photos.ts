@@ -16,6 +16,7 @@ import exifr from "exifr";
 import { writeClient } from "../sanity/client";
 import { resolveShotDetails } from "../lib/astro/resolveShotDetails";
 import { formatShotSummary } from "../lib/astro/shotDetails";
+import { applyWatermark } from "./lib/watermark";
 
 const IMAGE_EXT_RE = /\.(jpe?g|png)$/i;
 
@@ -77,7 +78,16 @@ async function importOne(dir: string, filename: string) {
     : humanizeFilename(filename);
   const slug = slugify(slugBase) || slugify(filename);
 
-  const asset = await writeClient.assets.upload("image", buf, { filename });
+  // Clean original — this is what a print order actually uses, never
+  // rendered on the public site. Uploaded first so a watermark failure
+  // doesn't leave the document referencing a missing asset for either field.
+  const printMasterAsset = await writeClient.assets.upload("image", buf, { filename });
+
+  // Public-facing copy — everything the site actually displays.
+  const watermarkedBuf = await applyWatermark(buf);
+  const displayAsset = await writeClient.assets.upload("image", watermarkedBuf, {
+    filename: filename.replace(IMAGE_EXT_RE, "-watermarked.jpg"),
+  });
 
   const docId = `drafts.astro-photo-${slugify(filename)}`;
   await writeClient.createOrReplace({
@@ -87,7 +97,11 @@ async function importOne(dir: string, filename: string) {
     slug: { _type: "slug", current: slug },
     mainImage: {
       _type: "image",
-      asset: { _type: "reference", _ref: asset._id },
+      asset: { _type: "reference", _ref: displayAsset._id },
+    },
+    printMasterImage: {
+      _type: "image",
+      asset: { _type: "reference", _ref: printMasterAsset._id },
     },
     ...(resolved.category ? { category: resolved.category } : {}),
     shotDetails: {

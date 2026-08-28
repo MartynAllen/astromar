@@ -45,6 +45,11 @@ export interface AstroPhotoDetail extends AstroPhotoSummary {
   story?: unknown[];
   gearNotes?: string;
   videoUrl?: string;
+  // Clean, unwatermarked original — populated by the import pipeline,
+  // read only by the checkout route for print orders. Never rendered
+  // anywhere on the public site; mainImage (watermarked) is what every
+  // page displays, including this one's own hero image.
+  printMasterImage?: SanityImageWithDimensions;
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
@@ -129,6 +134,7 @@ export async function getPhotoBySlug(
     /* groq */ `*[_type == "astroPhoto" && slug.current == $slug][0]{
       _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, seo,
       "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions},
+      "printMasterImage": printMasterImage{..., "dimensions": asset->metadata.dimensions},
       "videoUrl": video.asset->url
     }`,
     { slug },

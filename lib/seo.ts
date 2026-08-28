@@ -11,11 +11,26 @@ interface BuildMetadataInput {
   description?: string;
   path: string;
   image?: SanityImageSource;
+  /** Astro photo pages only: mainImage carries a watermark baked into its
+   * bottom-right corner, and this forced 1200x630 crop would otherwise cut
+   * it away on tall/square sources — bottom-anchoring the crop keeps it in
+   * frame. Other content types (reviews, guides, research) have no
+   * watermark to protect and don't need this. */
+  cropBottom?: boolean;
 }
 
-export function buildMetadata({ title, description, path, image }: BuildMetadataInput): Metadata {
+export function buildMetadata({
+  title,
+  description,
+  path,
+  image,
+  cropBottom,
+}: BuildMetadataInput): Metadata {
   const url = `${SITE_URL}${path}`;
-  const ogImage = image ? [urlFor(image).width(1200).height(630).url()] : undefined;
+  const ogImageBuilder = image ? urlFor(image).width(1200).height(630).fit("crop") : undefined;
+  const ogImage = ogImageBuilder
+    ? [cropBottom ? ogImageBuilder.crop("bottom").url() : ogImageBuilder.url()]
+    : undefined;
 
   return {
     title,

@@ -88,6 +88,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "This photo isn't available as a print" }, { status: 400 });
   }
 
+  // mainImage is watermarked (see astroPhoto schema) — printMasterImage is
+  // the clean original a physical print must actually use. Refuse outright
+  // rather than falling back to mainImage: a silent fallback here would
+  // ship a paying customer a watermarked print.
+  if (!photo.printMasterImage?.asset) {
+    console.error(`Checkout blocked: no printMasterImage for photo ${photo._id} (${photoSlug})`);
+    return NextResponse.json(
+      { error: "This photo isn't fully set up for printing yet — check back shortly" },
+      { status: 400 },
+    );
+  }
+
   const products = await getPrintProducts();
   const product = products.find((p) => p._id === printProductId);
   if (!product) {
@@ -115,9 +127,12 @@ export async function POST(request: Request) {
     productLabel = product.title;
   }
 
+  // The clean, unwatermarked master — never mainImage (watermarked) here.
   // Sanity can't upscale past the original — this just asks for as large as
-  // exists, which is what Prodigi's print quality actually needs.
-  const imageUrl = urlFor(photo.mainImage).width(6000).format("jpg").quality(90).url();
+  // exists, which is what Prodigi's print quality actually needs. Also used
+  // as the Stripe line item's thumbnail, which is correct: it's showing the
+  // customer what they're actually about to receive, unwatermarked.
+  const imageUrl = urlFor(photo.printMasterImage).width(6000).format("jpg").quality(90).url();
 
   try {
     const session = await stripe.checkout.sessions.create({
