@@ -2,17 +2,17 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 
-// Rendered once via scripts/assets/render-watermark.py (Snell Roundhand Bold,
-// off-white to match the site's own --color-star-100, soft shadow for
-// legibility over bright regions) at high resolution so it stays crisp when
+// Rendered once via scripts/assets/render-watermark.py (a signature-style
+// mark: "Martyn Allen" in Sacramento over a rule over tracked-out
+// "PHOTOGRAPHY" in JetBrains Mono) at high resolution so it stays crisp when
 // scaled up for the largest source photos. Re-run that script and replace
 // watermark.png if the look ever needs to change — nothing here regenerates
 // it automatically.
 const WATERMARK_PATH = path.join("scripts", "assets", "watermark.png");
 
-// Deliberately substantial rather than a small corner mark — big enough that
-// cropping it out costs real image content, not just a corner pixel-snip.
-const WIDTH_FRACTION = 0.3;
+// A modest corner mark, not a deterrent-sized block — sized for a modern,
+// professional signature look rather than making cropping expensive.
+const WIDTH_FRACTION = 0.16;
 const MARGIN_FRACTION = 0.03;
 
 /**
