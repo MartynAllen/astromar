@@ -168,7 +168,7 @@ export default async function AboutPage() {
             href={SUPPORT_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 border border-void-600 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-star-300 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+            className="inline-flex items-center gap-2 border border-nebula-teal-400 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-nebula-teal-400 transition-colors hover:bg-nebula-teal-400 hover:text-void-950"
           >
             Buy me a coffee
           </a>
