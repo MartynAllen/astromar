@@ -1,6 +1,7 @@
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
+import ProductTierBlock from "@/components/guide/ProductTierBlock";
 
 const components: PortableTextComponents = {
   block: {
@@ -83,6 +84,7 @@ const components: PortableTextComponents = {
         </div>
       );
     },
+    productTier: ({ value }) => <ProductTierBlock value={value} />,
     code: ({ value }) => (
       <div className="mt-6 overflow-hidden border border-void-700 bg-void-900">
         {(value?.filename || value?.language) && (

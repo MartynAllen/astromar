@@ -49,6 +49,7 @@ export default defineType({
         { type: "bodyImage" },
         { type: "bodyImageRow" },
         { type: "code", options: { withFilename: true } },
+        { type: "productTier" },
       ],
     }),
     defineField({

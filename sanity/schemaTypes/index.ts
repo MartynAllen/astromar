@@ -18,6 +18,7 @@ import bodyImageRow from "./objects/bodyImageRow";
 import reviewGalleryImage from "./objects/reviewGalleryImage";
 import printableAccessory from "./objects/printableAccessory";
 import recommendedAccessory from "./objects/recommendedAccessory";
+import productTier from "./objects/productTier";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -40,5 +41,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     reviewGalleryImage,
     printableAccessory,
     recommendedAccessory,
+    productTier,
   ],
 };
