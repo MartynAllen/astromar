@@ -64,10 +64,16 @@ export default async function HomePage() {
       <section className="relative overflow-hidden">
         {heroPhoto?.mainImage?.asset && (
           <Image
-            // crop("bottom") anchors the crop to the bottom edge so the
-            // watermark baked into mainImage's bottom-right corner survives
+            // A deliberate hotspot (set in Studio for real art direction)
+            // always wins via crop("focalpoint"). Otherwise crop("bottom")
+            // anchors to the bottom edge so mainImage's watermark survives
             // this forced-aspect crop instead of getting cropped away.
-            src={urlFor(heroPhoto.mainImage).width(2400).height(1400).fit("crop").crop("bottom").url()}
+            src={urlFor(heroPhoto.mainImage)
+              .width(2400)
+              .height(1400)
+              .fit("crop")
+              .crop(heroPhoto.mainImage.hotspot ? "focalpoint" : "bottom")
+              .url()}
             alt=""
             fill
             priority

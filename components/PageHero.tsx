@@ -49,9 +49,19 @@ export default function PageHero({
                 // + imagePosition do all the cropping against the real
                 // rendered box.
                 urlFor(photo.mainImage).width(1920).orientation(imageRotate).url()
-              : // crop("bottom") keeps mainImage's watermark (bottom-right
-                // corner) intact through this forced-aspect crop.
-                urlFor(photo.mainImage).width(1920).height(800).fit("crop").crop("bottom").url()
+              : // A deliberate hotspot (set in Studio when a hero crop needs
+                // real art direction — e.g. a nebula whose structure sits
+                // away from the bottom edge) always wins via crop
+                // ("focalpoint"). Otherwise crop("bottom") is the safe
+                // default: it keeps mainImage's watermark (bottom-right
+                // corner) intact through this forced-aspect crop, which a
+                // plain center crop can't guarantee.
+                urlFor(photo.mainImage)
+                  .width(1920)
+                  .height(800)
+                  .fit("crop")
+                  .crop(photo.mainImage.hotspot ? "focalpoint" : "bottom")
+                  .url()
           }
           alt=""
           fill
