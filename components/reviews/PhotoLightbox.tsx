@@ -19,7 +19,7 @@ export function PhotoCredit({ photo }: { photo: LightboxPhoto }) {
     <>
       {photo.caption}
       {photo.creditText && (
-        <span className="mt-1 block text-xs text-star-600">
+        <span className="mt-1 block text-xs text-star-500">
           Photo:{" "}
           {photo.creditUrl ? (
             <a

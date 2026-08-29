@@ -24,7 +24,7 @@ export default function PrintableAccessories({
               <p className="mt-1.5 text-sm text-star-300">{accessory.notes}</p>
             )}
             {accessory.designerCredit && (
-              <p className="mt-1.5 text-xs text-star-600">{accessory.designerCredit}</p>
+              <p className="mt-1.5 text-xs text-star-500">{accessory.designerCredit}</p>
             )}
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
               <a
