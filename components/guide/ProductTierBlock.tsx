@@ -4,8 +4,7 @@ import type { RecommendedAccessory } from "@/lib/sanity.queries";
 interface ProductTierValue {
   tierTitle: string;
   tierNote?: string;
-  newOptions?: RecommendedAccessory[];
-  usedOptions?: RecommendedAccessory[];
+  products?: RecommendedAccessory[];
 }
 
 function ProductCard({ item }: { item: RecommendedAccessory }) {
@@ -16,7 +15,7 @@ function ProductCard({ item }: { item: RecommendedAccessory }) {
         <p className="mt-1.5 text-sm text-star-300">{item.description}</p>
       )}
       {item.compatibilityNote && (
-        <p className="mt-1.5 text-xs text-star-600">{item.compatibilityNote}</p>
+        <p className="mt-1.5 text-xs text-star-500">{item.compatibilityNote}</p>
       )}
       <div className="mt-3">
         <AffiliateButton link={item.affiliateLink} />
@@ -25,14 +24,15 @@ function ProductCard({ item }: { item: RecommendedAccessory }) {
   );
 }
 
-// Renders a productTier portable-text block — a price tier with New (Amazon)
-// and Used (eBay) columns. Used gracefully shows a "coming soon" note
-// instead of a blank column or a dead link until that affiliate program is
-// actually set up; New shows the same honest fallback if a tier's picks
-// haven't been written yet, rather than rendering an empty grid.
+// Renders a productTier portable-text block — a price tier with Amazon
+// picks. No eBay column: that affiliate program isn't set up, and rather
+// than a dead link or a permanent "coming soon" gap, every tier just points
+// readers at the secondhand market themselves. Each product's own
+// affiliateLink can still carry its own priceComparisonNote for a specific
+// tip (same field the About page's gear tiles already use) — this standing
+// note is the fallback that's always there regardless.
 export default function ProductTierBlock({ value }: { value: ProductTierValue }) {
-  const newOptions = value.newOptions ?? [];
-  const usedOptions = value.usedOptions ?? [];
+  const products = value.products ?? [];
 
   return (
     <div className="mt-10 border-t border-void-700 pt-8">
@@ -41,41 +41,20 @@ export default function ProductTierBlock({ value }: { value: ProductTierValue })
       </h3>
       {value.tierNote && <p className="mt-2 text-star-300">{value.tierNote}</p>}
 
-      <div className="mt-5 grid gap-6 sm:grid-cols-2">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-widest text-nebula-amber-400">
-            New
-          </p>
-          {newOptions.length > 0 ? (
-            <div className="mt-3 space-y-4">
-              {newOptions.map((item) => (
-                <ProductCard key={item.affiliateLink.url} item={item} />
-              ))}
-            </div>
-          ) : (
-            <p className="mt-3 text-sm text-star-600">
-              Nothing picked for this tier yet.
-            </p>
-          )}
+      {products.length > 0 ? (
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          {products.map((item) => (
+            <ProductCard key={item.affiliateLink.url} item={item} />
+          ))}
         </div>
+      ) : (
+        <p className="mt-5 text-sm text-star-500">Nothing picked for this tier yet.</p>
+      )}
 
-        <div>
-          <p className="font-mono text-xs uppercase tracking-widest text-nebula-amber-400">
-            Used
-          </p>
-          {usedOptions.length > 0 ? (
-            <div className="mt-3 space-y-4">
-              {usedOptions.map((item) => (
-                <ProductCard key={item.affiliateLink.url} item={item} />
-              ))}
-            </div>
-          ) : (
-            <p className="mt-3 text-sm text-star-600">
-              Used listings coming soon — eBay affiliate link in progress.
-            </p>
-          )}
-        </div>
-      </div>
+      <p className="mt-4 text-xs text-star-500">
+        Prefer used? Worth checking Facebook Marketplace or eBay too — always
+        worth comparing before buying new.
+      </p>
     </div>
   );
 }

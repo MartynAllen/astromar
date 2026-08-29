@@ -5,7 +5,7 @@ export default defineType({
   title: "Product tier",
   type: "object",
   description:
-    "A price-tier block for buying guides — a heading, a short note on what's realistic at this level, then New and Used product columns. Drop into a guide article's body wherever a tier belongs.",
+    "A price-tier block for buying guides — a heading, a short note on what's realistic at this level, then Amazon picks. Drop into a guide article's body wherever a tier belongs.",
   fields: [
     defineField({
       name: "tierTitle",
@@ -21,26 +21,19 @@ export default defineType({
       rows: 2,
     }),
     defineField({
-      name: "newOptions",
-      title: "New (via Amazon)",
-      type: "array",
-      of: [{ type: "recommendedAccessory" }],
-    }),
-    defineField({
-      name: "usedOptions",
-      title: "Used (via eBay)",
+      name: "products",
+      title: "Products (via Amazon)",
       type: "array",
       of: [{ type: "recommendedAccessory" }],
       description:
-        "Leave empty until the eBay Partner Network link is set up — the page shows an honest \"coming soon\" note instead of a blank column, never a placeholder or dead link.",
+        "Each product's own affiliate link has an optional price-comparison note field — the same one already used on the About page's gear tiles — worth using for a specific \"also worth checking X for a used one\" tip on that listing. A generic secondhand-marketplace note is shown automatically under every tier regardless.",
     }),
   ],
   preview: {
-    select: { title: "tierTitle", newCount: "newOptions", usedCount: "usedOptions" },
-    prepare({ title, newCount, usedCount }) {
-      const n = Array.isArray(newCount) ? newCount.length : 0;
-      const u = Array.isArray(usedCount) ? usedCount.length : 0;
-      return { title, subtitle: `${n} new · ${u} used` };
+    select: { title: "tierTitle", products: "products" },
+    prepare({ title, products }) {
+      const n = Array.isArray(products) ? products.length : 0;
+      return { title, subtitle: `${n} product${n === 1 ? "" : "s"}` };
     },
   },
 });

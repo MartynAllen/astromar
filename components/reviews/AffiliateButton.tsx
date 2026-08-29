@@ -12,7 +12,7 @@ export default function AffiliateButton({ link }: { link: AffiliateLink }) {
         {link.label}
       </a>
       {link.priceComparisonNote && (
-        <p className="mt-1.5 max-w-xs text-xs text-star-600">{link.priceComparisonNote}</p>
+        <p className="mt-1.5 max-w-xs text-xs text-star-500">{link.priceComparisonNote}</p>
       )}
     </div>
   );
