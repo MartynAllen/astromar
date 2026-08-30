@@ -6,7 +6,7 @@ import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureB
 import AffiliateButton from "@/components/reviews/AffiliateButton";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import CategoryIcon from "@/components/about/CategoryIcon";
-import { urlFor } from "@/sanity/image";
+import { urlFor, heroCropUrl } from "@/sanity/image";
 import { getAboutPage, getSiteSettings, type GearItem } from "@/lib/sanity.queries";
 import { SUPPORT_URL } from "@/lib/navigation";
 
@@ -45,26 +45,28 @@ export default async function AboutPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
-      <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
-      <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">About</h1>
+      <div className="mx-auto max-w-2xl">
+        <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
+        <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">About</h1>
 
-      {about?.heroImage?.asset && (
-        <div className="mt-6 overflow-hidden border border-void-700">
-          <Image
-            src={urlFor(about.heroImage).width(1200).url()}
-            alt="Martyn's imaging setup"
-            width={about.heroImage.dimensions?.width ?? 1200}
-            height={about.heroImage.dimensions?.height ?? 800}
-            className="h-auto w-full"
-          />
-        </div>
-      )}
+        {about?.heroImage?.asset && (
+          <div className="relative mt-6 h-64 overflow-hidden border border-void-700 sm:h-80">
+            <Image
+              src={heroCropUrl(about.heroImage, 1600, 640)}
+              alt="Martyn's imaging setup"
+              fill
+              sizes="(min-width: 672px) 672px, 100vw"
+              className="object-cover"
+            />
+          </div>
+        )}
 
-      {about?.bio ? (
-        <PortableTextContent value={about.bio} />
-      ) : (
-        <p className="mt-6 text-star-500">Bio coming soon.</p>
-      )}
+        {about?.bio ? (
+          <PortableTextContent value={about.bio} />
+        ) : (
+          <p className="mt-6 text-star-500">Bio coming soon.</p>
+        )}
+      </div>
 
       {about?.gear && about.gear.length > 0 && (
         <div className="mt-12">
