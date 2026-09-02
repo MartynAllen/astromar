@@ -258,11 +258,23 @@ export default function BuyPrintPanel({
         </button>
       </div>
 
-      <p className="mt-3 text-xs text-star-700">
+      <p className="mt-3 text-xs text-star-500">
         Made to order and shipped within the UK.{" "}
-        <Link href="/shipping-returns" className="underline hover:text-star-500">
+        <Link href="/shipping-returns" className="underline hover:text-star-300">
           Shipping &amp; returns
         </Link>
+      </p>
+      <p className="mt-1 text-xs text-star-500">
+        1% of this sale goes toward carbon removal, via{" "}
+        <a
+          href="https://climate.stripe.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-star-300"
+        >
+          Stripe Climate
+        </a>
+        .
       </p>
 
       {previewOpen && selected && (
