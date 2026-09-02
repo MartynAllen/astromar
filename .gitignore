@@ -33,8 +33,10 @@ yarn-error.log*
 /EDITING-GUIDE.md
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files — except the template, which needs to be in the repo for anyone
+# cloning it to have something to copy from (see README's first-time setup)
 .env*
+!.env.local.example
 
 # raw source photos carry embedded GPS location — kept local, never public.
 # Re-populate from your camera/Seestar exports; scripts/import-photos.ts
