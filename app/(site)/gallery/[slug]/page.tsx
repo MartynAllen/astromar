@@ -9,6 +9,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BackLink from "@/components/BackLink";
 import { getPhotoBySlug, getPhotoSlugs, getPrintProducts } from "@/lib/sanity.queries";
 import { buildMetadata, imageObjectJsonLd } from "@/lib/seo";
+import { printProductsForPhoto } from "@/lib/print";
 
 export const revalidate = 60;
 
@@ -43,7 +44,7 @@ export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
   let printCatalogUnavailable = false;
   if (photo.availableAsPrint) {
     try {
-      printProducts = await getPrintProducts();
+      printProducts = printProductsForPhoto(await getPrintProducts(), photo);
     } catch (err) {
       console.error("getPrintProducts failed on photo page:", err);
       printCatalogUnavailable = true;

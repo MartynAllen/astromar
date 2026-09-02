@@ -63,6 +63,9 @@ export interface AstroPhotoDetail extends AstroPhotoSummary {
   // Trims a strip off the raw frame before the print/Quick-View crop runs —
   // see the schema field's own description for why some targets need this.
   printCrop?: PrintCrop;
+  // Caps which catalog sizes this photo can be sold at — see the schema
+  // field's own description and lib/print.ts's printProductsForPhoto.
+  maxPrintLongEdgeIn?: number;
   videoUrl?: string;
   // Clean, unwatermarked original — populated by the import pipeline,
   // read only by the checkout route for print orders. Never rendered
@@ -151,7 +154,7 @@ export async function getPhotoBySlug(
 ): Promise<AstroPhotoDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "astroPhoto" && slug.current == $slug][0]{
-      _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, processingTools, printRotation, printCrop, seo,
+      _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, processingTools, printRotation, printCrop, maxPrintLongEdgeIn, seo,
       "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions},
       "printMasterImage": printMasterImage{..., "dimensions": asset->metadata.dimensions},
       "videoUrl": video.asset->url

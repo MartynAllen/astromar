@@ -4,6 +4,7 @@ import { getPhotoBySlug, getPrintProducts } from "@/lib/sanity.queries";
 import { applyPrintCrop, urlFor } from "@/sanity/image";
 import { SITE_URL } from "@/lib/seo";
 import { frameColorLabel, isValidFrameColor } from "@/lib/printFrameColors";
+import { printProductsForPhoto } from "@/lib/print";
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 // Tighter than /api/geocode — this triggers a real Stripe API call (and,
@@ -109,7 +110,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const products = await getPrintProducts();
+  // Same restriction BuyPrintPanel applies before ever showing a size —
+  // re-applied here so a size hidden for this photo (too low-resolution to
+  // print well at that size) can't be bought anyway by posting its
+  // printProductId directly, bypassing the UI entirely.
+  const products = printProductsForPhoto(await getPrintProducts(), photo);
   const product = products.find((p) => p._id === printProductId);
   if (!product) {
     return NextResponse.json({ error: "Unknown print product" }, { status: 400 });

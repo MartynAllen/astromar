@@ -71,6 +71,14 @@ export default defineType({
         "Rotates the print/Quick-View crop only — the gallery image itself is untouched. Print sizes here are all portrait-ish (ratio 0.71-0.8), so a diagonally-oriented target (e.g. Andromeda's long axis running corner-to-corner in a landscape frame) can lose its outer edges to a plain centre-crop; rotating so the target's long axis runs closer to vertical fixes that. Leave empty for targets that don't need it.",
     }),
     defineField({
+      name: "maxPrintLongEdgeIn",
+      title: "Max print size (longest edge, inches)",
+      type: "number",
+      validation: (r) => r.positive(),
+      description:
+        "Caps which catalog sizes this photo can be sold at, for a source that can't support the full range at real print resolution (e.g. a lower-resolution single-frame capture, not a long-stacked deep-sky shot). Set to the longest edge of the largest size that still holds up — e.g. 10 to cap at 8x10. Leave empty to offer every size in the catalog, as normal.",
+    }),
+    defineField({
       name: "printCrop",
       title: "Print crop",
       type: "object",
