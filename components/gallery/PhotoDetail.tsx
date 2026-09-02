@@ -24,13 +24,12 @@ export default function PhotoDetail({
   const posterUrl = urlFor(photo.mainImage).width(1600).url();
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-      {/* lg:self-start: grid items stretch to the row's height by default,
-          and the right-hand column (title, buy panel, shot details) is
-          almost always taller than the image itself — without this, the
-          image box stretches to match and leaves its own bg-void-900
-          showing as empty space below the image. */}
-      <div className="overflow-hidden border border-void-700 bg-void-900 lg:self-start">
+    <div>
+      {/* Full width, not a sidebar-constrained column — this is a wide-field
+          shot, and the two-column layout it used to sit in squeezed it down
+          to make room for the buy panel next to it. Everything else reads
+          fine as a single stacked column underneath. */}
+      <div className="overflow-hidden border border-void-700 bg-void-900">
         {photo.videoUrl ? (
           <video
             src={photo.videoUrl}
@@ -45,14 +44,17 @@ export default function PhotoDetail({
             alt={photo.caption || photo.title}
             width={dims?.width ?? 1600}
             height={dims?.height ?? 1000}
-            sizes="(min-width: 1024px) 65vw, 100vw"
+            sizes="100vw"
             priority
             className="h-auto w-full"
           />
         )}
       </div>
 
-      <div>
+      {/* Narrowed to match the About/Reviews pages' own reading column —
+          title, buy panel and technical details all read better at this
+          width than stretched across the full image's span. */}
+      <div className="mx-auto mt-8 max-w-2xl">
         <h1 className="font-mono text-3xl font-bold uppercase tracking-wide text-star-100">{photo.title}</h1>
         {photo.caption && <p className="mt-2 text-star-500">{photo.caption}</p>}
         {/* Buy panel sits above the technical EXIF details — someone who
@@ -81,13 +83,13 @@ export default function PhotoDetail({
             {photo.gearNotes}
           </p>
         )}
-      </div>
 
-      {Array.isArray(photo.story) && photo.story.length > 0 && (
-        <div className="lg:col-span-2">
-          <PortableTextContent value={photo.story} />
-        </div>
-      )}
+        {Array.isArray(photo.story) && photo.story.length > 0 && (
+          <div className="mt-8">
+            <PortableTextContent value={photo.story} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

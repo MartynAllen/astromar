@@ -31,3 +31,15 @@ export function isValidFrameColor(value: unknown): value is string {
 export function frameColorLabel(value: string): string {
   return FRAME_COLORS.find((c) => c.value === value)?.label ?? value;
 }
+
+// Real Prodigi Classic Frame spec (support.prodigi.com/hc/en-us/articles/
+// 13137070879772), not a guess: every framed print gets a conservation-grade
+// mount/mat between the glazing and the print, and its width is tiered by
+// size — frames 10x10" or below get a 1" mount, 11x14" or below get 1.5",
+// 12x16" or above get 2". Used so the Quick View's framed mockup shows a
+// real mat window instead of the print running edge-to-edge under the glass.
+export function matWidthIn(longEdgeIn: number): number {
+  if (longEdgeIn <= 10) return 1;
+  if (longEdgeIn <= 14) return 1.5;
+  return 2;
+}
