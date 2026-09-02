@@ -5,10 +5,13 @@ export default function PhotoGrid({
   photos,
   fromPriceGBP,
   showShotSummary,
+  returnTo,
 }: {
   photos: AstroPhotoSummary[];
   fromPriceGBP?: number;
   showShotSummary?: boolean;
+  /** Forwarded to every PhotoCard — see its own doc comment. */
+  returnTo?: string;
 }) {
   if (photos.length === 0) {
     return (
@@ -26,6 +29,7 @@ export default function PhotoGrid({
           photo={photo}
           fromPriceGBP={fromPriceGBP}
           showShotSummary={showShotSummary}
+          returnTo={returnTo}
         />
       ))}
     </div>

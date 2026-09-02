@@ -8,6 +8,7 @@ export default function PhotoCard({
   photo,
   fromPriceGBP,
   showShotSummary,
+  returnTo,
 }: {
   photo: AstroPhotoSummary;
   /** Cheapest active print size, in pence. Pass this from any page that
@@ -22,6 +23,11 @@ export default function PhotoCard({
    * a purchase decision — turns it on. Silently omitted for single-exposure
    * shots (aurora, star trails) that have no sub/exposure data to show. */
   showShotSummary?: boolean;
+  /** Where this card's own list actually lives — e.g. "/prints", or
+   * "/gallery?prints=true" when reached through the gallery's own filter —
+   * so the detail page's back link returns here instead of always falling
+   * back to the plain, unfiltered /gallery. See GalleryBackLink. */
+  returnTo?: string;
 }) {
   const dims = photo.mainImage.dimensions;
   const width = dims?.width ?? 1200;
@@ -30,10 +36,13 @@ export default function PhotoCard({
   const shotSummary =
     showShotSummary && photo.shotDetails ? formatShotSummary(photo.shotDetails) : undefined;
   const showPrintBadge = photo.availableAsPrint && typeof fromPriceGBP === "number";
+  const href = returnTo
+    ? `/gallery/${photo.slug.current}?from=${encodeURIComponent(returnTo)}`
+    : `/gallery/${photo.slug.current}`;
 
   return (
     <Link
-      href={`/gallery/${photo.slug.current}`}
+      href={href}
       data-photo-slug={photo.slug.current}
       className="group relative mb-4 block break-inside-avoid overflow-hidden border border-void-700 bg-void-900"
     >

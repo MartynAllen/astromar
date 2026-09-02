@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import PhotoDetail from "@/components/gallery/PhotoDetail";
 import CheckoutStatusBanner from "@/components/gallery/CheckoutStatusBanner";
+import GalleryBackLink from "@/components/gallery/GalleryBackLink";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BackLink from "@/components/BackLink";
@@ -66,7 +67,12 @@ export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
           { name: photo.title, path: `/gallery/${slug}` },
         ]}
       />
-      <BackLink href="/gallery" label="Gallery" />
+      {/* Returns to wherever the visitor actually came from — /prints, or a
+          filtered /gallery?... — instead of always the plain, unfiltered
+          gallery. See GalleryBackLink for why this needs to be client-side. */}
+      <Suspense fallback={<BackLink href="/gallery" label="Gallery" />}>
+        <GalleryBackLink />
+      </Suspense>
 
       <div className="mt-4">
         <Suspense>

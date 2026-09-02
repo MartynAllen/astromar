@@ -26,6 +26,19 @@ const WATERMARK_PATTERN = `data:image/svg+xml,${encodeURIComponent(
     "</svg>",
 )}`;
 
+// Procedural grain for the moulding — a flat fill reads as a coloured
+// plastic strip, not a physical material. feTurbulence generates the noise
+// so this needs no external texture asset; blended at low opacity with
+// mix-blend-mode below so it tints whatever frame colour is underneath
+// rather than imposing its own.
+const FRAME_GRAIN = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">' +
+    '<filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.9" ' +
+    'numOctaves="2" seed="7" stitchTiles="stitch"/>' +
+    '<feColorMatrix type="saturate" values="0"/></filter>' +
+    '<rect width="100%" height="100%" filter="url(#g)"/></svg>',
+)}`;
+
 function QuickViewModal({
   photo,
   product,
@@ -115,81 +128,103 @@ function QuickViewModal({
       </button>
 
       <div
-        className="flex max-w-lg flex-col items-center"
+        className="relative flex max-w-lg flex-col items-center"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* A flat black modal background swallows a drop shadow completely —
+            real frame mockups (and real gallery walls) always sit against
+            something a shade lighter than the frame's own shadow, or the
+            "floating off the wall" depth cue this is going for is invisible.
+            A soft radial glow behind the frame stands in for that, styled
+            like a gallery spotlight rather than a plain wall to fit the
+            site's own dark theme. */}
+        {framed && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-16 -z-10"
+            style={{
+              background: "radial-gradient(ellipse 60% 55% at 50% 45%, rgba(255,255,255,0.10) 0%, transparent 70%)",
+            }}
+          />
+        )}
         {/* Approximate preview only — a CSS mockup, not a real product
             photo, built from what's already on hand rather than needing
             external mockup assets. The moulding colour is exact (Prodigi's
-            own 8 options), and the mat now follows their real mount-width
-            spec (see matWidthIn) rather than just being a flat colour
-            border with no mat at all. Still an approximation: no true
-            moulding profile/texture, and the mat is always their default
-            off-white rather than a colour choice. */}
+            own 8 options), the mat follows their real mount-width spec (see
+            matWidthIn), and the moulding gets a procedural grain rather than
+            a flat fill. Still an approximation: no true moulding profile,
+            and the mat is always their default off-white rather than a
+            colour choice.
+            The moulding is padding + background, not a CSS border — a
+            border paints opaquely over its element's own background, so a
+            border-based moulding couldn't actually show the grain texture
+            sitting on that same background underneath it. */}
         <div
-          className={
-            framed
-              ? "w-full max-w-md bg-void-950 p-4 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]"
-              : "w-full max-w-md"
-          }
+          className={framed ? "w-full max-w-md p-3.5 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]" : "w-full max-w-md"}
           style={
             framed
               ? {
-                  border: `14px solid ${swatch}`,
-                  // A flat border reads as a coloured line, not moulding —
-                  // this fakes a bevelled profile catching the light along
-                  // two edges, same trick real frame mockups use.
+                  backgroundColor: swatch,
+                  backgroundImage: `url("${FRAME_GRAIN}")`,
+                  backgroundBlendMode: "overlay",
+                  // Fakes a bevelled moulding profile catching the light
+                  // along two edges — the same trick real frame mockups use
+                  // in place of an actual 3D profile.
                   boxShadow:
                     "inset 2px 2px 0 rgba(255,255,255,0.14), inset -2px -2px 0 rgba(0,0,0,0.4)",
                 }
               : undefined
           }
         >
-          <div
-            className={`relative w-full overflow-hidden ${framed ? "border border-void-800" : "border border-void-700"}`}
-            style={{ aspectRatio, containerType: "size" }}
-          >
-            <Image
-              src={previewUrl}
-              alt={photo.caption || photo.title}
-              fill
-              sizes="(min-width: 640px) 448px, 90vw"
-              className="object-cover"
-              draggable={false}
-              onContextMenu={(e) => e.preventDefault()}
-            />
+          {/* The recessed rabbet where glazing actually sits, a shade below
+              the moulding's own surface — real frames aren't flush here. */}
+          <div className={framed ? "bg-void-950 p-2.5" : undefined}>
             <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 select-none"
-              style={{
-                backgroundImage: `url("${WATERMARK_PATTERN}")`,
-                backgroundRepeat: "repeat",
-                backgroundSize: "182px 105px",
-              }}
-            />
-            {framed && (
+              className={`relative w-full overflow-hidden ${framed ? "border border-void-800" : "border border-void-700"}`}
+              style={{ aspectRatio, containerType: "size" }}
+            >
+              <Image
+                src={previewUrl}
+                alt={photo.caption || photo.title}
+                fill
+                sizes="(min-width: 640px) 448px, 90vw"
+                className="object-cover"
+                draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
+              />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 select-none"
+                style={{
+                  backgroundImage: `url("${WATERMARK_PATTERN}")`,
+                  backgroundRepeat: "repeat",
+                  backgroundSize: "182px 105px",
+                }}
+              />
+              {framed && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    borderStyle: "solid",
+                    borderColor: "#f4f1ea",
+                    borderWidth: `${matPercentV}cqh ${matPercentH}cqw`,
+                    boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.3)",
+                  }}
+                />
+              )}
+              {/* Soft diagonal sheen, suggesting the glazing every Prodigi
+                  frame ships with — real glass/acrylic reflects, a flat
+                  photo print doesn't. */}
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
                 style={{
-                  borderStyle: "solid",
-                  borderColor: "#f4f1ea",
-                  borderWidth: `${matPercentV}cqh ${matPercentH}cqw`,
-                  boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.3)",
+                  background:
+                    "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 22%, transparent 45%)",
                 }}
               />
-            )}
-            {/* Soft diagonal sheen, suggesting the glazing every Prodigi
-                frame ships with — real glass/acrylic reflects, a flat
-                photo print doesn't. */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 22%, transparent 45%)",
-              }}
-            />
+            </div>
           </div>
         </div>
         <p className="mt-4 text-center text-sm text-star-500">

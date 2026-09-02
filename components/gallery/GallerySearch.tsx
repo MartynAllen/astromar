@@ -52,11 +52,21 @@ export default function GallerySearch({
   fromPriceGBP?: number;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const initialCategory = useInitialCategory();
   const initialPrintsOnly = useInitialPrintsOnly();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<PhotoCategory | undefined>(initialCategory);
   const [printsOnly, setPrintsOnly] = useState(initialPrintsOnly);
+
+  // Kept in sync with the address bar by updateUrl() below (category/prints
+  // only — the free-text query box is deliberately not persisted there), so
+  // reading it straight back gives each card exactly the filtered URL a
+  // "back" from the detail page should return to. undefined when there's no
+  // filter active — plain /gallery is already the detail page's own
+  // fallback, no need to say so explicitly in every card's URL.
+  const qs = searchParams.toString();
+  const returnTo = qs ? `/gallery?${qs}` : undefined;
 
   const filtered = useMemo(() => {
     return photos.filter((photo) => {
@@ -138,7 +148,7 @@ export default function GallerySearch({
       )}
 
       <div className="mt-6">
-        <PhotoGrid photos={filtered} fromPriceGBP={fromPriceGBP} />
+        <PhotoGrid photos={filtered} fromPriceGBP={fromPriceGBP} returnTo={returnTo} />
       </div>
     </div>
   );
