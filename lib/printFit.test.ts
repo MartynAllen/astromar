@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { bestFitProductId, cropRatioCss, effectiveAspectRatio, retainedFraction } from "./printFit";
+import { bestFitProductId, cropRatioCss, effectiveAspectRatio, rawAspectRatio, retainedFraction } from "./printFit";
 
 // The site's real catalog as of the size-range expansion (see printProduct
 // docs in Sanity) — kept inline rather than imported so this test doesn't
@@ -61,6 +61,18 @@ test("bestFitProductId picks the size closest to the source's own shape", () => 
   // away, even though 8x10 looks "more square" by its own catalogued shape.
   const landscapeSource = { mainImage: { dimensions: { width: 6000, height: 4000 } } } as never;
   assert.equal(bestFitProductId(PRODUCTS, landscapeSource), "20x28");
+});
+
+test("rawAspectRatio ignores printRotation, unlike effectiveAspectRatio", () => {
+  // Andromeda: landscape asset, printRotation: 90 makes effectiveAspectRatio
+  // say portrait (for the real order), but rawAspectRatio must still say
+  // landscape (for the Quick View preview, kept matching the gallery page).
+  const photo = {
+    mainImage: { dimensions: { width: 8192, height: 5469 } },
+    printRotation: 90,
+  } as never;
+  assert.ok(rawAspectRatio(photo) > 1, "rawAspectRatio should stay landscape");
+  assert.ok(effectiveAspectRatio(photo) < 1, "effectiveAspectRatio should still flip to portrait");
 });
 
 test("bestFitProductId picks the size exactly matching a portrait source", () => {

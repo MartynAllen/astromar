@@ -27,6 +27,22 @@ export function effectiveAspectRatio(photo: PhotoForFit): number {
   return width / height;
 }
 
+/**
+ * width/height of the photo exactly as it's shown everywhere else on the
+ * site (gallery grid, detail hero) — deliberately ignoring printRotation,
+ * unlike effectiveAspectRatio above. Used only for the Quick View preview's
+ * own crop, kept visually consistent with the gallery page by request, even
+ * though the actual order (effectiveAspectRatio, checkout's imageUrl) may
+ * still rotate the submitted image to avoid losing the edges of a
+ * diagonally-oriented target. This is a deliberate, known mismatch — see
+ * BuyPrintPanel's QuickViewModal for where it's surfaced to the customer.
+ */
+export function rawAspectRatio(photo: PhotoForFit): number {
+  const dims = photo.mainImage.dimensions;
+  if (!dims?.width || !dims?.height) return 1;
+  return dims.width / dims.height;
+}
+
 /** The crop's own width/height ratio, oriented to match the source photo
  * rather than always the portrait shape the size is catalogued as. */
 export function cropRatio(product: ProductShape, sourceIsLandscape: boolean): number {

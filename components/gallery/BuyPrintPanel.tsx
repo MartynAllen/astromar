@@ -6,7 +6,7 @@ import Image from "next/image";
 import { urlFor } from "@/sanity/image";
 import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
 import { FRAME_COLORS, DEFAULT_FRAME_COLOR, frameColorLabel, matWidthIn } from "@/lib/printFrameColors";
-import { cropRatioCss, effectiveAspectRatio, retainedFraction } from "@/lib/printFit";
+import { cropRatioCss, effectiveAspectRatio, rawAspectRatio, retainedFraction } from "@/lib/printFit";
 
 function formatGBP(pence: number) {
   return `£${(pence / 100).toFixed(2)}`;
@@ -69,7 +69,15 @@ function QuickViewModal({
   // catalog's portrait-ish shape (confirmed via their docs) — so a
   // landscape source (e.g. a wide star-trail shot) gets cropped landscape,
   // not squeezed into a portrait crop that throws away most of the frame.
-  const sourceIsLandscape = effectiveAspectRatio(photo) > 1;
+  //
+  // rawAspectRatio, not effectiveAspectRatio — by request, this preview is
+  // kept visually consistent with how the photo looks on the gallery page,
+  // even for a photo like Andromeda where the real order (see previewUrl
+  // and checkout's imageUrl) rotates the submitted image to keep the whole
+  // diagonal galaxy in frame. That's a deliberate, known mismatch: this
+  // preview no longer represents the true print orientation for a rotated
+  // photo — see the notice rendered below the frame for exactly that case.
+  const sourceIsLandscape = rawAspectRatio(photo) > 1;
   const aspectRatio = cropRatioCss(product, sourceIsLandscape);
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -84,17 +92,16 @@ function QuickViewModal({
     };
   }, [onClose]);
 
-  // Must match the rotation checkout actually sends to Prodigi (see
-  // app/api/checkout/route.ts) — otherwise this preview would show a crop
-  // the real print doesn't match, which is worse than not rotating at all.
+  // Deliberately NOT applying photo.printRotation here (unlike checkout's
+  // imageUrl, which still does) — by request, this preview always shows the
+  // photo the same way round as the gallery page, even when the real print
+  // will be rotated. See the sourceIsLandscape comment above for the
+  // tradeoff this accepts.
   //
   // photo.mainImage, not printMasterImage — the watermarked public copy,
   // same one used everywhere else on the site. printMasterImage (the clean
   // original) never reaches the browser before checkout, on purpose.
-  const previewBuilder = urlFor(photo.mainImage).width(900);
-  const previewUrl = (
-    photo.printRotation ? previewBuilder.orientation(photo.printRotation) : previewBuilder
-  ).url();
+  const previewUrl = urlFor(photo.mainImage).width(900).url();
 
   // Real Prodigi Classic Frame spec, not a guess (see matWidthIn) — every
   // framed print gets a conservation-grade mount between the glazing and
@@ -234,6 +241,12 @@ function QuickViewModal({
         <p className="mt-1 text-center text-xs text-star-700">
           Crop approximates this size&apos;s actual print area — framing, mat and colour may vary slightly.
         </p>
+        {photo.printRotation && (
+          <p className="mt-1 max-w-sm text-center text-xs text-star-700">
+            Shown here as it appears on the site — the print itself is rotated to keep the full frame, so it
+            may arrive turned compared to this preview.
+          </p>
+        )}
       </div>
     </div>
   );
