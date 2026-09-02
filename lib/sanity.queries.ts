@@ -50,6 +50,9 @@ export interface AstroPhotoDetail extends AstroPhotoSummary {
   story?: unknown[];
   gearNotes?: string;
   processingTools?: ProcessingTool[];
+  // Rotates the print/Quick-View crop only, never the gallery image — see
+  // the schema field's own description for why some targets need this.
+  printRotation?: 90 | 180 | 270;
   videoUrl?: string;
   // Clean, unwatermarked original — populated by the import pipeline,
   // read only by the checkout route for print orders. Never rendered
@@ -138,7 +141,7 @@ export async function getPhotoBySlug(
 ): Promise<AstroPhotoDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "astroPhoto" && slug.current == $slug][0]{
-      _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, processingTools, seo,
+      _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, processingTools, printRotation, seo,
       "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions},
       "printMasterImage": printMasterImage{..., "dimensions": asset->metadata.dimensions},
       "videoUrl": video.asset->url

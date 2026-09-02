@@ -49,7 +49,13 @@ function QuickViewModal({
     };
   }, [onClose]);
 
-  const previewUrl = urlFor(photo.mainImage).width(900).url();
+  // Must match the rotation checkout actually sends to Prodigi (see
+  // app/api/checkout/route.ts) — otherwise this preview would show a crop
+  // the real print doesn't match, which is worse than not rotating at all.
+  const previewBuilder = urlFor(photo.mainImage).width(900);
+  const previewUrl = (
+    photo.printRotation ? previewBuilder.orientation(photo.printRotation) : previewBuilder
+  ).url();
 
   return (
     <div

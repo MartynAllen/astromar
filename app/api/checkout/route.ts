@@ -141,7 +141,18 @@ export async function POST(request: Request) {
   // exists, which is what Prodigi's print quality actually needs. Also used
   // as the Stripe line item's thumbnail, which is correct: it's showing the
   // customer what they're actually about to receive, unwatermarked.
-  const imageUrl = urlFor(photo.printMasterImage).width(6000).format("jpg").quality(90).url();
+  // photo.printRotation (see astroPhoto schema) is applied here too — it
+  // must match BuyPrintPanel's Quick View preview exactly, since Prodigi
+  // crops this exact rotated image to the ordered SKU's shape. Rotating
+  // only the preview and not this would mean the physical print doesn't
+  // match what the customer was shown before paying.
+  const printMasterBuilder = urlFor(photo.printMasterImage)
+    .width(6000)
+    .format("jpg")
+    .quality(90);
+  const imageUrl = (
+    photo.printRotation ? printMasterBuilder.orientation(photo.printRotation) : printMasterBuilder
+  ).url();
 
   try {
     const session = await stripe.checkout.sessions.create({

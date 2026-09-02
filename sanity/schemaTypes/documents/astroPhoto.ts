@@ -63,6 +63,14 @@ export default defineType({
       options: { metadata: ["blurhash"] },
     }),
     defineField({
+      name: "printRotation",
+      title: "Print rotation",
+      type: "number",
+      options: { list: [90, 180, 270] },
+      description:
+        "Rotates the print/Quick-View crop only — the gallery image itself is untouched. Print sizes here are all portrait-ish (ratio 0.71-0.8), so a diagonally-oriented target (e.g. Andromeda's long axis running corner-to-corner in a landscape frame) can lose its outer edges to a plain centre-crop; rotating so the target's long axis runs closer to vertical fixes that. Leave empty for targets that don't need it.",
+    }),
+    defineField({
       name: "video",
       title: "Video",
       type: "file",
