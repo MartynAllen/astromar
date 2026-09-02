@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
 import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
+import { FRAME_COLORS, DEFAULT_FRAME_COLOR, frameColorLabel } from "@/lib/printFrameColors";
 
 function formatGBP(pence: number) {
   return `£${(pence / 100).toFixed(2)}`;
@@ -14,13 +15,16 @@ function QuickViewModal({
   photo,
   product,
   framed,
+  frameColor,
   onClose,
 }: {
   photo: AstroPhotoDetail;
   product: PrintProduct;
   framed: boolean;
+  frameColor: string;
   onClose: () => void;
 }) {
+  const swatch = FRAME_COLORS.find((c) => c.value === frameColor)?.swatch ?? "#0a0a0a";
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -41,7 +45,7 @@ function QuickViewModal({
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-950/95 p-6 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label={`Preview — ${photo.title}, ${product.title}${framed ? ", framed" : ""}`}
+      aria-label={`Preview — ${photo.title}, ${product.title}${framed ? `, framed (${frameColorLabel(frameColor)})` : ""}`}
       onClick={onClose}
     >
       <button
@@ -69,7 +73,7 @@ function QuickViewModal({
               ? "bg-void-950 p-4 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]"
               : ""
           }
-          style={framed ? { border: "14px solid #0a0a0a" } : undefined}
+          style={framed ? { border: `14px solid ${swatch}` } : undefined}
         >
           <Image
             src={previewUrl}
@@ -81,7 +85,7 @@ function QuickViewModal({
         </div>
         <p className="mt-4 text-center text-sm text-star-500">
           {photo.title} — {product.title}
-          {framed ? ", framed (black)" : ""}
+          {framed ? `, framed (${frameColorLabel(frameColor)})` : ""}
         </p>
         <p className="mt-1 text-center text-xs text-star-700">
           Approximate preview — actual framing, mat and colour may vary slightly.
@@ -100,6 +104,7 @@ export default function BuyPrintPanel({
 }) {
   const [selectedId, setSelectedId] = useState(products[0]?._id);
   const [framed, setFramed] = useState(false);
+  const [frameColor, setFrameColor] = useState(DEFAULT_FRAME_COLOR);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -132,6 +137,7 @@ export default function BuyPrintPanel({
           photoSlug: photo.slug.current,
           printProductId: selected._id,
           framed: framed && canFrame,
+          ...(framed && canFrame ? { frameColor } : {}),
         }),
       });
       const data = await res.json();
@@ -182,15 +188,49 @@ export default function BuyPrintPanel({
       )}
 
       {canFrame && (
-        <label className="mt-3 flex items-center gap-2 text-sm text-star-300">
-          <input
-            type="checkbox"
-            checked={framed}
-            onChange={(e) => setFramed(e.target.checked)}
-            className="h-4 w-4 accent-nebula-rose-500"
-          />
-          Add framing (black) — +{formatGBP(selected!.framingAddonPriceGBP ?? 0)}
-        </label>
+        <>
+          <label className="mt-3 flex items-center gap-2 text-sm text-star-300">
+            <input
+              type="checkbox"
+              checked={framed}
+              onChange={(e) => setFramed(e.target.checked)}
+              className="h-4 w-4 accent-nebula-rose-500"
+            />
+            Add framing — +{formatGBP(selected!.framingAddonPriceGBP ?? 0)}
+          </label>
+
+          {framed && (
+            <div className="mt-3">
+              <p className="text-xs uppercase tracking-widest text-star-500">Frame colour</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {FRAME_COLORS.map((color) => {
+                  const isActive = color.value === frameColor;
+                  return (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => setFrameColor(color.value)}
+                      aria-pressed={isActive}
+                      title={color.label}
+                      className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                        isActive
+                          ? "border-nebula-rose-500 bg-nebula-rose-500/10 text-nebula-rose-400"
+                          : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
+                      }`}
+                    >
+                      <span
+                        className="h-3 w-3 flex-none rounded-full border border-void-600"
+                        style={{ backgroundColor: color.swatch }}
+                        aria-hidden="true"
+                      />
+                      {color.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {error && (
@@ -230,6 +270,7 @@ export default function BuyPrintPanel({
           photo={photo}
           product={selected}
           framed={framed && canFrame}
+          frameColor={frameColor}
           onClose={() => setPreviewOpen(false)}
         />
       )}

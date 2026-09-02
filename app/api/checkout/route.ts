@@ -3,6 +3,7 @@ import { stripe, stripeConfigured } from "@/lib/stripe";
 import { getPhotoBySlug, getPrintProducts } from "@/lib/sanity.queries";
 import { urlFor } from "@/sanity/image";
 import { SITE_URL } from "@/lib/seo";
+import { frameColorLabel, isValidFrameColor } from "@/lib/printFrameColors";
 
 const RATE_LIMIT_WINDOW_MS = 60_000;
 // Tighter than /api/geocode — this triggers a real Stripe API call (and,
@@ -62,10 +63,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { photoSlug, printProductId, framed } = (body ?? {}) as {
+  const { photoSlug, printProductId, framed, frameColor } = (body ?? {}) as {
     photoSlug?: unknown;
     printProductId?: unknown;
     framed?: unknown;
+    frameColor?: unknown;
   };
 
   if (
@@ -81,6 +83,13 @@ export async function POST(request: Request) {
       { error: "Missing or invalid photoSlug/printProductId/framed" },
       { status: 400 },
     );
+  }
+
+  // Only meaningful (and required) when framed — an unframed print has no
+  // colour attribute at all. Validated against the same real Prodigi-backed
+  // list the buy panel renders from, never trusted as freeform input.
+  if (framed && !isValidFrameColor(frameColor)) {
+    return NextResponse.json({ error: "Missing or invalid frameColor" }, { status: 400 });
   }
 
   const photo = await getPhotoBySlug(photoSlug);
@@ -120,7 +129,7 @@ export async function POST(request: Request) {
     }
     sku = product.framedSku;
     priceGBP = product.unframedPriceGBP + product.framingAddonPriceGBP;
-    productLabel = `${product.title} (Framed)`;
+    productLabel = `${product.title} (Framed — ${frameColorLabel(frameColor as string)})`;
   } else {
     sku = product.unframedSku;
     priceGBP = product.unframedPriceGBP;
@@ -160,6 +169,10 @@ export async function POST(request: Request) {
           photoSlug,
           sku,
           imageUrl,
+          // Only set for framed orders — the webhook falls back to
+          // DEFAULT_FRAME_COLOR for unframed SKUs, which don't take a
+          // colour attribute at all, so this is never actually read there.
+          ...(framed ? { frameColor: frameColor as string } : {}),
           prodigiStatus: "pending",
         },
       },

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe, stripeConfigured } from "@/lib/stripe";
+import { DEFAULT_FRAME_COLOR, isValidFrameColor } from "@/lib/printFrameColors";
 
 const PRODIGI_API_BASE_URL = process.env.PRODIGI_API_BASE_URL;
 const PRODIGI_API_KEY = process.env.PRODIGI_API_KEY;
@@ -31,6 +32,7 @@ async function placeProdigiOrder(params: {
   };
   sku: string;
   imageUrl: string;
+  frameColor: string;
 }): Promise<ProdigiOrderResult | ProdigiOrderFailure> {
   if (!PRODIGI_API_BASE_URL || !PRODIGI_API_KEY) {
     return { ok: false, error: "Prodigi not configured" };
@@ -68,9 +70,10 @@ async function placeProdigiOrder(params: {
             // Prodigi's Classic Framed Print line (GLOBAL-CFPM-*) requires a
             // frame color attribute — confirmed via a real sandbox order
             // that came back 400 ValidationFailed/MissingRequiredAttributes
-            // without it. v1 launches black-only per the plan (frame color
-            // isn't yet a choice printProduct or the buy panel exposes).
-            ...(params.sku.includes("CFPM") ? { attributes: { color: "black" } } : {}),
+            // without it. The buy panel now offers a real colour choice
+            // (see lib/printFrameColors.ts); params.frameColor carries it
+            // through from checkout's Stripe metadata.
+            ...(params.sku.includes("CFPM") ? { attributes: { color: params.frameColor } } : {}),
           },
         ],
       }),
@@ -124,6 +127,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   const sku = paymentIntent.metadata.sku;
   const imageUrl = paymentIntent.metadata.imageUrl;
+  // Set by checkout only for framed orders; falls back defensively for any
+  // in-flight session created before this field existed rather than failing
+  // an otherwise-good order over a missing colour.
+  const frameColor = isValidFrameColor(paymentIntent.metadata.frameColor)
+    ? paymentIntent.metadata.frameColor
+    : DEFAULT_FRAME_COLOR;
   const shipping = session.collected_information?.shipping_details;
   const addressLine1 = shipping?.address.line1;
   const addressCountry = shipping?.address.country;
@@ -153,6 +162,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     },
     sku,
     imageUrl,
+    frameColor,
   });
 
   if (result.ok) {
