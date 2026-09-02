@@ -25,6 +25,17 @@ function QuickViewModal({
   onClose: () => void;
 }) {
   const swatch = FRAME_COLORS.find((c) => c.value === frameColor)?.swatch ?? "#0a0a0a";
+  // Prodigi orders every print with sizing: "fillPrintArea" — a cover-crop
+  // to whatever aspect ratio the chosen size actually is, not the source
+  // photo's own ratio. None of the site's print sizes (0.71-0.8) match a
+  // typical sensor's native ratio, so real cropping happens on every
+  // order regardless of size — showing the full uncropped photo here
+  // regardless of which size is selected would misrepresent what actually
+  // arrives. object-cover + this exact ratio approximates Prodigi's own
+  // crop (a plain geometric centre-crop, since no crop offset is sent to
+  // their API) rather than a nicer hotspot-aware one this site could
+  // render but Prodigi never actually applies.
+  const aspectRatio = `${product.widthIn} / ${product.heightIn}`;
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -66,29 +77,36 @@ function QuickViewModal({
         {/* Approximate preview only — a CSS mat/frame treatment, not a real
             product photo, so it's built from what's already on hand rather
             than needing external mockup assets. Border width is scaled
-            roughly toward the print's own aspect ratio, not exact. */}
+            roughly toward the print's own aspect ratio, not exact. The
+            image itself IS cropped to the real print ratio, though —
+            see the aspectRatio comment above. */}
         <div
           className={
             framed
-              ? "bg-void-950 p-4 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]"
-              : ""
+              ? "w-full max-w-md bg-void-950 p-4 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]"
+              : "w-full max-w-md"
           }
           style={framed ? { border: `14px solid ${swatch}` } : undefined}
         >
-          <Image
-            src={previewUrl}
-            alt={photo.caption || photo.title}
-            width={900}
-            height={900}
-            className={`h-auto max-h-[70vh] w-auto ${framed ? "border border-void-800" : "border border-void-700"}`}
-          />
+          <div
+            className={`relative w-full overflow-hidden ${framed ? "border border-void-800" : "border border-void-700"}`}
+            style={{ aspectRatio }}
+          >
+            <Image
+              src={previewUrl}
+              alt={photo.caption || photo.title}
+              fill
+              sizes="(min-width: 640px) 448px, 90vw"
+              className="object-cover"
+            />
+          </div>
         </div>
         <p className="mt-4 text-center text-sm text-star-500">
           {photo.title} — {product.title}
           {framed ? `, framed (${frameColorLabel(frameColor)})` : ""}
         </p>
         <p className="mt-1 text-center text-xs text-star-700">
-          Approximate preview — actual framing, mat and colour may vary slightly.
+          Crop approximates this size&apos;s actual print area — framing, mat and colour may vary slightly.
         </p>
       </div>
     </div>

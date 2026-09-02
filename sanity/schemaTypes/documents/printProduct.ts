@@ -17,6 +17,21 @@ export default defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: "widthIn",
+      title: "Width (inches)",
+      type: "number",
+      description:
+        "The short edge, in the same units as the title — used to crop the Quick View preview to the print's real aspect ratio. Not just a display value.",
+      validation: (r) => r.required().positive(),
+    }),
+    defineField({
+      name: "heightIn",
+      title: "Height (inches)",
+      type: "number",
+      description: "The long edge, matching widthIn.",
+      validation: (r) => r.required().positive(),
+    }),
+    defineField({
       name: "unframedSku",
       title: "Unframed Prodigi SKU",
       type: "string",
