@@ -25,7 +25,12 @@ export default function PhotoDetail({
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-      <div className="overflow-hidden border border-void-700 bg-void-900">
+      {/* lg:self-start: grid items stretch to the row's height by default,
+          and the right-hand column (title, buy panel, shot details) is
+          almost always taller than the image itself — without this, the
+          image box stretches to match and leaves its own bg-void-900
+          showing as empty space below the image. */}
+      <div className="overflow-hidden border border-void-700 bg-void-900 lg:self-start">
         {photo.videoUrl ? (
           <video
             src={photo.videoUrl}
