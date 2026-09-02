@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
 import ShotDetailsPanel from "./ShotDetailsPanel";
+import ProcessingPanel from "./ProcessingPanel";
 import BuyPrintPanel from "./BuyPrintPanel";
 import PortableTextContent from "@/components/PortableTextContent";
 import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
@@ -64,6 +65,11 @@ export default function PhotoDetail({
         <div className="mt-4">
           <ShotDetailsPanel details={photo.shotDetails} />
         </div>
+        {photo.processingTools && photo.processingTools.length > 0 && (
+          <div className="mt-4">
+            <ProcessingPanel tools={photo.processingTools} />
+          </div>
+        )}
         {photo.gearNotes && (
           <p className="mt-4 text-sm text-star-500">
             <span className="text-star-300">Gear notes: </span>

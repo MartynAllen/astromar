@@ -41,9 +41,15 @@ export interface AstroPhotoSummary {
   shotDetails?: ShotDetails;
 }
 
+export interface ProcessingTool {
+  tool: string;
+  role?: string;
+}
+
 export interface AstroPhotoDetail extends AstroPhotoSummary {
   story?: unknown[];
   gearNotes?: string;
+  processingTools?: ProcessingTool[];
   videoUrl?: string;
   // Clean, unwatermarked original — populated by the import pipeline,
   // read only by the checkout route for print orders. Never rendered
@@ -132,7 +138,7 @@ export async function getPhotoBySlug(
 ): Promise<AstroPhotoDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "astroPhoto" && slug.current == $slug][0]{
-      _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, seo,
+      _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, processingTools, seo,
       "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions},
       "printMasterImage": printMasterImage{..., "dimensions": asset->metadata.dimensions},
       "videoUrl": video.asset->url

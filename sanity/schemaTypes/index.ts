@@ -19,6 +19,7 @@ import reviewGalleryImage from "./objects/reviewGalleryImage";
 import printableAccessory from "./objects/printableAccessory";
 import recommendedAccessory from "./objects/recommendedAccessory";
 import productTier from "./objects/productTier";
+import processingTool from "./objects/processingTool";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -42,5 +43,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     printableAccessory,
     recommendedAccessory,
     productTier,
+    processingTool,
   ],
 };

@@ -107,6 +107,13 @@ export default defineType({
       components: { input: ShotDetailsAutofill },
     }),
     defineField({
+      name: "processingTools",
+      title: "Processing tools",
+      type: "array",
+      of: [{ type: "processingTool" }],
+      description: "What this shot was actually processed with, e.g. stacked in Siril, finished in Lightroom.",
+    }),
+    defineField({
       name: "featured",
       title: "Featured on home page",
       type: "boolean",
