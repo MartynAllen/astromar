@@ -21,10 +21,10 @@ export default function RecommendedAccessories({
           <div key={accessory.affiliateLink.url} className="border border-void-700 bg-void-900 p-4">
             <p className="font-mono uppercase tracking-wide text-star-100">{accessory.name}</p>
             {accessory.description && (
-              <p className="mt-1.5 text-sm text-star-300">{accessory.description}</p>
+              <p className="mt-1.5 break-words text-sm text-star-300">{accessory.description}</p>
             )}
             {accessory.compatibilityNote && (
-              <p className="mt-1.5 text-xs text-star-500">{accessory.compatibilityNote}</p>
+              <p className="mt-1.5 break-words text-xs text-star-500">{accessory.compatibilityNote}</p>
             )}
             <div className="mt-3">
               <AffiliateButton link={accessory.affiliateLink} />

@@ -12,10 +12,10 @@ function ProductCard({ item }: { item: RecommendedAccessory }) {
     <div className="border border-void-700 bg-void-900 p-4">
       <p className="font-mono uppercase tracking-wide text-star-100">{item.name}</p>
       {item.description && (
-        <p className="mt-1.5 text-sm text-star-300">{item.description}</p>
+        <p className="mt-1.5 break-words text-sm text-star-300">{item.description}</p>
       )}
       {item.compatibilityNote && (
-        <p className="mt-1.5 text-xs text-star-500">{item.compatibilityNote}</p>
+        <p className="mt-1.5 break-words text-xs text-star-500">{item.compatibilityNote}</p>
       )}
       <div className="mt-3">
         <AffiliateButton link={item.affiliateLink} />
@@ -39,7 +39,7 @@ export default function ProductTierBlock({ value }: { value: ProductTierValue })
       <h3 className="font-mono text-2xl uppercase tracking-wide text-star-100">
         {value.tierTitle}
       </h3>
-      {value.tierNote && <p className="mt-2 text-star-300">{value.tierNote}</p>}
+      {value.tierNote && <p className="mt-2 break-words text-star-300">{value.tierNote}</p>}
 
       {products.length > 0 ? (
         <div className="mt-5 grid gap-4 sm:grid-cols-2">

@@ -21,10 +21,10 @@ export default function PrintableAccessories({
           <div key={accessory.url} className="border border-void-700 bg-void-900 p-4">
             <p className="font-mono uppercase tracking-wide text-star-100">{accessory.name}</p>
             {accessory.notes && (
-              <p className="mt-1.5 text-sm text-star-300">{accessory.notes}</p>
+              <p className="mt-1.5 break-words text-sm text-star-300">{accessory.notes}</p>
             )}
             {accessory.designerCredit && (
-              <p className="mt-1.5 text-xs text-star-500">{accessory.designerCredit}</p>
+              <p className="mt-1.5 break-words text-xs text-star-500">{accessory.designerCredit}</p>
             )}
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
               <a
