@@ -75,6 +75,19 @@ test("rawAspectRatio ignores printRotation, unlike effectiveAspectRatio", () => 
   assert.ok(effectiveAspectRatio(photo) < 1, "effectiveAspectRatio should still flip to portrait");
 });
 
+test("effectiveAspectRatio and rawAspectRatio both apply printCrop, unlike printRotation", () => {
+  // A 3024x3632 (0.8326) source with a chunk trimmed off the top and
+  // bottom edges only — width untouched, height reduced, so the crop
+  // alone should push the ratio up (less portrait) on both functions.
+  const photo = {
+    mainImage: { dimensions: { width: 3024, height: 3632 } },
+    printCrop: { top: 0.09, bottom: 0.292 },
+  } as never;
+  const uncropped = 3024 / 3632;
+  assert.ok(rawAspectRatio(photo) > uncropped, "printCrop should be reflected in rawAspectRatio");
+  assert.ok(effectiveAspectRatio(photo) > uncropped, "printCrop should be reflected in effectiveAspectRatio");
+});
+
 test("bestFitProductId picks the size exactly matching a portrait source", () => {
   const portraitSource = { mainImage: { dimensions: { width: 4000, height: 5000 } } } as never; // 0.8
   assert.equal(bestFitProductId(PRODUCTS, portraitSource), "8x10");

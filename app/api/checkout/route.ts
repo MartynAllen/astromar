@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { getPhotoBySlug, getPrintProducts } from "@/lib/sanity.queries";
-import { urlFor } from "@/sanity/image";
+import { applyPrintCrop, urlFor } from "@/sanity/image";
 import { SITE_URL } from "@/lib/seo";
 import { frameColorLabel, isValidFrameColor } from "@/lib/printFrameColors";
 
@@ -141,12 +141,18 @@ export async function POST(request: Request) {
   // exists, which is what Prodigi's print quality actually needs. Also used
   // as the Stripe line item's thumbnail, which is correct: it's showing the
   // customer what they're actually about to receive, unwatermarked.
-  // photo.printRotation (see astroPhoto schema) is applied here too — it
-  // must match BuyPrintPanel's Quick View preview exactly, since Prodigi
-  // crops this exact rotated image to the ordered SKU's shape. Rotating
-  // only the preview and not this would mean the physical print doesn't
-  // match what the customer was shown before paying.
-  const printMasterBuilder = urlFor(photo.printMasterImage)
+  // photo.printCrop and photo.printRotation (see astroPhoto schema) are
+  // applied here too, in that order (rect() addresses the pre-rotation
+  // image) — printCrop must always match BuyPrintPanel's Quick View
+  // preview exactly, since it exists to exclude something genuinely
+  // unwanted from the frame. printRotation is a deliberate exception to
+  // that (see lib/printFit.ts's rawAspectRatio) but must still match what
+  // Prodigi actually crops this exact image to.
+  const printMasterBuilder = applyPrintCrop(
+    urlFor(photo.printMasterImage),
+    photo.printCrop,
+    photo.printMasterImage.dimensions,
+  )
     .width(6000)
     .format("jpg")
     .quality(90);

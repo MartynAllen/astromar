@@ -71,6 +71,19 @@ export default defineType({
         "Rotates the print/Quick-View crop only — the gallery image itself is untouched. Print sizes here are all portrait-ish (ratio 0.71-0.8), so a diagonally-oriented target (e.g. Andromeda's long axis running corner-to-corner in a landscape frame) can lose its outer edges to a plain centre-crop; rotating so the target's long axis runs closer to vertical fixes that. Leave empty for targets that don't need it.",
     }),
     defineField({
+      name: "printCrop",
+      title: "Print crop",
+      type: "object",
+      description:
+        "Trims a strip off one or more edges (fraction of that edge, 0-1) before the print/Quick-View crop runs — for excluding something in the raw frame a plain centre-crop wouldn't reliably avoid (a roofline caught in shot, a foreground object). Affects print orders and the Quick View preview only — the gallery image itself is untouched. Leave every field empty for photos that don't need it.",
+      fields: [
+        defineField({ name: "top", title: "Top", type: "number", validation: (r) => r.min(0).max(1) }),
+        defineField({ name: "bottom", title: "Bottom", type: "number", validation: (r) => r.min(0).max(1) }),
+        defineField({ name: "left", title: "Left", type: "number", validation: (r) => r.min(0).max(1) }),
+        defineField({ name: "right", title: "Right", type: "number", validation: (r) => r.min(0).max(1) }),
+      ],
+    }),
+    defineField({
       name: "video",
       title: "Video",
       type: "file",

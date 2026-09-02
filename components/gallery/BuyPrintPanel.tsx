@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { urlFor } from "@/sanity/image";
+import { applyPrintCrop, urlFor } from "@/sanity/image";
 import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
 import { FRAME_COLORS, DEFAULT_FRAME_COLOR, frameColorLabel, matWidthIn } from "@/lib/printFrameColors";
 import { cropRatioCss, effectiveAspectRatio, rawAspectRatio, retainedFraction } from "@/lib/printFit";
@@ -101,7 +101,17 @@ function QuickViewModal({
   // photo.mainImage, not printMasterImage — the watermarked public copy,
   // same one used everywhere else on the site. printMasterImage (the clean
   // original) never reaches the browser before checkout, on purpose.
-  const previewUrl = urlFor(photo.mainImage).width(900).url();
+  // printCrop, unlike printRotation above, is NOT a preview-only concern —
+  // it exists to exclude something genuinely unwanted from the frame (a
+  // roofline caught in shot, a foreground object), so unlike the deliberate
+  // preview/order mismatch above, this should always match the real print.
+  const previewUrl = applyPrintCrop(
+    urlFor(photo.mainImage),
+    photo.printCrop,
+    photo.mainImage.dimensions,
+  )
+    .width(900)
+    .url();
 
   // Real Prodigi Classic Frame spec, not a guess (see matWidthIn) — every
   // framed print gets a conservation-grade mount between the glazing and

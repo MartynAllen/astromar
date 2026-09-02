@@ -46,6 +46,13 @@ export interface ProcessingTool {
   role?: string;
 }
 
+export interface PrintCrop {
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+}
+
 export interface AstroPhotoDetail extends AstroPhotoSummary {
   story?: unknown[];
   gearNotes?: string;
@@ -53,6 +60,9 @@ export interface AstroPhotoDetail extends AstroPhotoSummary {
   // Rotates the print/Quick-View crop only, never the gallery image — see
   // the schema field's own description for why some targets need this.
   printRotation?: 90 | 180 | 270;
+  // Trims a strip off the raw frame before the print/Quick-View crop runs —
+  // see the schema field's own description for why some targets need this.
+  printCrop?: PrintCrop;
   videoUrl?: string;
   // Clean, unwatermarked original — populated by the import pipeline,
   // read only by the checkout route for print orders. Never rendered
@@ -141,7 +151,7 @@ export async function getPhotoBySlug(
 ): Promise<AstroPhotoDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "astroPhoto" && slug.current == $slug][0]{
-      _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, processingTools, printRotation, seo,
+      _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, story, gearNotes, processingTools, printRotation, printCrop, seo,
       "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions},
       "printMasterImage": printMasterImage{..., "dimensions": asset->metadata.dimensions},
       "videoUrl": video.asset->url
