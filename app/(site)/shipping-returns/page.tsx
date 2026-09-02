@@ -29,12 +29,12 @@ export default function ShippingReturnsPage() {
           <h2 className="font-mono text-xl uppercase tracking-wide text-star-100">
             Production &amp; delivery times
           </h2>
-          {/* TODO (Martyn): replace with real figures once confirmed — either
-              Prodigi's own published SLA for the products offered, or your
-              own observed turnaround. Don't publish a guess. */}
           <p className="mt-2">
-            [Placeholder — real production and delivery timeframes to be confirmed before this
-            page goes live.]
+            Prodigi&apos;s own turnaround is 24–72 hours to produce most prints at their UK lab —
+            occasionally up to a week for more complex framed or canvas pieces. Standard UK
+            shipping typically adds another 2–3 working days on top. All in, allow{" "}
+            <strong className="text-star-100">3–7 working days</strong> from order to delivery.
+            Shipping is currently UK-only.
           </p>
         </section>
 
@@ -43,10 +43,10 @@ export default function ShippingReturnsPage() {
             Cancellations
           </h2>
           <p className="mt-2">
-            Every print is made specifically for your order once it&apos;s placed. Personalised
-            and made-to-order goods are commonly exempt from the UK&apos;s standard 14-day
-            distance-selling cancellation right — if you need the exact, current wording for your
-            own terms, gov.uk is the authoritative source rather than this paragraph.
+            Every print is made specifically for your order, and production usually starts
+            within hours of checkout — so get in touch as soon as possible if you need to
+            cancel. If production hasn&apos;t started yet, it&apos;s usually no problem; once
+            it has, we may not be able to stop or refund it.
           </p>
         </section>
 
