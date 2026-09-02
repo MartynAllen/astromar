@@ -1,6 +1,7 @@
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
+import { isSafeHref } from "@/lib/safeUrl";
 import ProductTierBlock from "@/components/guide/ProductTierBlock";
 
 const components: PortableTextComponents = {
@@ -23,16 +24,23 @@ const components: PortableTextComponents = {
     ),
   },
   marks: {
-    link: ({ value, children }) => (
-      <a
-        href={value?.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-nebula-teal-400 underline decoration-nebula-teal-700 underline-offset-2 hover:text-nebula-teal-300"
-      >
-        {children}
-      </a>
-    ),
+    // Rich-text link hrefs are editor-entered free text, not a URL-typed
+    // Sanity field — isSafeHref rules out a javascript:/data: scheme
+    // executing on click. Renders as plain unlinked text rather than
+    // silently dropping the content the editor actually wrote.
+    link: ({ value, children }) =>
+      isSafeHref(value?.href) ? (
+        <a
+          href={value.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-nebula-teal-400 underline decoration-nebula-teal-700 underline-offset-2 hover:text-nebula-teal-300"
+        >
+          {children}
+        </a>
+      ) : (
+        <>{children}</>
+      ),
     strong: ({ children }) => (
       <strong className="text-star-100">{children}</strong>
     ),

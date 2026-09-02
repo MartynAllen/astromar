@@ -1,12 +1,16 @@
 import Link from "next/link";
 import { NAV_LINKS } from "@/lib/navigation";
 import { getSiteSettings } from "@/lib/sanity.queries";
+import { isSafeHref } from "@/lib/safeUrl";
 import Logo from "@/components/Logo";
 import MobileNav from "./MobileNav";
 
 export default async function Header() {
   const settings = await getSiteSettings().catch(() => null);
-  const shopUrl = settings?.shopUrl;
+  // shopUrl is a free-text Studio field, not URL-typed — isSafeHref rules
+  // out a stored javascript:/data: scheme executing on click.
+  const rawShopUrl = settings?.shopUrl;
+  const shopUrl = isSafeHref(rawShopUrl) ? rawShopUrl : undefined;
 
   return (
     <header className="sticky top-0 z-40 border-b border-void-700 bg-void-950/85 backdrop-blur">

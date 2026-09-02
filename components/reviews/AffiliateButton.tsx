@@ -1,6 +1,12 @@
 import type { AffiliateLink } from "@/lib/sanity.queries";
+import { isSafeHref } from "@/lib/safeUrl";
 
 export default function AffiliateButton({ link }: { link: AffiliateLink }) {
+  // Affiliate URLs are free-text Studio fields — rules out a stored
+  // javascript:/data: scheme executing on click. Not expected in practice,
+  // but cheap insurance against a compromised or careless edit.
+  if (!isSafeHref(link.url)) return null;
+
   return (
     <div>
       <a

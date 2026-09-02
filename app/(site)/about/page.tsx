@@ -9,6 +9,7 @@ import CategoryIcon from "@/components/about/CategoryIcon";
 import { urlFor, heroCropUrl } from "@/sanity/image";
 import { getAboutPage, getSiteSettings, type GearItem } from "@/lib/sanity.queries";
 import { SUPPORT_URL } from "@/lib/navigation";
+import { isSafeHref } from "@/lib/safeUrl";
 
 export const revalidate = 60;
 
@@ -41,7 +42,10 @@ export default async function AboutPage() {
     getAboutPage(),
     getSiteSettings().catch(() => null),
   ]);
-  const shopUrl = settings?.shopUrl;
+  // shopUrl is a free-text Studio field, not URL-typed — isSafeHref rules
+  // out a stored javascript:/data: scheme executing on click.
+  const rawShopUrl = settings?.shopUrl;
+  const shopUrl = isSafeHref(rawShopUrl) ? rawShopUrl : undefined;
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">

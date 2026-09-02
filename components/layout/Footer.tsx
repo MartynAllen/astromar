@@ -1,13 +1,19 @@
 import Link from "next/link";
 import { NAV_LINKS, LEGAL_LINKS, SUPPORT_URL } from "@/lib/navigation";
 import { getSiteSettings } from "@/lib/sanity.queries";
+import { isSafeHref } from "@/lib/safeUrl";
 
 export default async function Footer() {
   const settings = await getSiteSettings().catch(() => null);
   const siteName = settings?.siteName ?? "Astromar";
   const tagline = settings?.tagline ?? "Astronomy and astrophotography from a garden setup.";
-  const hasSocial = Boolean(settings?.socialLinks && settings.socialLinks.length > 0);
-  const shopUrl = settings?.shopUrl;
+  // socialLinks/shopUrl are free-text Studio fields, not URL-typed —
+  // isSafeHref rules out a stored javascript:/data: scheme executing on
+  // click for either.
+  const socialLinks = (settings?.socialLinks ?? []).filter((s) => isSafeHref(s.url));
+  const hasSocial = socialLinks.length > 0;
+  const rawShopUrl = settings?.shopUrl;
+  const shopUrl = isSafeHref(rawShopUrl) ? rawShopUrl : undefined;
 
   return (
     <footer className="border-t border-void-700 bg-void-900/40">
@@ -72,7 +78,7 @@ export default async function Footer() {
                 Elsewhere
               </p>
               <ul className="mt-3 flex flex-col gap-2">
-                {settings!.socialLinks!.map((social) => (
+                {socialLinks.map((social) => (
                   <li key={social.url}>
                     <a
                       href={social.url}

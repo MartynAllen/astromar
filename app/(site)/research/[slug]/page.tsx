@@ -12,6 +12,7 @@ import {
   getResearchSlugs,
 } from "@/lib/sanity.queries";
 import { buildMetadata, articleJsonLd } from "@/lib/seo";
+import { isSafeHref } from "@/lib/safeUrl";
 
 export const revalidate = 60;
 
@@ -81,7 +82,7 @@ export default async function ResearchProjectPage(
         </div>
       )}
 
-      {project.repoUrl && (
+      {isSafeHref(project.repoUrl) && (
         <a
           href={project.repoUrl}
           target="_blank"

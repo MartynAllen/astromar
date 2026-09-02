@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
+import { isSafeHref } from "@/lib/safeUrl";
 import type { SanityImageWithDimensions } from "@/lib/sanity.queries";
 
 export interface LightboxPhoto {
@@ -21,7 +22,7 @@ export function PhotoCredit({ photo }: { photo: LightboxPhoto }) {
       {photo.creditText && (
         <span className="mt-1 block text-xs text-star-500">
           Photo:{" "}
-          {photo.creditUrl ? (
+          {isSafeHref(photo.creditUrl) ? (
             <a
               href={photo.creditUrl}
               target="_blank"

@@ -3,9 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { NAV_LINKS } from "@/lib/navigation";
+import { isSafeHref } from "@/lib/safeUrl";
 
-export default function MobileNav({ shopUrl }: { shopUrl?: string }) {
+export default function MobileNav({ shopUrl: rawShopUrl }: { shopUrl?: string }) {
   const [open, setOpen] = useState(false);
+  // Validated again here rather than trusting the caller already did —
+  // Header passes an already-safe value today, but this component
+  // shouldn't rely on that discipline holding for every future caller.
+  const shopUrl = isSafeHref(rawShopUrl) ? rawShopUrl : undefined;
 
   return (
     <div className="md:hidden">

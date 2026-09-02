@@ -1,4 +1,5 @@
 import type { CalendarEvent } from "@/lib/sanity.queries";
+import { isSafeHref } from "@/lib/safeUrl";
 
 const TYPE_LABEL: Record<CalendarEvent["eventType"], string> = {
   "personal-plan": "Observing plan",
@@ -27,7 +28,7 @@ export default function EventCard({ event }: { event: CalendarEvent }) {
       </div>
       <p className="mt-1.5 font-mono text-lg uppercase tracking-wide text-star-100">{event.title}</p>
       {event.description && <p className="mt-1 text-sm text-star-500">{event.description}</p>}
-      {event.externalLink && (
+      {isSafeHref(event.externalLink) && (
         <a
           href={event.externalLink}
           target="_blank"
