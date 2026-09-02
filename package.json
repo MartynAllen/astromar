@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test lib/**/*.test.ts",
+    "test": "node --import tsx --test \"lib/**/*.test.ts\"",
     "import": "node --env-file=.env.local --import tsx scripts/import-photos.ts"
   },
   "dependencies": {

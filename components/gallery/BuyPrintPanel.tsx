@@ -6,6 +6,7 @@ import Image from "next/image";
 import { urlFor } from "@/sanity/image";
 import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
 import { FRAME_COLORS, DEFAULT_FRAME_COLOR, frameColorLabel } from "@/lib/printFrameColors";
+import { cropRatioCss, effectiveAspectRatio, retainedFraction } from "@/lib/printFit";
 
 function formatGBP(pence: number) {
   return `£${(pence / 100).toFixed(2)}`;
@@ -35,7 +36,14 @@ function QuickViewModal({
   // crop (a plain geometric centre-crop, since no crop offset is sent to
   // their API) rather than a nicer hotspot-aware one this site could
   // render but Prodigi never actually applies.
-  const aspectRatio = `${product.widthIn} / ${product.heightIn}`;
+  //
+  // Prodigi also auto-rotates the physical substrate to match the submitted
+  // image's own orientation rather than forcing every order into this
+  // catalog's portrait-ish shape (confirmed via their docs) — so a
+  // landscape source (e.g. a wide star-trail shot) gets cropped landscape,
+  // not squeezed into a portrait crop that throws away most of the frame.
+  const sourceIsLandscape = effectiveAspectRatio(photo) > 1;
+  const aspectRatio = cropRatioCss(product, sourceIsLandscape);
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -135,6 +143,17 @@ export default function BuyPrintPanel({
 
   if (products.length === 0) return null;
 
+  // Every size crops to fit (Prodigi's fillPrintArea), so nothing stops a
+  // customer picking a size that throws away most of the frame — flag
+  // whichever one actually matches this photo's own shape best, so they
+  // don't find out only after a print arrives more cropped than expected.
+  // Skipped entirely when every size fits this photo about equally well —
+  // a badge that lands on every pill recommends nothing.
+  const sourceRatio = effectiveAspectRatio(photo);
+  const fitScores = products.map((p) => retainedFraction(p, sourceRatio));
+  const bestFitScore = Math.max(...fitScores);
+  const allFitEqually = fitScores.every((s) => Math.abs(s - bestFitScore) < 0.005);
+  const recommendedId = allFitEqually ? null : products[fitScores.indexOf(bestFitScore)]._id;
   const selected = products.find((p) => p._id === selectedId);
   const canFrame = Boolean(selected?.framedSku && selected?.framingAddonPriceGBP);
   const totalGBP = selected
@@ -190,6 +209,7 @@ export default function BuyPrintPanel({
       <div className="mt-3 flex flex-wrap gap-2">
         {products.map((product) => {
           const isActive = product._id === selectedId;
+          const isRecommended = product._id === recommendedId;
           return (
             <button
               key={product._id}
@@ -202,10 +222,20 @@ export default function BuyPrintPanel({
               }`}
             >
               {product.title} — {formatGBP(product.unframedPriceGBP)}
+              {isRecommended && (
+                <span className="ml-1.5 text-xs text-nebula-teal-400">· Best fit</span>
+              )}
             </button>
           );
         })}
       </div>
+
+      {recommendedId && recommendedId !== selectedId && (
+        <p className="mt-2 text-xs text-nebula-teal-400">
+          {products.find((p) => p._id === recommendedId)?.title} keeps the most of this shot
+          uncropped — other sizes trim more off the edges to fit.
+        </p>
+      )}
 
       {selected?.description && (
         <p className="mt-2 text-sm text-star-500">{selected.description}</p>
