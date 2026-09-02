@@ -47,6 +47,19 @@ async function placeProdigiOrder(params: {
       },
       body: JSON.stringify({
         merchantReference: params.merchantReference,
+        // Closes a real race window in the idempotency guard below: two
+        // near-simultaneous webhook deliveries for the same session (a
+        // Stripe retry landing before the first invocation has written
+        // prodigiStatus: "created" back to the PaymentIntent) would
+        // otherwise both read "not yet created" and both place a real
+        // order. Prodigi's own idempotencyKey exists specifically for
+        // this — a duplicate submission returns the *original* order
+        // (outcome: "alreadyExists", still HTTP 200) instead of creating
+        // a second one, so session.id is reused here rather than
+        // merchantReference precisely because Prodigi's own docs note
+        // merchantReference isn't unique-per-request (a merchant might
+        // reorder under the same reference) while this needs to be.
+        idempotencyKey: params.merchantReference,
         shippingMethod: "Standard",
         recipient: {
           name: params.recipientName,
