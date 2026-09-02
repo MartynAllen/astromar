@@ -29,16 +29,43 @@ export default function ReviewSearch({ reviews }: { reviews: ReviewSummary[] }) 
 
   return (
     <div>
-      <label className="block">
+      <label className="relative block">
         <span className="sr-only">Search reviews</span>
+        <svg
+          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-star-700"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.75" />
+          <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+        </svg>
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search reviews — product, type…"
-          className="w-full border border-void-600 bg-void-950 px-3 py-2 text-sm text-star-100 placeholder:text-star-700 focus:border-nebula-teal-500"
+          className="w-full border border-void-600 bg-void-950 py-2 pl-9 pr-9 text-sm text-star-100 placeholder:text-star-700 focus:border-nebula-teal-500 [&::-webkit-search-cancel-button]:hidden"
         />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            aria-label="Clear search"
+            className="absolute right-2.5 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-star-500 transition-colors hover:text-star-100"
+          >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
       </label>
+
+      {query.trim() && filtered.length > 0 && (
+        <p className="mt-3 text-sm text-star-500">
+          {filtered.length} {filtered.length === 1 ? "review" : "reviews"} matching &ldquo;{query}&rdquo;
+        </p>
+      )}
 
       {filtered.length === 0 ? (
         <p className="mt-16 text-center text-star-500">

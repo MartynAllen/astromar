@@ -10,6 +10,7 @@ import ProductImagesThumbnails from "@/components/reviews/ProductImagesThumbnail
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import BackLink from "@/components/BackLink";
 import { getReviewBySlug, getReviewSlugs } from "@/lib/sanity.queries";
 import { buildMetadata, reviewJsonLd } from "@/lib/seo";
 
@@ -54,8 +55,11 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
           { name: review.title, path: `/reviews/${slug}` },
         ]}
       />
+      <BackLink href="/reviews" label="Reviews" />
 
-      <AffiliateDisclosureBanner />
+      <div className="mt-4">
+        <AffiliateDisclosureBanner />
+      </div>
 
       <div className="flex flex-col items-start gap-5 sm:flex-row">
         {review.productImages && review.productImages.length > 0 && (

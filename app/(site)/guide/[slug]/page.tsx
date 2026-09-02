@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import BackLink from "@/components/BackLink";
 import BahtinovMaskGenerator from "@/components/guide/BahtinovMaskGenerator";
 import BahtinovMaskFieldGuide from "@/components/guide/BahtinovMaskFieldGuide";
 import { getGuideArticleBySlug, getGuideSlugs } from "@/lib/sanity.queries";
@@ -48,8 +49,9 @@ export default async function GuideArticlePage(props: PageProps<"/guide/[slug]">
           { name: article.title, path: `/guide/${slug}` },
         ]}
       />
+      <BackLink href="/guide" label="Guide" />
 
-      <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+      <p className="mt-4 font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
         {article.section}
         {article.difficulty ? ` · ${article.difficulty}` : ""}
       </p>

@@ -5,6 +5,7 @@ import StatusBadge from "@/components/research/StatusBadge";
 import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import BackLink from "@/components/BackLink";
 import { urlFor } from "@/sanity/image";
 import {
   getResearchProjectBySlug,
@@ -56,8 +57,9 @@ export default async function ResearchProjectPage(
           { name: project.title, path: `/research/${slug}` },
         ]}
       />
+      <BackLink href="/research" label="Research" />
 
-      <div className="flex items-center gap-3">
+      <div className="mt-4 flex items-center gap-3">
         <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{project.title}</h1>
         <StatusBadge status={project.status} />
       </div>

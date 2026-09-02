@@ -5,6 +5,7 @@ import PhotoDetail from "@/components/gallery/PhotoDetail";
 import CheckoutStatusBanner from "@/components/gallery/CheckoutStatusBanner";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import BackLink from "@/components/BackLink";
 import { getPhotoBySlug, getPhotoSlugs, getPrintProducts } from "@/lib/sanity.queries";
 import { buildMetadata, imageObjectJsonLd } from "@/lib/seo";
 
@@ -65,9 +66,13 @@ export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
           { name: photo.title, path: `/gallery/${slug}` },
         ]}
       />
-      <Suspense>
-        <CheckoutStatusBanner />
-      </Suspense>
+      <BackLink href="/gallery" label="Gallery" />
+
+      <div className="mt-4">
+        <Suspense>
+          <CheckoutStatusBanner />
+        </Suspense>
+      </div>
       <PhotoDetail
         photo={photo}
         printProducts={printProducts}
