@@ -75,8 +75,8 @@ export default async function PrintsPage() {
               Framed or unframed
             </p>
             <p className="mt-2 text-sm text-star-500">
-              Every size ships ready to hang, or add black framing at
-              checkout for a couple of the larger sizes.
+              Every size ships ready to hang, or add framing at checkout — 8
+              real frame colours, available on every size.
             </p>
           </div>
           <div>

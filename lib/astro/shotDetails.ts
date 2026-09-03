@@ -25,6 +25,22 @@ export function formatCaptureDate(captureDate?: string): string | undefined {
   });
 }
 
+/**
+ * "None/Other" is the raw Sanity option value for "no filter was used" (see
+ * sanity/schemaTypes/objects/shotDetails.ts) — a literal CMS enum string,
+ * not reader-facing copy. Shown verbatim it reads like a rendering error
+ * rather than a deliberate choice, so both display sites (the shot-details
+ * panel and this summary line) route through this instead of the raw
+ * field. Returns undefined for "no filter" rather than a "No filter" label —
+ * an absent row/segment says the same thing with less noise, matching how
+ * every other optional shot-detail field here already omits itself when
+ * there's nothing to show.
+ */
+export function filterLabel(filter?: string): string | undefined {
+  if (!filter || filter === "None/Other") return undefined;
+  return filter;
+}
+
 export interface ShotSummaryInput {
   subCount?: number;
   subExposureSeconds?: number;
@@ -41,6 +57,7 @@ export function formatShotSummary(details: ShotSummaryInput): string | undefined
   }
   const formattedTotal = formatIntegrationTime(total);
   if (formattedTotal) parts.push(formattedTotal);
-  if (filter) parts.push(filter);
+  const label = filterLabel(filter);
+  if (label) parts.push(label);
   return parts.length ? parts.join(" · ") : undefined;
 }

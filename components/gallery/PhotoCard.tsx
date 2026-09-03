@@ -44,6 +44,10 @@ export default function PhotoCard({
     <Link
       href={href}
       data-photo-slug={photo.slug.current}
+      // A masonry grid can show 30+ of these — eagerly prefetching every
+      // visible card's RSC payload (next/link's default) is a real request-
+      // count spike with no benefit until a card is actually clicked.
+      prefetch={false}
       className="group relative mb-4 block break-inside-avoid overflow-hidden border border-void-700 bg-void-900"
     >
       <Image
@@ -61,7 +65,10 @@ export default function PhotoCard({
       )}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-void-950/90 via-void-950/50 to-transparent p-3 pt-8">
         <p className="font-mono text-lg uppercase tracking-wide text-star-100">{photo.title}</p>
-        {captureDate && <p className="text-xs italic text-star-500">{captureDate}</p>}
+        {/* Not italic — this is a data readout (Mono-Does-More rule), not
+            prose, and italic is otherwise reserved for the one sanctioned
+            blockquote case sitewide (The Italic Rule). */}
+        {captureDate && <p className="text-xs text-star-500">{captureDate}</p>}
         {shotSummary && <p className="font-mono text-xs text-star-500">{shotSummary}</p>}
       </div>
     </Link>
