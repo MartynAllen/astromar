@@ -14,7 +14,7 @@ export default function ContactPage() {
       <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Contact</h1>
       <p className="mt-2 text-star-500">
         A question about an order, a photo, or anything else on the site — send a message below
-        and I&apos;ll get back to you directly.
+        and I&apos;ll get back to you myself.
       </p>
 
       <div className="mt-8">
