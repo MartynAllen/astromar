@@ -318,10 +318,16 @@ Flat by design — no drop shadows anywhere in the current implementation.
 `--shadow-glow-rose` and `--shadow-glow-teal` are still defined in `app/globals.css` but
 are vestigial: leftovers from an earlier rounded-pill-button treatment, unreferenced by
 any component today. Depth is conveyed through the hairline-rule system instead —
-`border-void-700` dividing regions — and through the coordinate-grid texture on the body
-background (`repeating-linear-gradient`, ~3% opacity, 88px spacing): near-invisible from
-normal reading distance, present as texture on close look, evoking a star chart's
-declination/RA lines rather than a literal decoration.
+`border-void-700` dividing regions — and through a scattered star-field texture on the
+body background: several soft 1-1.5px radial-gradient dots, each inside its own
+irregular, mutually-non-aligning tile size, so the layers never lock into a visible
+lattice. Replaced an earlier `repeating-linear-gradient` coordinate grid (RA/Dec-line
+reasoning, but a plain square grid reads as generic dashboard/graph-paper texture —
+exactly the category-interchangeable "tech template" grammar this system otherwise
+reacts against) after a design review flagged it as too visible and not specific to the
+product. Real, faint stars are literally the site's own subject rather than an abstracted
+coordinate system standing in for it. Same restraint as before: felt as ambient texture on
+close look, never seen as a pattern from normal reading distance.
 
 ### Named Rules
 **The Flat-By-Default Rule.** No component gains a shadow at any state, including hover.
