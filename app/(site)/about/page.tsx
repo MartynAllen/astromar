@@ -59,13 +59,25 @@ export default async function AboutPage() {
             shot, and it's what the link/print note just below points at. */}
         {(about?.heroPhoto?.mainImage?.asset || about?.heroImage?.asset) && (
           <>
+            {/* 1344x640 (exactly 672x320 at 2x) matches this box's own
+                aspect ratio at the sm: breakpoint and up (max-w-2xl = 672px
+                wide, h-80 = 320px tall) — the previous 1600x640 (2.5:1)
+                didn't match either breakpoint's real box shape, so
+                object-cover was cropping a second time on top of Sanity's
+                own crop, with no awareness of what sat near that edge. That
+                silently clipped the corner signature once this started
+                showing a real watermarked gallery photo instead of a
+                private, unwatermarked one. object-position biased right
+                covers the narrower mobile box too (h-64, ~1.3:1) — some
+                further cropping still happens there, but toward the left
+                edge (aurora sky, not the signature) rather than centred. */}
             <div className="relative mt-6 h-64 overflow-hidden border border-void-700 sm:h-80">
               <Image
-                src={heroCropUrl(about.heroPhoto?.mainImage ?? about!.heroImage!, 1600, 640)}
+                src={heroCropUrl(about.heroPhoto?.mainImage ?? about!.heroImage!, 1344, 640)}
                 alt={about.heroPhoto ? about.heroPhoto.title : "Martyn's imaging setup"}
                 fill
                 sizes="(min-width: 672px) 672px, 100vw"
-                className="object-cover"
+                className="object-cover object-right sm:object-center"
               />
             </div>
             {about.heroPhoto && (
