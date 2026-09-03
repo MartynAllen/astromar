@@ -27,13 +27,25 @@ function ExpandIcon() {
  * because requestFullscreen needs a client component, while PhotoDetail
  * itself stays server-rendered otherwise.
  *
- * `compact` caps the image's own display height (used only inside the
- * gallery lightbox, whose fixed-viewport modal has much less room to
- * spare than a standalone page) — the expand button exists in both modes,
- * since viewing an astrophoto at true fullscreen is worth having
- * everywhere, not just where space is tight. See img:fullscreen in
- * app/globals.css for why the height cap doesn't also apply once
- * fullscreened.
+ * Both modes cap the image's own height, not just width-fill — a plain
+ * `w-full h-auto` treatment (the standalone page's original behaviour)
+ * computes height from width divided by aspect ratio, and for a portrait
+ * shot at typical container widths that height comfortably exceeds a full
+ * viewport (a 1080x1920 source at ~1150px container width renders over
+ * 2000px tall) — pushing the *entire image itself* below the fold before
+ * a visitor even reaches the title, not just the content that follows it.
+ * `max-height` + `w-auto` (both modes) lets the browser's normal
+ * width-vs-height-constraint resolution pick whichever is actually
+ * binding, so a landscape photo still fills the container edge to edge
+ * exactly as before (its natural height rarely approaches the cap), while
+ * a portrait photo instead letterboxes within the same full-width frame.
+ * `compact` (the gallery lightbox only, a fixed-viewport modal with far
+ * less room than a standalone page) uses a much tighter cap than the
+ * standalone page's own — see PhotoDetail's own doc comment on `compact`.
+ * The expand button exists in both modes, since viewing an astrophoto at
+ * true fullscreen is worth having everywhere, not just where space is
+ * tight. See img:fullscreen in app/globals.css for why neither cap also
+ * applies once actually fullscreened.
  */
 export default function PhotoHeroImage({
   posterUrl,
@@ -73,7 +85,7 @@ export default function PhotoHeroImage({
       className={
         compact
           ? "relative mx-auto w-fit max-w-full overflow-hidden border border-void-700 bg-void-900"
-          : "relative overflow-hidden border border-void-700 bg-void-900"
+          : "relative flex w-full items-center justify-center overflow-hidden border border-void-700 bg-void-900"
       }
     >
       {videoUrl ? (
@@ -90,7 +102,11 @@ export default function PhotoHeroImage({
             height={height}
             sizes={compact ? "90vw" : "100vw"}
             priority
-            className={compact ? "mx-auto max-h-[45vh] w-auto object-contain sm:max-h-[60vh]" : "h-auto w-full"}
+            className={
+              compact
+                ? "mx-auto max-h-[45vh] w-auto object-contain sm:max-h-[60vh]"
+                : "h-auto max-h-[70vh] w-auto max-w-full object-contain sm:max-h-[85vh]"
+            }
           />
           <button
             type="button"
