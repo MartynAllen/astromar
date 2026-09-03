@@ -444,7 +444,12 @@ export async function getUpcomingCalendarEvents(): Promise<CalendarEvent[]> {
   const now = new Date();
   now.setDate(now.getDate() - 1); // include events from earlier today
   return client.fetch(
-    /* groq */ `*[_type == "calendarEvent" && date >= $since] | order(date asc) {
+    // date >= $since alone would drop a multi-day event (Kelling Heath
+    // Star Party, say) the day after it *starts*, even with days still to
+    // run — endDate >= $since keeps it listed for its whole real span.
+    // Single-day events have no endDate, so they still fall back to date
+    // alone.
+    /* groq */ `*[_type == "calendarEvent" && (date >= $since || endDate >= $since)] | order(date asc) {
       _id, title, eventType, date, endDate, description, externalLink
     }`,
     { since: now.toISOString() },
