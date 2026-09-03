@@ -5,44 +5,27 @@ import { applyPrintCrop, urlFor } from "@/sanity/image";
 import { SITE_URL } from "@/lib/seo";
 import { frameColorLabel, isValidFrameColor } from "@/lib/printFrameColors";
 import { printProductsForPhoto } from "@/lib/print";
+import { getClientIp } from "@/lib/getClientIp";
+import { isSameSiteRequest } from "@/lib/sameSiteRequest";
+import { createRateLimiter } from "@/lib/rateLimiter";
 
-const RATE_LIMIT_WINDOW_MS = 60_000;
 // Tighter than /api/geocode — this triggers a real Stripe API call (and,
 // on success, a real Checkout Session), not a free lookup.
-const RATE_LIMIT_MAX_REQUESTS = 10;
-
-// In-memory per-instance limiter — see /api/geocode/route.ts for why this
-// (not Redis) is the right amount of infra for a personal blog's traffic.
-const requestLog = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(ip: string): { limited: boolean; retryAfterSeconds: number } {
-  const now = Date.now();
-  const entry = requestLog.get(ip);
-
-  if (!entry || now >= entry.resetAt) {
-    requestLog.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return { limited: false, retryAfterSeconds: 0 };
-  }
-
-  entry.count += 1;
-  if (entry.count > RATE_LIMIT_MAX_REQUESTS) {
-    return { limited: true, retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000) };
-  }
-  return { limited: false, retryAfterSeconds: 0 };
-}
-
-function pruneExpired() {
-  const now = Date.now();
-  for (const [ip, entry] of requestLog) {
-    if (now >= entry.resetAt) requestLog.delete(ip);
-  }
-}
+const { isRateLimited, pruneExpired } = createRateLimiter(60_000, 10);
 
 // Starts a hosted Stripe Checkout session for one print of one photo.
 // No cart, no client-supplied price — everything that affects the charge
 // is re-fetched server-side from Sanity, keyed only by photoSlug + sku.
 export async function POST(request: Request) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  // This route can only be reached from Astromar's own buy panel — reject
+  // any cross-site POST before it touches the rate limiter or Stripe at
+  // all. A simple same-site form submission needs no CORS preflight, so
+  // this Origin check is the only thing that would otherwise catch it.
+  if (!isSameSiteRequest(request)) {
+    return NextResponse.json({ error: "Invalid request origin" }, { status: 403 });
+  }
+
+  const ip = getClientIp(request);
   const { limited, retryAfterSeconds } = isRateLimited(ip);
   if (Math.random() < 0.01) pruneExpired();
 
@@ -198,8 +181,8 @@ export async function POST(request: Request) {
           prodigiStatus: "pending",
         },
       },
-      success_url: `${SITE_URL}/gallery/${photoSlug}?checkout=success`,
-      cancel_url: `${SITE_URL}/gallery/${photoSlug}?checkout=cancelled`,
+      success_url: `${SITE_URL}/gallery/${encodeURIComponent(photoSlug)}?checkout=success`,
+      cancel_url: `${SITE_URL}/gallery/${encodeURIComponent(photoSlug)}?checkout=cancelled`,
     });
 
     if (!session.url) {

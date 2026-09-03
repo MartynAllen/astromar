@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getClientIp } from "@/lib/getClientIp";
+import { createRateLimiter } from "@/lib/rateLimiter";
 
 interface NominatimResult {
   lat: string;
@@ -6,47 +8,19 @@ interface NominatimResult {
   display_name: string;
 }
 
-const RATE_LIMIT_WINDOW_MS = 60_000;
 // The finder calls this once per search submit, not per keystroke, so a
 // genuine user fires a handful of requests per session at most — this caps
-// scripted abuse while staying well clear of real usage.
-const RATE_LIMIT_MAX_REQUESTS = 20;
-
-// In-memory per-instance limiter: good enough to blunt a single client
-// hammering this route (which is what actually risks tripping Nominatim's
-// 1 req/sec usage policy for everyone sharing this server's IP), without
-// reaching for external infra like Redis on a personal blog's traffic.
-const requestLog = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(ip: string): { limited: boolean; retryAfterSeconds: number } {
-  const now = Date.now();
-  const entry = requestLog.get(ip);
-
-  if (!entry || now >= entry.resetAt) {
-    requestLog.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return { limited: false, retryAfterSeconds: 0 };
-  }
-
-  entry.count += 1;
-  if (entry.count > RATE_LIMIT_MAX_REQUESTS) {
-    return { limited: true, retryAfterSeconds: Math.ceil((entry.resetAt - now) / 1000) };
-  }
-  return { limited: false, retryAfterSeconds: 0 };
-}
-
-// Prevents unbounded growth from one-off IPs across a long-lived instance.
-function pruneExpired() {
-  const now = Date.now();
-  for (const [ip, entry] of requestLog) {
-    if (now >= entry.resetAt) requestLog.delete(ip);
-  }
-}
+// scripted abuse while staying well clear of real usage. (Good enough to
+// blunt a single client hammering this route, which is what actually risks
+// tripping Nominatim's 1 req/sec usage policy for everyone sharing this
+// server's IP.)
+const { isRateLimited, pruneExpired } = createRateLimiter(60_000, 20);
 
 // Proxies OpenStreetMap's free Nominatim geocoder server-side — it requires
 // a descriptive User-Agent (browsers can't set that header themselves) and
 // this keeps the 1 req/sec usage-policy limit off the client.
 export async function GET(request: Request) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = getClientIp(request);
   const { limited, retryAfterSeconds } = isRateLimited(ip);
   if (Math.random() < 0.01) pruneExpired();
 
