@@ -1,6 +1,7 @@
 import { urlFor } from "@/sanity/image";
 import PhotoHeroImage from "./PhotoHeroImage";
 import ShotDetailsPanel from "./ShotDetailsPanel";
+import GearNotesPanel from "./GearNotesPanel";
 import ProcessingPanel from "./ProcessingPanel";
 import BuyPrintPanel from "./BuyPrintPanel";
 import PortableTextContent from "@/components/PortableTextContent";
@@ -67,16 +68,20 @@ export default function PhotoDetail({
         <div className="mt-4">
           <ShotDetailsPanel details={photo.shotDetails} />
         </div>
+        {/* Gear notes sits right after what was captured and before how it
+            was finished — capture gear, then processing, in that order. A
+            plain muted paragraph here previously undersold it: for a shot
+            that needs nothing more than a lens and a tripod, this is
+            genuinely a "you can do this too" recipe, not a footnote. */}
+        {photo.gearNotes && (
+          <div className="mt-4">
+            <GearNotesPanel notes={photo.gearNotes} />
+          </div>
+        )}
         {photo.processingTools && photo.processingTools.length > 0 && (
           <div className="mt-4">
             <ProcessingPanel tools={photo.processingTools} />
           </div>
-        )}
-        {photo.gearNotes && (
-          <p className="mt-4 text-sm text-star-500">
-            <span className="text-star-300">Gear notes: </span>
-            {photo.gearNotes}
-          </p>
         )}
 
         {Array.isArray(photo.story) && photo.story.length > 0 && (
