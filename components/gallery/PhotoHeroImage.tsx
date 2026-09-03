@@ -37,11 +37,16 @@ function ExpandIcon() {
  * `max-height` + `w-auto` (both modes) lets the browser's normal
  * width-vs-height-constraint resolution pick whichever is actually
  * binding, so a landscape photo still fills the container edge to edge
- * exactly as before (its natural height rarely approaches the cap), while
- * a portrait photo instead letterboxes within the same full-width frame.
- * `compact` (the gallery lightbox only, a fixed-viewport modal with far
- * less room than a standalone page) uses a much tighter cap than the
- * standalone page's own — see PhotoDetail's own doc comment on `compact`.
+ * exactly as before (its natural height rarely approaches the cap). The
+ * wrapping frame itself is sized to the rendered image (`w-fit`), not a
+ * fixed full width — an earlier version kept the frame full-width and let
+ * a capped portrait photo float inside it, which read as a wall of dead
+ * void-900 on both sides rather than a deliberate letterbox; hugging the
+ * actual rendered size instead means the border only ever traces the
+ * photo itself, at any ratio. `compact` (the gallery lightbox only, a
+ * fixed-viewport modal with far less room than a standalone page) uses a
+ * much tighter cap than the standalone page's own — see PhotoDetail's own
+ * doc comment on `compact`.
  * The expand button exists in both modes, since viewing an astrophoto at
  * true fullscreen is worth having everywhere, not just where space is
  * tight. See img:fullscreen in app/globals.css for why neither cap also
@@ -81,13 +86,7 @@ export default function PhotoHeroImage({
   }
 
   return (
-    <div
-      className={
-        compact
-          ? "relative mx-auto w-fit max-w-full overflow-hidden border border-void-700 bg-void-900"
-          : "relative flex w-full items-center justify-center overflow-hidden border border-void-700 bg-void-900"
-      }
-    >
+    <div className="relative mx-auto w-fit max-w-full overflow-hidden border border-void-700 bg-void-900">
       {videoUrl ? (
         // Native <video controls> already carries its own fullscreen
         // button — a second custom one here would be redundant.
