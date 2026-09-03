@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function GuidePage() {
   const [articles, heroPhoto] = await Promise.all([
     getAllGuideArticles(),
-    getHeroPhoto(4),
+    getHeroPhoto(2),
   ]);
   const sections = Array.from(new Set(articles.map((a) => a.section)));
 

@@ -30,14 +30,17 @@ export default async function PrintsPage() {
   ]);
   const printProducts = printProductsResult.data;
   const catalogUnavailable = !printProductsResult.ok;
-  // Pinned to the same shot as the homepage hero — Andromeda reads stronger
-  // full-bleed than whichever photo happens to be newest (the previous
-  // mechanical pick landed on a flatter, dimmer frame). Falls back to the
-  // newest featured-and-printable photo, then the newest printable photo at
-  // all, so the page still has a sensible hero if Andromeda is ever pulled
-  // from the print catalog.
+  // Pinned to its own shot, distinct from every other page's hero (see
+  // PINNED_HERO_SLUGS in sanity.queries.ts) — this used to be Andromeda,
+  // the same photo as the homepage hero, which meant two different tabs
+  // opened to the exact same banner. Aurora — Twin Pillars reads just as
+  // strong full-bleed and is a genuinely different subject/palette from
+  // every other pinned or rotating hero on the site. Falls back to the
+  // newest featured-and-printable photo, then the newest printable photo
+  // at all, so the page still has a sensible hero if this one is ever
+  // pulled from the print catalog.
   const heroPhoto =
-    photos.find((p) => p.slug.current === "andromeda-galaxy-2026-08-12") ??
+    photos.find((p) => p.slug.current === "aurora-northlew-2024-10-10-twin-pillars") ??
     photos.find((p) => p.featured) ??
     photos[0] ??
     null;

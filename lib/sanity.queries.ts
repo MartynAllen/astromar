@@ -107,13 +107,37 @@ export async function getFeaturedPhotos(
   );
 }
 
+// The photos three pages pin to a *specific* shot rather than rotating
+// through the featured pool (Home pins Andromeda; Calendar pins East Veil
+// Nebula, tuned specifically for that page's crop; Prints pins Aurora —
+// Twin Pillars — see each page's own comment on why). Named here, in one
+// place, so getHeroPhoto below can exclude them by default — every
+// rotating page pulling from the same pool without this would risk
+// re-picking one of these the moment the featured list changes shape,
+// exactly what happened before this fix (East Veil Nebula ended up on both
+// Calendar and Gallery, Andromeda on Home, Reviews *and* Prints).
+export const PINNED_HERO_SLUGS = [
+  "andromeda-galaxy-2026-08-12", // Home
+  "east-veil-nebula-2026-08-22", // Calendar
+  "aurora-northlew-2024-10-10-twin-pillars", // Prints
+];
+
 // Picks a stable-but-varied hero photo per page: different pages pass a
 // different offset so they don't all show the same shot, without needing a
-// dedicated "hero" flag in Studio.
+// dedicated "hero" flag in Studio. Always excludes PINNED_HERO_SLUGS (see
+// above) so a rotating page can never re-collide with a pinned one; pass
+// `excludeSlugs` too for any additional one-off exclusion. Offsets among
+// the rotating pages should be sequential (0, 1, 2, 3, ...) rather than
+// arbitrary spread-out numbers — indexing is modulo the *filtered* pool's
+// actual length, so widely-spaced offsets (1, 2, 4, 6, ...) can collide
+// with each other the moment the pool shrinks, which is exactly how the
+// Andromeda/Reviews collision happened previously.
 export async function getHeroPhoto(
   offset = 0,
+  excludeSlugs: string[] = [],
 ): Promise<AstroPhotoSummary | null> {
-  const pool = await getFeaturedPhotos(8);
+  const excluded = new Set([...PINNED_HERO_SLUGS, ...excludeSlugs]);
+  const pool = (await getFeaturedPhotos(12)).filter((p) => !excluded.has(p.slug.current));
   if (pool.length === 0) return null;
   return pool[offset % pool.length];
 }

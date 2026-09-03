@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function ReviewsPage() {
   const [reviews, heroPhoto] = await Promise.all([
     getAllReviews(),
-    getHeroPhoto(2),
+    getHeroPhoto(1),
   ]);
 
   return (

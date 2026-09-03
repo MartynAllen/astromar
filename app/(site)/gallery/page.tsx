@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default async function GalleryPage() {
   const [photos, heroPhoto, settings, printProducts] = await Promise.all([
     getAllPhotos(),
-    getHeroPhoto(1),
+    getHeroPhoto(0),
     getSiteSettings().catch(() => null),
     getPrintProducts().catch(() => []),
   ]);

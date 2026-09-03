@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function ResearchPage() {
   const [projects, heroPhoto] = await Promise.all([
     getAllResearchProjects(),
-    getHeroPhoto(6),
+    getHeroPhoto(3),
   ]);
 
   // Two honest buckets rather than three statuses flattened into one list:
