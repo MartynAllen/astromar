@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
 import { isSafeHref } from "@/lib/safeUrl";
@@ -52,10 +52,15 @@ export default function PhotoLightbox({
   onNavigate: (index: number) => void;
 }) {
   const photo = photos[index];
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // Matches Lightbox.tsx's pattern — without this, a keyboard user who
+    // opens this modal has focus left wherever it was on the page behind
+    // it, with no indication a dialog opened.
+    closeButtonRef.current?.focus();
     return () => {
       document.body.style.overflow = previousOverflow;
     };
@@ -80,10 +85,11 @@ export default function PhotoLightbox({
       onClick={onClose}
     >
       <button
+        ref={closeButtonRef}
         type="button"
         onClick={onClose}
         aria-label="Close"
-        className="fixed top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-void-600 bg-void-900 text-star-100 hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+        className="fixed top-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-void-600 bg-void-900 text-star-100 hover:border-nebula-teal-500 hover:text-nebula-teal-400"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />

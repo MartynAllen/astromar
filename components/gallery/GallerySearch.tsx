@@ -109,7 +109,7 @@ export default function GallerySearch({
             className="w-full border border-void-600 bg-void-950 px-3 py-2 text-sm text-star-100 placeholder:text-star-700 focus:border-nebula-teal-500"
           />
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
           {CATEGORIES.map((c) => {
             const isActive = c.value === category;
             return (
@@ -117,7 +117,8 @@ export default function GallerySearch({
                 key={c.label}
                 type="button"
                 onClick={() => selectCategory(c.value)}
-                className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
+                aria-pressed={isActive}
+                className={`min-h-11 rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
                   isActive
                     ? "border-nebula-teal-500 bg-nebula-teal-500/10 text-nebula-teal-400"
                     : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
@@ -130,7 +131,8 @@ export default function GallerySearch({
           <button
             type="button"
             onClick={togglePrintsOnly}
-            className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
+            aria-pressed={printsOnly}
+            className={`min-h-11 rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
               printsOnly
                 ? "border-nebula-rose-500 bg-nebula-rose-500/10 text-nebula-rose-400"
                 : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"

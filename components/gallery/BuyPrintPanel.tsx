@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { applyPrintCrop, urlFor } from "@/sanity/image";
@@ -85,6 +85,7 @@ function QuickViewModal({
   // photo — see the notice rendered below the frame for exactly that case.
   const sourceIsLandscape = rawAspectRatio(photo) > 1;
   const aspectRatio = cropRatioCss(product, sourceIsLandscape);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -92,6 +93,10 @@ function QuickViewModal({
     window.addEventListener("keydown", onKeyDown);
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    // Moves keyboard focus into the dialog on open, matching Lightbox.tsx's
+    // existing pattern — without this, a keyboard user who opens Quick View
+    // has focus left wherever it was, with no indication a dialog opened.
+    closeButtonRef.current?.focus();
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
@@ -147,10 +152,11 @@ function QuickViewModal({
       onClick={onClose}
     >
       <button
+        ref={closeButtonRef}
         type="button"
         onClick={onClose}
         aria-label="Close preview"
-        className="fixed right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-void-600 bg-void-900 text-star-100 hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+        className="fixed right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-void-600 bg-void-900 text-star-100 hover:border-nebula-teal-500 hover:text-nebula-teal-400"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
@@ -268,11 +274,16 @@ function QuickViewModal({
           {photo.title} — {product.title}
           {framed ? `, framed (${frameColorLabel(frameColor)})` : ""}
         </p>
-        <p className="mt-1 text-center text-xs text-star-700">
+        {/* text-star-500, not star-700 — this is real explanatory copy a
+            buyer needs to read on the purchase path, not a decorative mark
+            or placeholder. star-700 measures ~2.9:1 against this modal's
+            void-950 background, failing WCAG AA; see DESIGN.md's own
+            documented rule on this exact distinction. */}
+        <p className="mt-1 text-center text-xs text-star-500">
           Crop approximates this size&apos;s actual print area — framing, mat and colour may vary slightly.
         </p>
         {photo.printRotation && (
-          <p className="mt-1 max-w-sm text-center text-xs text-star-700">
+          <p className="mt-1 max-w-sm text-center text-xs text-star-500">
             Shown here as it appears on the site — the print itself is rotated to keep the full frame, so it
             may arrive turned compared to this preview.
           </p>
@@ -361,7 +372,7 @@ export default function BuyPrintPanel({
         Buy a print
       </p>
 
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Print size">
         {products.map((product) => {
           const isActive = product._id === selectedId;
           const isRecommended = product._id === recommendedId;
@@ -370,7 +381,8 @@ export default function BuyPrintPanel({
               key={product._id}
               type="button"
               onClick={() => selectProduct(product._id)}
-              className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
+              aria-pressed={isActive}
+              className={`min-h-11 rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
                 isActive
                   ? "border-nebula-rose-500 bg-nebula-rose-500/10 text-nebula-rose-400"
                   : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
@@ -453,7 +465,7 @@ export default function BuyPrintPanel({
           type="button"
           onClick={() => setPreviewOpen(true)}
           disabled={!selected}
-          className="flex items-center justify-center gap-2 border border-void-600 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-star-300 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex min-h-11 items-center justify-center gap-2 border border-void-600 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-star-300 transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Quick view
         </button>
@@ -461,7 +473,7 @@ export default function BuyPrintPanel({
           type="button"
           onClick={handleBuy}
           disabled={loading || !selected}
-          className="flex flex-1 items-center justify-center gap-2 border border-nebula-rose-400 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-nebula-rose-400"
+          className="flex min-h-11 flex-1 items-center justify-center gap-2 border border-nebula-rose-400 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-nebula-rose-400"
         >
           {loading ? "Redirecting to checkout…" : `Buy print — ${formatGBP(totalGBP)}`}
         </button>

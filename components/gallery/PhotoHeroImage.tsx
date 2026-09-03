@@ -111,7 +111,7 @@ export default function PhotoHeroImage({
             type="button"
             onClick={handleExpand}
             aria-label="View full screen"
-            className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-void-600 bg-void-950/70 text-star-100 backdrop-blur-sm transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+            className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-void-600 bg-void-950/70 text-star-100 backdrop-blur-sm transition-colors hover:border-nebula-teal-500 hover:text-nebula-teal-400"
           >
             <ExpandIcon />
           </button>
