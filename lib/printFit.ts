@@ -77,6 +77,57 @@ export function retainedFraction(product: ProductShape, sourceAspectRatio: numbe
   return Math.min(target, sourceAspectRatio) / Math.max(target, sourceAspectRatio);
 }
 
+// Mirrors scripts/lib/watermark.ts's own placement constants exactly — keep
+// these two in sync if the watermark's sizing/margin ever changes.
+// WATERMARK_ASPECT is scripts/assets/watermark.png's real height/width
+// (740/2043), not a guess.
+const WATERMARK_WIDTH_FRACTION = 0.16;
+const WATERMARK_MARGIN_FRACTION = 0.03;
+const WATERMARK_ASPECT = 740 / 2043;
+// Headroom over the exact computed footprint so a preview never clips even
+// the very edge of the signature; capped so a pathological aspect ratio
+// can't eat an unreasonable chunk of the frame.
+const WATERMARK_SAFETY_FACTOR = 1.3;
+const WATERMARK_MAX_BOTTOM_FRACTION = 0.35;
+
+/**
+ * How much of the bottom edge (a printCrop-compatible fraction) a
+ * mainImage's own baked-in corner signature actually occupies, computed
+ * from the same maths applyWatermark() used to place it — not a guess.
+ * Exists specifically for BuyPrintPanel's Quick View preview: unlike
+ * printCrop (an editor-set, per-photo override for something wrong in the
+ * raw frame), this is universal and always-on, because the signature sits
+ * at a fixed, known, watermark-relative position on every mainImage, and a
+ * print/Quick-View crop that trims height can otherwise slice straight
+ * through it — showing half a signature rather than a clean crop.
+ * printMasterImage (used for the real order) carries no watermark at all,
+ * so this must never be applied there — only to the mainImage-based
+ * preview fetch, composed with any existing printCrop via
+ * previewCropWithSignatureExcluded below.
+ */
+export function signatureSafeBottomFraction(dimensions: { width: number; height: number } | undefined): number {
+  if (!dimensions?.width || !dimensions?.height) return 0;
+  const aspectRatio = dimensions.width / dimensions.height;
+  const footprint = (WATERMARK_WIDTH_FRACTION * WATERMARK_ASPECT + WATERMARK_MARGIN_FRACTION) * aspectRatio;
+  return Math.min(footprint * WATERMARK_SAFETY_FACTOR, WATERMARK_MAX_BOTTOM_FRACTION);
+}
+
+/**
+ * The crop to actually fetch for the Quick View preview — any editor-set
+ * printCrop, with the signature-safe bottom trim folded in. Takes the
+ * larger of the two bottom fractions rather than summing them: both are
+ * already absolute fractions of the *original* frame, so if printCrop
+ * already trims more off the bottom than the signature needs, applying
+ * both would double-crop.
+ */
+export function previewCropWithSignatureExcluded(
+  photo: PhotoForFit,
+): { top?: number; bottom?: number; left?: number; right?: number } {
+  const base = photo.printCrop ?? {};
+  const sigBottom = signatureSafeBottomFraction(photo.mainImage.dimensions);
+  return { ...base, bottom: Math.max(base.bottom ?? 0, sigBottom) };
+}
+
 /** The size that wastes the least of this specific photo's frame. */
 export function bestFitProductId(products: ProductForFit[], photo: PhotoForFit): string | null {
   if (products.length === 0) return null;

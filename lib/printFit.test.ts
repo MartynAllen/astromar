@@ -1,6 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { bestFitProductId, cropRatioCss, effectiveAspectRatio, rawAspectRatio, retainedFraction } from "./printFit";
+import {
+  bestFitProductId,
+  cropRatioCss,
+  effectiveAspectRatio,
+  previewCropWithSignatureExcluded,
+  rawAspectRatio,
+  retainedFraction,
+  signatureSafeBottomFraction,
+} from "./printFit";
 
 // The site's real catalog as of the size-range expansion (see printProduct
 // docs in Sanity) — kept inline rather than imported so this test doesn't
@@ -91,4 +99,50 @@ test("effectiveAspectRatio and rawAspectRatio both apply printCrop, unlike print
 test("bestFitProductId picks the size exactly matching a portrait source", () => {
   const portraitSource = { mainImage: { dimensions: { width: 4000, height: 5000 } } } as never; // 0.8
   assert.equal(bestFitProductId(PRODUCTS, portraitSource), "8x10");
+});
+
+test("signatureSafeBottomFraction scales with the source's own aspect ratio", () => {
+  // Dumbbell Nebula: 8192x5608 (1.4608) — a landscape source needs more
+  // bottom trim than a portrait one, since the watermark's height is a
+  // fraction of *width*, not height.
+  const landscape = signatureSafeBottomFraction({ width: 8192, height: 5608 });
+  const portrait = signatureSafeBottomFraction({ width: 5608, height: 8192 });
+  assert.ok(landscape > portrait, `landscape (${landscape}) should need more trim than portrait (${portrait})`);
+  // Sanity-check the actual magnitude — should be a modest slice, not a
+  // huge chunk of the frame, for a real photo's aspect ratio.
+  assert.ok(landscape > 0.1 && landscape < 0.25, `expected a modest fraction, got ${landscape}`);
+});
+
+test("signatureSafeBottomFraction returns 0 for missing dimensions", () => {
+  assert.equal(signatureSafeBottomFraction(undefined), 0);
+});
+
+test("previewCropWithSignatureExcluded takes the larger of printCrop's own bottom and the signature's", () => {
+  const photoWithNoCrop = {
+    mainImage: { dimensions: { width: 8192, height: 5608 } },
+  } as never;
+  const sigOnly = previewCropWithSignatureExcluded(photoWithNoCrop);
+  assert.ok((sigOnly.bottom ?? 0) > 0, "should trim for the signature even with no editor printCrop set");
+  assert.equal(sigOnly.top, undefined);
+  assert.equal(sigOnly.left, undefined);
+  assert.equal(sigOnly.right, undefined);
+
+  // An editor-set printCrop that already trims more off the bottom than
+  // the signature needs shouldn't get double-cropped.
+  const photoWithBiggerCrop = {
+    mainImage: { dimensions: { width: 8192, height: 5608 } },
+    printCrop: { bottom: 0.5, left: 0.1 },
+  } as never;
+  const biggerWins = previewCropWithSignatureExcluded(photoWithBiggerCrop);
+  assert.equal(biggerWins.bottom, 0.5);
+  assert.equal(biggerWins.left, 0.1);
+
+  // An editor-set printCrop whose own bottom trim is smaller than the
+  // signature needs should be topped up, not left as-is.
+  const photoWithSmallerCrop = {
+    mainImage: { dimensions: { width: 8192, height: 5608 } },
+    printCrop: { bottom: 0.01 },
+  } as never;
+  const sigWins = previewCropWithSignatureExcluded(photoWithSmallerCrop);
+  assert.ok((sigWins.bottom ?? 0) > 0.01, "signature exclusion should top up an insufficient printCrop bottom");
 });

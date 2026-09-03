@@ -6,7 +6,13 @@ import Image from "next/image";
 import { applyPrintCrop, urlFor } from "@/sanity/image";
 import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
 import { FRAME_COLORS, DEFAULT_FRAME_COLOR, frameColorLabel, matWidthIn } from "@/lib/printFrameColors";
-import { cropRatioCss, effectiveAspectRatio, rawAspectRatio, retainedFraction } from "@/lib/printFit";
+import {
+  cropRatioCss,
+  effectiveAspectRatio,
+  previewCropWithSignatureExcluded,
+  rawAspectRatio,
+  retainedFraction,
+} from "@/lib/printFit";
 
 function formatGBP(pence: number) {
   return `£${(pence / 100).toFixed(2)}`;
@@ -105,9 +111,16 @@ function QuickViewModal({
   // it exists to exclude something genuinely unwanted from the frame (a
   // roofline caught in shot, a foreground object), so unlike the deliberate
   // preview/order mismatch above, this should always match the real print.
+  //
+  // previewCropWithSignatureExcluded folds in one more, preview-only
+  // exclusion on top of that: mainImage's own baked-in corner signature,
+  // which a print/Quick-View crop can otherwise slice straight through
+  // (half a signature reads as broken, not as a crop). printMasterImage
+  // carries no signature at all, so this never touches the real order —
+  // only this fetch. See lib/printFit.ts for the actual maths.
   const previewUrl = applyPrintCrop(
     urlFor(photo.mainImage),
-    photo.printCrop,
+    previewCropWithSignatureExcluded(photo),
     photo.mainImage.dimensions,
   )
     .width(900)
@@ -232,15 +245,22 @@ function QuickViewModal({
               )}
               {/* Soft diagonal sheen, suggesting the glazing every Prodigi
                   frame ships with — real glass/acrylic reflects, a flat
-                  photo print doesn't. */}
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 22%, transparent 45%)",
-                }}
-              />
+                  photo print doesn't. framed-only: this was previously
+                  showing unconditionally, so an unframed print (no glass
+                  at all) got a "reflection" that made no physical sense —
+                  and on a mostly black frame (a sparse starfield shot, say)
+                  a flat white gradient wash reads as a visible, unexplained
+                  bright patch rather than a glass reflection at all. */}
+              {framed && (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 22%, transparent 45%)",
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>
