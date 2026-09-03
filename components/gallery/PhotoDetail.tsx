@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { urlFor } from "@/sanity/image";
+import PhotoHeroImage from "./PhotoHeroImage";
 import ShotDetailsPanel from "./ShotDetailsPanel";
 import ProcessingPanel from "./ProcessingPanel";
 import BuyPrintPanel from "./BuyPrintPanel";
@@ -10,6 +10,7 @@ export default function PhotoDetail({
   photo,
   printProducts,
   printCatalogUnavailable,
+  compact = false,
 }: {
   photo: AstroPhotoDetail;
   printProducts?: PrintProduct[];
@@ -19,42 +20,36 @@ export default function PhotoDetail({
    * silently not appearing, which otherwise reads as "this photo stopped
    * being for sale" rather than "pricing failed to load." */
   printCatalogUnavailable?: boolean;
+  /** True when rendered inside the gallery lightbox (@modal) — that fixed
+   * full-viewport overlay has far less room to spare than a standalone
+   * page, so a portrait or otherwise tall shot at full width was pushing
+   * title/buy-panel/shot-details well below the fold, requiring far more
+   * scrolling than a "quick view" modal should. Caps the image's own
+   * display height there; the standalone page (default) keeps the full
+   * width/height treatment, where scrolling past a big hero photo is
+   * normal, expected page behaviour. See PhotoHeroImage. */
+  compact?: boolean;
 }) {
   const dims = photo.mainImage.dimensions;
   const posterUrl = urlFor(photo.mainImage).width(1600).url();
 
   return (
     <div>
-      {/* Full width, not a sidebar-constrained column — this is a wide-field
-          shot, and the two-column layout it used to sit in squeezed it down
-          to make room for the buy panel next to it. Everything else reads
-          fine as a single stacked column underneath. */}
-      <div className="overflow-hidden border border-void-700 bg-void-900">
-        {photo.videoUrl ? (
-          <video
-            src={photo.videoUrl}
-            poster={posterUrl}
-            controls
-            playsInline
-            className="h-auto w-full"
-          />
-        ) : (
-          <Image
-            src={posterUrl}
-            alt={photo.caption || photo.title}
-            width={dims?.width ?? 1600}
-            height={dims?.height ?? 1000}
-            sizes="100vw"
-            priority
-            className="h-auto w-full"
-          />
-        )}
-      </div>
+      <PhotoHeroImage
+        posterUrl={posterUrl}
+        videoUrl={photo.videoUrl}
+        alt={photo.caption || photo.title}
+        width={dims?.width ?? 1600}
+        height={dims?.height ?? 1000}
+        compact={compact}
+      />
 
       {/* Narrowed to match the About/Reviews pages' own reading column —
           title, buy panel and technical details all read better at this
-          width than stretched across the full image's span. */}
-      <div className="mx-auto mt-8 max-w-2xl">
+          width than stretched across the full image's span. Tighter gap
+          in compact/lightbox mode — the same scroll budget the height cap
+          above is trying to protect. */}
+      <div className={compact ? "mx-auto mt-4 max-w-2xl" : "mx-auto mt-8 max-w-2xl"}>
         <h1 className="font-mono text-3xl font-bold uppercase tracking-wide text-star-100">{photo.title}</h1>
         {photo.caption && <p className="mt-2 text-star-500">{photo.caption}</p>}
         {/* Buy panel sits above the technical EXIF details — someone who

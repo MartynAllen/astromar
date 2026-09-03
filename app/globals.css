@@ -197,3 +197,24 @@ body {
     animation-delay: 0ms;
   }
 }
+
+/* PhotoHeroImage's expand-to-fullscreen button (photo detail pages, and the
+   lightbox's own compact variant) requests fullscreen on the <img> itself.
+   Its normal-state sizing classes (max-h-[...] in compact mode, or a fixed
+   width/height from Next/Image) would otherwise still apply once
+   fullscreened, capping the image at a small fraction of the real screen —
+   this overrides both to fill the fullscreen surface properly, centred on
+   a near-black backdrop matching the site's own void-950 rather than
+   browsers' default fullscreen black. Comes after Tailwind's own import so
+   the cascade favours this over any utility class without needing
+   !important; type selector + pseudo-class already out-specifies a single
+   utility class. */
+img:fullscreen,
+img:-webkit-full-screen {
+  width: auto;
+  height: auto;
+  max-width: 100vw;
+  max-height: 100vh;
+  object-fit: contain;
+  background: var(--color-void-950);
+}

@@ -10,7 +10,7 @@ export default async function PhotoModal(props: PageProps<"/gallery/[slug]">) {
 
   return (
     <Lightbox slug={slug} captureDate={photo.shotDetails?.captureDate}>
-      <PhotoDetail photo={photo} />
+      <PhotoDetail photo={photo} compact />
     </Lightbox>
   );
 }
