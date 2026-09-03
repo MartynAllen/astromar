@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 export const metadata: Metadata = {
@@ -51,8 +52,12 @@ export default function PrivacyPage() {
         <section>
           <h2 className="font-mono text-xl uppercase tracking-wide text-star-100">Contact</h2>
           <p className="mt-2">
-            No contact form here yet — social links will appear in the footer once
-            they&apos;re set up.
+            The{" "}
+            <Link href="/contact" className="text-nebula-teal-400 hover:underline">
+              contact form
+            </Link>{" "}
+            sends your name, email and message straight to my own inbox via Resend, an
+            email-delivery service — nothing you submit there is stored anywhere on this site.
           </p>
         </section>
       </div>

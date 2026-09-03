@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 export const metadata: Metadata = {
@@ -44,9 +45,12 @@ export default function ShippingReturnsPage() {
           </h2>
           <p className="mt-2">
             Every print is made specifically for your order, and production usually starts
-            within hours of checkout — so get in touch as soon as possible if you need to
-            cancel. If production hasn&apos;t started yet, it&apos;s usually no problem; once
-            it has, we may not be able to stop or refund it.
+            within hours of checkout — so{" "}
+            <Link href="/contact" className="text-nebula-teal-400 hover:underline">
+              get in touch
+            </Link>{" "}
+            as soon as possible if you need to cancel. If production hasn&apos;t started yet,
+            it&apos;s usually no problem; once it has, we may not be able to stop or refund it.
           </p>
         </section>
 
@@ -55,8 +59,11 @@ export default function ShippingReturnsPage() {
             If something arrives damaged or wrong
           </h2>
           <p className="mt-2">
-            Get in touch and it&apos;ll be sorted — a replacement or refund, whichever&apos;s
-            right for what went wrong.
+            <Link href="/contact" className="text-nebula-teal-400 hover:underline">
+              Get in touch
+            </Link>{" "}
+            and it&apos;ll be sorted — a replacement or refund, whichever&apos;s right for what
+            went wrong.
           </p>
         </section>
       </div>
