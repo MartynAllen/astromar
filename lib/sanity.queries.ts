@@ -439,6 +439,16 @@ export interface GearItem {
 
 export interface AboutPageContent {
   heroImage?: SanityImageWithDimensions;
+  /** Set only when heroImage is actually one of the gallery photos (see
+   * aboutPage.ts's heroPhotoRef field) — the real, watermarked gallery
+   * asset plus enough to link back to its own page and note whether it's
+   * sold as a print. Preferred over heroImage when present. */
+  heroPhoto?: {
+    title: string;
+    slug: { current: string };
+    mainImage: SanityImageWithDimensions;
+    availableAsPrint?: boolean;
+  };
   bio?: unknown[];
   gear?: GearItem[];
   seo?: {
@@ -452,7 +462,13 @@ export async function getAboutPage(): Promise<AboutPageContent | null> {
   return client.fetch(
     /* groq */ `*[_type == "aboutPage"][0]{
       bio, gear, seo,
-      "heroImage": heroImage{..., "dimensions": asset->metadata.dimensions}
+      "heroImage": heroImage{..., "dimensions": asset->metadata.dimensions},
+      "heroPhoto": heroPhotoRef->{
+        title,
+        slug,
+        availableAsPrint,
+        "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions}
+      }
     }`,
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },

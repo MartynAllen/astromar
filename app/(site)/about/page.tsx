@@ -53,16 +53,34 @@ export default async function AboutPage() {
         <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
         <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">About</h1>
 
-        {about?.heroImage?.asset && (
-          <div className="relative mt-6 h-64 overflow-hidden border border-void-700 sm:h-80">
-            <Image
-              src={heroCropUrl(about.heroImage, 1600, 640)}
-              alt="Martyn's imaging setup"
-              fill
-              sizes="(min-width: 672px) 672px, 100vw"
-              className="object-cover"
-            />
-          </div>
+        {/* heroPhoto (a resolved astroPhoto reference) wins over the plain
+            heroImage upload when both exist — it's the real, watermarked
+            gallery asset rather than a second, uncredited copy of the same
+            shot, and it's what the link/print note just below points at. */}
+        {(about?.heroPhoto?.mainImage?.asset || about?.heroImage?.asset) && (
+          <>
+            <div className="relative mt-6 h-64 overflow-hidden border border-void-700 sm:h-80">
+              <Image
+                src={heroCropUrl(about.heroPhoto?.mainImage ?? about!.heroImage!, 1600, 640)}
+                alt={about.heroPhoto ? about.heroPhoto.title : "Martyn's imaging setup"}
+                fill
+                sizes="(min-width: 672px) 672px, 100vw"
+                className="object-cover"
+              />
+            </div>
+            {about.heroPhoto && (
+              <p className="mt-2 text-xs text-star-500">
+                {about.heroPhoto.title}
+                {about.heroPhoto.availableAsPrint ? " — prints available." : "."}{" "}
+                <Link
+                  href={`/gallery/${about.heroPhoto.slug.current}`}
+                  className="underline hover:text-star-300"
+                >
+                  View in the gallery →
+                </Link>
+              </p>
+            )}
+          </>
         )}
 
         {about?.bio ? (
