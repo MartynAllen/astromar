@@ -95,7 +95,7 @@ export default function VisibilityFinder() {
 
   return (
     <div className="border border-void-700 bg-void-900 p-5">
-      <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+      <p className="font-mono text-xs uppercase tracking-widest text-nebula-indigo-400">
         Optimal targets
       </p>
       <p className="mt-1 text-sm text-star-500">
@@ -109,13 +109,13 @@ export default function VisibilityFinder() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Town, city, or postcode"
-          className="w-full min-w-0 border border-void-600 bg-void-950 px-3 py-2 text-sm text-star-100 placeholder:text-star-700 focus:border-nebula-teal-500 sm:flex-1"
+          className="w-full min-w-0 border border-void-600 bg-void-950 px-3 py-2 text-sm text-star-100 placeholder:text-star-700 focus:border-nebula-indigo-400 sm:flex-1"
         />
         <div className="flex gap-2">
           <button
             type="submit"
             disabled={status === "loading"}
-            className="flex-1 bg-nebula-teal-400 px-4 py-2 font-mono text-xs uppercase tracking-widest text-void-950 disabled:opacity-60 sm:flex-none"
+            className="flex-1 bg-nebula-indigo-400 px-4 py-2 font-mono text-xs uppercase tracking-widest text-void-950 disabled:opacity-60 sm:flex-none"
           >
             Search
           </button>
@@ -123,7 +123,7 @@ export default function VisibilityFinder() {
             type="button"
             onClick={handleUseMyLocation}
             disabled={status === "loading"}
-            className="flex-1 border border-void-600 px-4 py-2 font-mono text-xs uppercase tracking-widest whitespace-nowrap text-star-300 hover:border-nebula-teal-500 disabled:opacity-60 sm:flex-none"
+            className="flex-1 border border-void-600 px-4 py-2 font-mono text-xs uppercase tracking-widest whitespace-nowrap text-star-300 hover:border-nebula-indigo-400 disabled:opacity-60 sm:flex-none"
           >
             Use my location
           </button>
@@ -138,7 +138,7 @@ export default function VisibilityFinder() {
             Showing results for <span className="text-star-300">{location.label}</span>
           </p>
 
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-1.5" role="group" aria-label="Select night">
             {nights.map((night, i) => (
               <button
                 key={i}
@@ -147,9 +147,10 @@ export default function VisibilityFinder() {
                   setHoveredHour(null);
                   setHoveredObjectId(null);
                 }}
-                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                aria-pressed={activeDay === i}
+                className={`min-h-11 rounded-full border px-3 py-1 text-xs transition-colors ${
                   activeDay === i
-                    ? "border-nebula-teal-500 bg-nebula-teal-500/10 text-nebula-teal-400"
+                    ? "border-nebula-indigo-400 bg-nebula-indigo-400/10 text-nebula-indigo-400"
                     : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
                 }`}
               >
@@ -166,7 +167,7 @@ export default function VisibilityFinder() {
           ) : (
             <>
               <div className="mt-4 border border-void-700 bg-void-950 p-4">
-                <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+                <p className="font-mono text-xs uppercase tracking-widest text-nebula-indigo-400">
                   Sky chart ·{" "}
                   {(hoveredHour ?? nights[activeDay].hours[0]).time.toLocaleTimeString("en-GB", {
                     hour: "2-digit",
@@ -198,20 +199,30 @@ export default function VisibilityFinder() {
                         <span className="text-sm text-star-500">Nothing well-placed</span>
                       ) : (
                         hour.best.map((v) => (
-                          <div
+                          // A real button, not a hover-only div — the sky
+                          // chart cross-reference below is otherwise
+                          // unreachable by keyboard, even though the data
+                          // itself (name, altitude, compass) is always
+                          // visible as text either way.
+                          <button
                             key={v.object.id}
+                            type="button"
                             onMouseEnter={() => {
                               setHoveredHour(hour);
                               setHoveredObjectId(v.object.id);
                             }}
-                            className="border border-void-600 px-2.5 py-1.5 transition-colors hover:border-nebula-teal-500"
+                            onFocus={() => {
+                              setHoveredHour(hour);
+                              setHoveredObjectId(v.object.id);
+                            }}
+                            className="border border-void-600 px-2.5 py-1.5 text-left transition-colors hover:border-nebula-indigo-400 focus-visible:border-nebula-indigo-400"
                             title={`${TYPE_LABEL[v.object.type]} · mag ${v.object.magnitude}`}
                           >
                             <p className="text-sm text-star-100">{v.object.name}</p>
-                            <p className="font-mono text-xs text-nebula-teal-400">
+                            <p className="font-mono text-xs text-nebula-indigo-400">
                               {v.altitude.toFixed(0)}° {v.compass}
                             </p>
-                          </div>
+                          </button>
                         ))
                       )}
                     </div>

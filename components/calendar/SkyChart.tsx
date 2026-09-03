@@ -8,7 +8,7 @@ const COLORS = {
   ring: "#1b1e2c",
   ringUseful: "#262a3b",
   compass: "#8a90a6",
-  star: "#6fdcec",
+  star: "#8fb2f5", // nebula-indigo-400 — Calendar's section accent
   starActive: "#f5f7fa",
 };
 

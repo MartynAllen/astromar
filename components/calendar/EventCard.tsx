@@ -21,7 +21,7 @@ export default function EventCard({ event }: { event: CalendarEvent }) {
   return (
     <div className="border border-void-700 bg-void-900 p-4">
       <div className="flex items-baseline justify-between gap-4">
-        <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+        <p className="font-mono text-xs uppercase tracking-widest text-nebula-indigo-400">
           {TYPE_LABEL[event.eventType]}
         </p>
         <span className="font-mono text-xs text-star-500">{formatDate(event.date)}</span>
@@ -33,7 +33,7 @@ export default function EventCard({ event }: { event: CalendarEvent }) {
           href={event.externalLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 inline-block text-sm text-nebula-teal-400 hover:underline"
+          className="mt-2 inline-block text-sm text-nebula-indigo-400 hover:underline"
         >
           More info →
         </a>

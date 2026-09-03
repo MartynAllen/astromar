@@ -19,7 +19,7 @@ export default function MoonPhaseWidget() {
         <path d={moonPath(r, phase)} fill="var(--color-star-100)" />
       </svg>
       <div>
-        <p className="font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+        <p className="font-mono text-xs uppercase tracking-widest text-nebula-indigo-400">
           Tonight&apos;s moon
         </p>
         <p className="mt-1 font-mono text-xl uppercase tracking-wide text-star-100">{phaseName}</p>

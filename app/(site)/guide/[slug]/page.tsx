@@ -51,7 +51,7 @@ export default async function GuideArticlePage(props: PageProps<"/guide/[slug]">
       />
       <BackLink href="/guide" label="Guide" />
 
-      <p className="mt-4 font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+      <p className="mt-4 font-mono text-xs uppercase tracking-widest text-nebula-amber-400">
         {article.section}
         {article.difficulty ? ` · ${article.difficulty}` : ""}
       </p>

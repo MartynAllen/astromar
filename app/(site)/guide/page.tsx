@@ -41,7 +41,7 @@ export default async function GuidePage() {
           <div className="mt-10 space-y-10">
             {sections.map((section) => (
               <div key={section}>
-                <h2 className="font-mono text-xl uppercase tracking-wide text-nebula-teal-400">
+                <h2 className="font-mono text-xl uppercase tracking-wide text-nebula-amber-400">
                   {section}
                 </h2>
                 <ul className="mt-3 divide-y divide-void-700">
@@ -54,7 +54,7 @@ export default async function GuidePage() {
                           className="group block"
                         >
                           <div className="flex items-center gap-2">
-                            <h3 className="font-mono text-lg uppercase tracking-wide text-star-100 group-hover:text-nebula-teal-400">
+                            <h3 className="font-mono text-lg uppercase tracking-wide text-star-100 group-hover:text-nebula-amber-400">
                               {article.title}
                             </h3>
                             {article.difficulty && (
