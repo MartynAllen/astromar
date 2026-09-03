@@ -6,8 +6,9 @@ import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureB
 import AffiliateButton from "@/components/reviews/AffiliateButton";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import CategoryIcon from "@/components/about/CategoryIcon";
+import FeaturedPhotoCluster from "@/components/about/FeaturedPhotoCluster";
 import { urlFor, heroCropUrl } from "@/sanity/image";
-import { getAboutPage, getSiteSettings, type GearItem } from "@/lib/sanity.queries";
+import { getAboutPage, getFeaturedPhotos, getSiteSettings, type GearItem } from "@/lib/sanity.queries";
 import { SUPPORT_URL } from "@/lib/navigation";
 import { isSafeHref } from "@/lib/safeUrl";
 
@@ -38,67 +39,75 @@ const CATEGORY_COLOR: Record<GearCategory, string> = {
 };
 
 export default async function AboutPage() {
-  const [about, settings] = await Promise.all([
+  const [about, settings, featuredPhotos] = await Promise.all([
     getAboutPage(),
     getSiteSettings().catch(() => null),
+    getFeaturedPhotos(8).catch(() => []),
   ]);
   // shopUrl is a free-text Studio field, not URL-typed — isSafeHref rules
   // out a stored javascript:/data: scheme executing on click.
   const rawShopUrl = settings?.shopUrl;
   const shopUrl = isSafeHref(rawShopUrl) ? rawShopUrl : undefined;
+  // A handful of other featured shots to scatter around the hero — never
+  // the hero photo itself twice over, and capped at 4 (2 per side; see
+  // FeaturedPhotoCluster).
+  const clusterPhotos = featuredPhotos
+    .filter((p) => p.slug.current !== about?.heroPhoto?.slug.current)
+    .slice(0, 4);
+
+  const heroBlock = (about?.heroPhoto?.mainImage?.asset || about?.heroImage?.asset) && (
+    <>
+      {/* 1344x640 (exactly 672x320 at 2x) matches this box's own aspect
+          ratio at the sm: breakpoint and up (max-w-2xl = 672px wide,
+          h-80 = 320px tall) — the previous 1600x640 (2.5:1) didn't match
+          either breakpoint's real box shape, so object-cover was cropping
+          a second time on top of Sanity's own crop, with no awareness of
+          what sat near that edge. That silently clipped the corner
+          signature once this started showing a real watermarked gallery
+          photo instead of a private, unwatermarked one. object-position
+          biased right covers the narrower mobile box too (h-64, ~1.3:1) —
+          some further cropping still happens there, but toward the left
+          edge (aurora sky, not the signature) rather than centred. */}
+      <div className="relative h-64 overflow-hidden border border-void-700 sm:h-80">
+        <Image
+          src={heroCropUrl(about!.heroPhoto?.mainImage ?? about!.heroImage!, 1344, 640)}
+          alt={about!.heroPhoto ? about!.heroPhoto.title : "Martyn's imaging setup"}
+          fill
+          sizes="(min-width: 672px) 672px, 100vw"
+          className="object-cover object-right sm:object-center"
+        />
+      </div>
+      {about!.heroPhoto && (
+        <p className="mt-2 text-xs text-star-500">
+          {about!.heroPhoto.title}
+          {about!.heroPhoto.availableAsPrint ? " — prints available." : "."}{" "}
+          <Link href={`/gallery/${about!.heroPhoto.slug.current}`} className="underline hover:text-star-300">
+            View in the gallery →
+          </Link>
+        </p>
+      )}
+    </>
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-14">
       <div className="mx-auto max-w-2xl">
         <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
         <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">About</h1>
+      </div>
 
-        {/* heroPhoto (a resolved astroPhoto reference) wins over the plain
-            heroImage upload when both exist — it's the real, watermarked
-            gallery asset rather than a second, uncredited copy of the same
-            shot, and it's what the link/print note just below points at. */}
-        {(about?.heroPhoto?.mainImage?.asset || about?.heroImage?.asset) && (
-          <>
-            {/* 1344x640 (exactly 672x320 at 2x) matches this box's own
-                aspect ratio at the sm: breakpoint and up (max-w-2xl = 672px
-                wide, h-80 = 320px tall) — the previous 1600x640 (2.5:1)
-                didn't match either breakpoint's real box shape, so
-                object-cover was cropping a second time on top of Sanity's
-                own crop, with no awareness of what sat near that edge. That
-                silently clipped the corner signature once this started
-                showing a real watermarked gallery photo instead of a
-                private, unwatermarked one. object-position biased right
-                covers the narrower mobile box too (h-64, ~1.3:1) — some
-                further cropping still happens there, but toward the left
-                edge (aurora sky, not the signature) rather than centred. */}
-            <div className="relative mt-6 h-64 overflow-hidden border border-void-700 sm:h-80">
-              <Image
-                src={heroCropUrl(about.heroPhoto?.mainImage ?? about!.heroImage!, 1344, 640)}
-                alt={about.heroPhoto ? about.heroPhoto.title : "Martyn's imaging setup"}
-                fill
-                sizes="(min-width: 672px) 672px, 100vw"
-                className="object-cover object-right sm:object-center"
-              />
-            </div>
-            {about.heroPhoto && (
-              <p className="mt-2 text-xs text-star-500">
-                {about.heroPhoto.title}
-                {about.heroPhoto.availableAsPrint ? " — prints available." : "."}{" "}
-                <Link
-                  href={`/gallery/${about.heroPhoto.slug.current}`}
-                  className="underline hover:text-star-300"
-                >
-                  View in the gallery →
-                </Link>
-              </p>
-            )}
-          </>
-        )}
+      {heroBlock &&
+        (clusterPhotos.length > 0 ? (
+          <FeaturedPhotoCluster clusterPhotos={clusterPhotos}>{heroBlock}</FeaturedPhotoCluster>
+        ) : (
+          <div className="mx-auto mt-6 max-w-2xl">{heroBlock}</div>
+        ))}
 
+      <div className="mx-auto mt-6 max-w-2xl">
         {about?.bio ? (
           <PortableTextContent value={about.bio} />
         ) : (
-          <p className="mt-6 text-star-500">Bio coming soon.</p>
+          <p className="text-star-500">Bio coming soon.</p>
         )}
       </div>
 
