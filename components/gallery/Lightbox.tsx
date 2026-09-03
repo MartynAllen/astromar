@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import SkyBackdrop from "./SkyBackdrop";
+import { useFocusTrap } from "@/lib/useFocusTrap";
 
 const SETTLE_EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
@@ -47,6 +48,8 @@ export default function Lightbox({
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
+
+  useFocusTrap(contentRef, true);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;

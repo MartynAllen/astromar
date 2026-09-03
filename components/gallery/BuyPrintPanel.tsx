@@ -13,6 +13,7 @@ import {
   rawAspectRatio,
   retainedFraction,
 } from "@/lib/printFit";
+import { useFocusTrap } from "@/lib/useFocusTrap";
 
 function formatGBP(pence: number) {
   return `£${(pence / 100).toFixed(2)}`;
@@ -31,6 +32,14 @@ const WATERMARK_PATTERN = `data:image/svg+xml,${encodeURIComponent(
     'font-family="monospace" font-size="17" fill="white" fill-opacity="0.16">ASTROMAR · PREVIEW</text>' +
     "</svg>",
 )}`;
+
+// Prodigi's actual conservation-grade mat/mount board colour — a fixed,
+// real physical material, not a design-system accent, so it deliberately
+// isn't one of DESIGN.md's UI tokens (same category as FRAME_COLORS'
+// swatch hexes in lib/printFrameColors.ts, which aren't tokens either).
+// Named here rather than left as an inline literal so it reads as an
+// intentional physical-material colour, not stray hex drift.
+const FRAME_MAT_COLOR = "#f4f1ea";
 
 // Procedural grain for the moulding — a flat fill reads as a coloured
 // plastic strip, not a physical material. feTurbulence generates the noise
@@ -86,6 +95,8 @@ function QuickViewModal({
   const sourceIsLandscape = rawAspectRatio(photo) > 1;
   const aspectRatio = cropRatioCss(product, sourceIsLandscape);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, true);
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -145,6 +156,7 @@ function QuickViewModal({
 
   return (
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-950/95 p-6 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
@@ -243,7 +255,7 @@ function QuickViewModal({
                   className="pointer-events-none absolute inset-0"
                   style={{
                     borderStyle: "solid",
-                    borderColor: "#f4f1ea",
+                    borderColor: FRAME_MAT_COLOR,
                     borderWidth: `${matPercentV}cqh ${matPercentH}cqw`,
                     boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.15), 0 1px 4px rgba(0,0,0,0.3)",
                   }}
@@ -390,7 +402,11 @@ export default function BuyPrintPanel({
             >
               {product.title} — {formatGBP(product.unframedPriceGBP)}
               {isRecommended && (
-                <span className="ml-1.5 text-xs text-nebula-teal-400">· Best fit</span>
+                // nebula-rose, not teal — this whole panel is rose-accented
+                // (header, active size, Buy button); the One Accent Rule
+                // says a card's own callouts share its one accent rather
+                // than each picking a different one.
+                <span className="ml-1.5 text-xs text-nebula-rose-400">· Best fit</span>
               )}
             </button>
           );
@@ -398,7 +414,7 @@ export default function BuyPrintPanel({
       </div>
 
       {recommendedId && recommendedId !== selectedId && (
-        <p className="mt-2 text-xs text-nebula-teal-400">
+        <p className="mt-2 text-xs text-nebula-rose-400">
           {products.find((p) => p._id === recommendedId)?.title} keeps the most of this shot
           uncropped — other sizes trim more off the edges to fit.
         </p>

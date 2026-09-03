@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
 import { isSafeHref } from "@/lib/safeUrl";
+import { useFocusTrap } from "@/lib/useFocusTrap";
 import type { SanityImageWithDimensions } from "@/lib/sanity.queries";
 
 export interface LightboxPhoto {
@@ -53,6 +54,8 @@ export default function PhotoLightbox({
 }) {
   const photo = photos[index];
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, true);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -78,6 +81,7 @@ export default function PhotoLightbox({
 
   return (
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-void-950/95 p-6 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"

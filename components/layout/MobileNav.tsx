@@ -4,10 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { NAV_LINKS } from "@/lib/navigation";
 import { isSafeHref } from "@/lib/safeUrl";
+import { useFocusTrap } from "@/lib/useFocusTrap";
 
 export default function MobileNav({ shopUrl: rawShopUrl }: { shopUrl?: string }) {
   const [open, setOpen] = useState(false);
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  useFocusTrap(navRef, open);
   // Validated again here rather than trusting the caller already did —
   // Header passes an already-safe value today, but this component
   // shouldn't rely on that discipline holding for every future caller.
@@ -79,6 +82,7 @@ export default function MobileNav({ shopUrl: rawShopUrl }: { shopUrl?: string })
             onClick={() => setOpen(false)}
           />
           <nav
+            ref={navRef}
             className="fixed inset-x-0 top-20 z-50 max-h-[calc(100vh-5rem)] overflow-y-auto border-t border-void-700 bg-void-950 px-6 py-4"
             role="dialog"
             aria-modal="true"
