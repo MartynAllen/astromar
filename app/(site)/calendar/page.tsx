@@ -38,8 +38,6 @@ export default async function CalendarPage() {
       <PageHero
         photo={heroPhoto}
         className="h-80 sm:h-96"
-        imageRotate={90}
-        imagePosition="object-[center_58%]"
       >
         <div className="mx-auto w-full max-w-4xl px-6">
           <Breadcrumbs items={[{ name: "Calendar", path: "/calendar" }]} />
