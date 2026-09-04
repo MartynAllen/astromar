@@ -187,6 +187,37 @@ function BahtinovPreview({
   const ring = (r: number) =>
     `M ${r},0 A ${r},${r} 0 1,0 ${-r},0 A ${r},${r} 0 1,0 ${r},0 Z`;
 
+  // A stroke-per-shape approach (bridging the antialiasing seam between two
+  // adjacent <polygon>s with a matching-color outline) turned out to still
+  // show a hairline gap in some browsers/zoom levels — stroke width is
+  // screen-space and DPI-dependent, so "thin enough to be invisible, thick
+  // enough to bridge the seam" isn't a fixed value. Rendering every shape as
+  // one combined <path> instead removes the seam at the source: there's no
+  // longer a boundary between separately-antialiased elements at all.
+  //
+  // That's only safe with `fillRule="nonzero"` if every subpath winds the
+  // same direction — two overlapping shapes with opposite winding would
+  // otherwise cancel out in their overlap region, creating a real hole
+  // (confirmed: StrutRect's corners are NOT guaranteed consistently wound).
+  // toCCW() normalizes each shape before it's combined.
+  function toCCW(corners: [number, number][]): [number, number][] {
+    let signedArea = 0;
+    for (let i = 0; i < corners.length; i++) {
+      const [x1, y1] = corners[i];
+      const [x2, y2] = corners[(i + 1) % corners.length];
+      signedArea += x1 * y2 - x2 * y1;
+    }
+    return signedArea < 0 ? [...corners].reverse() : corners;
+  }
+  const subpath = (corners: [number, number][]) =>
+    `M ${toCCW(corners)
+      .map(([x, y]) => `${x},${y}`)
+      .join(" L ")} Z`;
+
+  const solidPath = [spine.corners, divider.corners, ...struts.map((s) => s.corners)]
+    .map(subpath)
+    .join(" ");
+
   return (
     <svg
       viewBox={`${-size} ${-size} ${size * 2} ${size * 2}`}
@@ -203,35 +234,7 @@ function BahtinovPreview({
           fillRule="evenodd"
           className="fill-void-600"
         />
-        {/* Every shape here genuinely fuses into one solid — confirmed
-            point-for-point against the real geometry — but SVG antialiases
-            each <polygon>'s edges independently, so two shapes that only
-            just touch (rather than overlap by area, as at the strut-to-
-            spine/divider connection points) can still show a hairline seam
-            of background bleeding through between their soft edges. A
-            matching stroke, thin enough to be invisible on any shape's own
-            outer silhouette, closes that seam without needing to merge
-            these into one path (which would risk real holes wherever two
-            overlapping shapes happen to wind in opposite directions —
-            StrutRect's own winding isn't guaranteed). */}
-        <polygon
-          points={spine.corners.map(([x, y]) => `${x},${y}`).join(" ")}
-          className="fill-nebula-teal-400 stroke-nebula-teal-400"
-          strokeWidth={0.5}
-        />
-        <polygon
-          points={divider.corners.map(([x, y]) => `${x},${y}`).join(" ")}
-          className="fill-nebula-teal-400 stroke-nebula-teal-400"
-          strokeWidth={0.5}
-        />
-        {struts.map((strut, i) => (
-          <polygon
-            key={i}
-            points={strut.corners.map(([x, y]) => `${x},${y}`).join(" ")}
-            className="fill-nebula-teal-400 stroke-nebula-teal-400"
-            strokeWidth={0.5}
-          />
-        ))}
+        <path d={solidPath} fillRule="nonzero" className="fill-nebula-teal-400" />
       </g>
     </svg>
   );
