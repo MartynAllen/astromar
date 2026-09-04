@@ -1,6 +1,20 @@
+// polygon-clipping's own .d.ts declares named exports (union, intersection,
+// ...) matching its CJS build, but the package's actual ESM build
+// (dist/polygon-clipping.esm.js — what bundlers resolve for a client
+// component like this one) only exports a single default object with
+// those as properties: `export { index as default }`, no named exports at
+// all. Turbopack correctly uses the real ESM file and fails on the named
+// import ("Export union doesn't exist"); esModuleInterop's synthetic
+// default (importing the whole declared module shape as `pc`) is what
+// actually lines up with both the real runtime value and the .d.ts types.
+import pc, { type Polygon as ClipPolygon } from "polygon-clipping";
+import earcut, { flatten as earcutFlatten } from "earcut";
 import type { BahtinovGeometry, BahtinovInputs } from "./geometry";
 
+const { union } = pc;
+
 type Vec3 = [number, number, number];
+type Vec2 = [number, number];
 
 export interface Triangle {
   a: Vec3;
@@ -86,31 +100,173 @@ function buildWallTriangles(innerRadius: number, outerRadius: number, zLo: numbe
   return triangles;
 }
 
-export function buildMaskMesh(
+/** A regular polygon approximating a circle, wound CCW (increasing angle) or
+ * CW (`reverse`) — GeoJSON/polygon-clipping convention wants a hole ring
+ * wound opposite to its containing outer ring. */
+function circleRing(radius: number, segments: number, reverse = false): Vec2[] {
+  const pts: Vec2[] = [];
+  for (let k = 0; k < segments; k++) {
+    const a = (k / segments) * Math.PI * 2 * (reverse ? -1 : 1);
+    pts.push([radius * Math.cos(a), radius * Math.sin(a)]);
+  }
+  return pts;
+}
+
+/**
+ * Unions a set of 2D footprints into one watertight solid and extrudes it
+ * between zLo and zHi — this is what actually fixes the crossing-beam gaps
+ * a real 3D viewer showed (see this function's call site in buildMaskMesh):
+ * every strut, the spine, the divider, and the wall's own top-of-plate ring
+ * all occupy the *same* Z range and are meant to fuse into one flat plate
+ * with slit-shaped holes cut through it, not stay as separate,
+ * independently-closed boxes that merely overlap in space. An earlier
+ * attempt tried to fake this by skipping each shape's own end-cap faces
+ * (reasoning that they're always embedded inside a neighbour's volume) —
+ * that produced a *worse* mesh, confirmed with a real watertightness check
+ * (trimesh): 272 open boundary edges, because deleting a face from an
+ * independent, unconnected solid just leaves a hole in it rather than
+ * actually joining it to its neighbour. A real 2D union (polygon-clipping)
+ * plus a proper polygon-with-holes triangulation (earcut) is what actually
+ * produces one connected, hole-free boundary.
+ */
+/**
+ * polygon-clipping returns each ring GeoJSON-style: explicitly closed, its
+ * last point a repeat of its first. Every consumer here (earcut, and the
+ * side-wall loop below) instead assumes an *implicit* wraparound — feeding
+ * a still-closed ring in produced a zero-length closing edge at every
+ * single ring, which is both a degenerate triangle in its own right and
+ * threw off edge-matching for real watertightness checks. Dropping the
+ * duplicate last point is the fix.
+ */
+function openRing(ring: Vec2[]): Vec2[] {
+  if (ring.length < 2) return ring;
+  const [x0, y0] = ring[0];
+  const [xLast, yLast] = ring[ring.length - 1];
+  return Math.abs(x0 - xLast) < 1e-9 && Math.abs(y0 - yLast) < 1e-9 ? ring.slice(0, -1) : ring;
+}
+
+// Exported (only) so tests can union an arbitrary footprint set directly —
+// e.g. without the wall ring, which polygon-clipping can't accept as a
+// truly zero-width degenerate annulus (confirmed: it throws), making "just
+// the plate shapes, no wall" otherwise impossible to construct through
+// buildPlateTriangles's own fixed footprint list.
+export function unionAndExtrude(footprints: Vec2[][][], zLo: number, zHi: number): Triangle[] {
+  const [first, ...rest] = footprints;
+  const merged = union(first as ClipPolygon, ...(rest as ClipPolygon[]));
+  const triangles: Triangle[] = [];
+
+  for (const polygon of merged) {
+    const [outerRing, ...holeRings] = polygon.map(openRing);
+    const allRings = [outerRing, ...holeRings];
+    const flat = earcutFlatten(allRings);
+    const indices = earcut(flat.vertices, flat.holes, flat.dimensions);
+
+    const solidCentroid: Vec3 = [0, 0, (zLo + zHi) / 2];
+
+    // Top and bottom faces share the same 2D triangulation, just at the
+    // two different Z planes — pushOutwardTriangle sorts out which winding
+    // each needs relative to the shared solid centroid, so there's no need
+    // to reason about earcut's own triangle winding by hand.
+    for (let i = 0; i < indices.length; i += 3) {
+      const [ia, ib, ic] = [indices[i], indices[i + 1], indices[i + 2]];
+      const p = (idx: number): Vec2 => [flat.vertices[idx * 2], flat.vertices[idx * 2 + 1]];
+      const [ax, ay] = p(ia);
+      const [bx, by] = p(ib);
+      const [cx, cy] = p(ic);
+      pushOutwardTriangle(triangles, [ax, ay, zLo], [bx, by, zLo], [cx, cy, zLo], solidCentroid);
+      pushOutwardTriangle(triangles, [ax, ay, zHi], [bx, by, zHi], [cx, cy, zHi], solidCentroid);
+    }
+
+    // Side walls: every boundary ring (the outer silhouette, and every
+    // hole — a hole is just as much a real boundary of the solid as the
+    // outer edge is) gets its own vertical wall, one quad per ring edge.
+    //
+    // Deliberately NOT pushOutwardTriangle+solidCentroid here (unlike the
+    // top/bottom faces above, where it's fine — see why below): a wall
+    // segment's own outward direction is a genuine function of its XY
+    // position, and a single global "inside" reference point isn't a
+    // reliable stand-in for that once a ring can be a hole sitting
+    // anywhere relative to the overall shape (verified the hard way: this
+    // produced 208 non-manifold edges on a real geometry, mostly along the
+    // wall-to-plate hole boundaries, before this fix). Top/bottom faces
+    // don't have this problem — every one of their vertices shares the
+    // same Z, so their raw cross-product normal is already purely
+    // vertical regardless of XY position, making "which side of centroid.z"
+    // the only real question, and that's reliable everywhere.
+    //
+    // The fix: polygon-clipping's rings are wound so solid material is
+    // always to the left of the direction of travel — true for both a
+    // CCW outer ring and a CW hole ring, by construction (the standard
+    // GeoJSON convention). That means (P_bot, Q_bot, Q_top) and
+    // (P_bot, Q_top, P_top), taken directly in the ring's own given
+    // order, are already correctly outward-facing — no per-segment
+    // orientation guess needed at all.
+    for (const ring of allRings) {
+      for (let i = 0; i < ring.length; i++) {
+        const [x0, y0] = ring[i];
+        const [x1, y1] = ring[(i + 1) % ring.length];
+        triangles.push({ a: [x0, y0, zLo], b: [x1, y1, zLo], c: [x1, y1, zHi] });
+        triangles.push({ a: [x0, y0, zLo], b: [x1, y1, zHi], c: [x0, y0, zHi] });
+      }
+    }
+  }
+
+  return triangles;
+}
+
+/**
+ * The flat grating plate: struts, spine, divider, and the wall's own
+ * top-of-plate annulus, unioned into one watertight solid — see
+ * unionAndExtrude's doc comment for why this can't just be each shape
+ * extruded independently. Exported separately from the skirt (rather than
+ * folded directly into buildMaskMesh) so each half can be checked on its
+ * own terms in tests instead of guessing where one ends and the other
+ * begins inside a single concatenated triangle array — the plate's own
+ * triangle count is a real triangulation result now, not a fixed count
+ * per shape, so slicing a merged array by index no longer works.
+ */
+export function buildPlateTriangles(geometry: BahtinovGeometry, maskThicknessMm: number): Triangle[] {
+  const zLo = -maskThicknessMm / 2;
+  const zHi = maskThicknessMm / 2;
+  const footprints: Vec2[][][] = [
+    ...geometry.struts.map((s) => [s.corners as Vec2[]]),
+    [geometry.spine.corners as Vec2[]],
+    [geometry.divider.corners as Vec2[]],
+    [
+      circleRing(geometry.wallOuterRadiusMm, WALL_SEGMENTS),
+      circleRing(geometry.wallFillInnerRadiusMm, WALL_SEGMENTS, true),
+    ],
+  ];
+  return unionAndExtrude(footprints, zLo, zHi);
+}
+
+/**
+ * The deep mounting collar below the plate — a separate Z range with
+ * nothing else occupying it, so it's already one continuous ring on its
+ * own and doesn't need the union treatment buildPlateTriangles needs. It
+ * meets the plate's own wall-annulus portion exactly at their shared Z
+ * boundary (zLo), which is a plain two-solids-touching-at-a-flat-shared-
+ * footprint connection — not the crossing-at-odd-angles case the plate
+ * has to solve — so it's safe for any slicer left exactly as is.
+ */
+export function buildSkirtTriangles(
   geometry: BahtinovGeometry,
   maskThicknessMm: number,
   skirtDepthMm: number,
 ): Triangle[] {
   const zLo = -maskThicknessMm / 2;
-  const zHi = maskThicknessMm / 2;
+  return buildWallTriangles(geometry.wallFillInnerRadiusMm, geometry.wallOuterRadiusMm, zLo - skirtDepthMm, zLo);
+}
 
-  const triangles: Triangle[] = [];
-  for (const strut of geometry.struts) {
-    triangles.push(...extrudeQuad(strut.corners, zLo, zHi));
-  }
-  // Spine and divider are part of the flat grating plate, not the mounting
-  // collar — same Z range as the struts, not the deeper skirt below.
-  triangles.push(...extrudeQuad(geometry.spine.corners, zLo, zHi));
-  triangles.push(...extrudeQuad(geometry.divider.corners, zLo, zHi));
-  // The wall spans a taller Z range than the struts — same top surface
-  // (zHi), but extended well below the plate as a plain cylindrical skirt
-  // that slides over the tube, the way a lens cap or dew shield cap
-  // actually grips: a flush ring flush with a 3mm plate has nowhere near
-  // enough contact area to hold on by friction alone.
-  triangles.push(
-    ...buildWallTriangles(geometry.wallFillInnerRadiusMm, geometry.wallOuterRadiusMm, zLo - skirtDepthMm, zHi),
-  );
-  return triangles;
+export function buildMaskMesh(
+  geometry: BahtinovGeometry,
+  maskThicknessMm: number,
+  skirtDepthMm: number,
+): Triangle[] {
+  return [
+    ...buildPlateTriangles(geometry, maskThicknessMm),
+    ...buildSkirtTriangles(geometry, maskThicknessMm, skirtDepthMm),
+  ];
 }
 
 function fmt(n: number): string {

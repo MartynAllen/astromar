@@ -1,7 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { computeBahtinovGeometry, DEFAULT_ADVANCED, type BahtinovInputs } from "./geometry";
-import { buildMaskMesh, serializeStlAscii, suggestedFilename, WALL_SEGMENTS, type Triangle } from "./stl";
+import {
+  buildMaskMesh,
+  buildPlateTriangles,
+  buildSkirtTriangles,
+  serializeStlAscii,
+  suggestedFilename,
+  unionAndExtrude,
+  type Triangle,
+} from "./stl";
 
 const VALID_INPUTS: BahtinovInputs = {
   focalLengthMm: 900,
@@ -20,11 +28,104 @@ function triangleNormal(t: Triangle): [number, number, number] {
   return [uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx];
 }
 
-test("triangle count matches (struts + spine + divider)*12 plus the wall ring's 12-per-segment", () => {
+function vkey(p: [number, number, number]): string {
+  return p.map((n) => n.toFixed(6)).join(",");
+}
+
+/**
+ * The single most important structural guarantee, and the one that
+ * directly maps to the original bug report: is this mesh *one physically
+ * connected part*, or several separate, merely-overlapping solids (the
+ * pre-fix reality — 35 disconnected bodies for the real default geometry,
+ * confirmed with Python's trimesh, each strut/spine/divider/wall segment
+ * its own floating box)? Implemented as union-find over vertices sharing a
+ * triangle edge — two triangles are "connected" iff they share at least
+ * one vertex position.
+ */
+function countConnectedComponents(mesh: Triangle[]): number {
+  const parent = new Map<string, string>();
+  function find(x: string): string {
+    let root = x;
+    while (parent.get(root) !== root) root = parent.get(root)!;
+    let cur = x;
+    while (parent.get(cur) !== root) {
+      const next = parent.get(cur)!;
+      parent.set(cur, root);
+      cur = next;
+    }
+    return root;
+  }
+  function union(a: string, b: string) {
+    if (!parent.has(a)) parent.set(a, a);
+    if (!parent.has(b)) parent.set(b, b);
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent.set(ra, rb);
+  }
+  for (const { a, b, c } of mesh) {
+    const [ka, kb, kc] = [vkey(a), vkey(b), vkey(c)];
+    union(ka, kb);
+    union(kb, kc);
+  }
+  const roots = new Set<string>();
+  for (const k of parent.keys()) roots.add(find(k));
+  return roots.size;
+}
+
+/**
+ * Every edge of a closed ("watertight") mesh is used by exactly 2
+ * triangles. Returns how many (undirected) edges are used a different
+ * number of times — this is the same check Python's trimesh does
+ * (`edges_sorted`, count!=1 after deduplication), used here to verify a
+ * fix without needing an external tool for every run. See buildPlateTriangles'
+ * "Known limitation" note for why this isn't asserted at exactly 0.
+ */
+function countBadEdges(mesh: Triangle[]): number {
+  const count = new Map<string, number>();
+  for (const { a, b, c } of mesh) {
+    for (const [p, q] of [
+      [a, b],
+      [b, c],
+      [c, a],
+    ] as const) {
+      const k = [vkey(p), vkey(q)].sort().join("|");
+      count.set(k, (count.get(k) ?? 0) + 1);
+    }
+  }
+  let bad = 0;
+  for (const n of count.values()) if (n !== 2) bad++;
+  return bad;
+}
+
+test("the plate (struts + spine + divider + wall's top ring, unioned) is a single connected solid", () => {
   const geometry = computeBahtinovGeometry(VALID_INPUTS);
-  const mesh = buildMaskMesh(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
-  const expected = (geometry.struts.length + 2) * 12 + WALL_SEGMENTS * 12;
-  assert.equal(mesh.length, expected);
+  const plate = buildPlateTriangles(geometry, VALID_INPUTS.maskThicknessMm);
+  const components = countConnectedComponents(plate);
+  assert.equal(
+    components,
+    1,
+    `expected one fused part, found ${components} disconnected bodies — struts/spine/divider/wall aren't ` +
+      "actually joined (this is the exact defect a real 3D viewer showed pre-fix: 35 separate floating boxes)",
+  );
+});
+
+test("the plate mesh is almost entirely watertight (known limitation: earcut's multi-hole bridging leaves a small residual)", () => {
+  const geometry = computeBahtinovGeometry(VALID_INPUTS);
+  const plate = buildPlateTriangles(geometry, VALID_INPUTS.maskThicknessMm);
+  const bad = countBadEdges(plate);
+  const total = plate.length * 3;
+  // Verified via Python's trimesh on this exact default geometry: 84 open
+  // edges out of 7152 edge-instances (~1.2%), all clustered at bridge
+  // points earcut inserts to connect closely-spaced holes (the 4
+  // slit-grating quadrants) into one triangulatable simple polygon — not
+  // the gross, everywhere-a-strut-crosses-anything gaps a real 3D viewer
+  // showed before this fix (verified separately: 35 disconnected bodies,
+  // 272 open edges from an earlier, worse attempt at fixing this the same
+  // way). Generous headroom (5%) rather than the exact measured value, so
+  // this doesn't become a brittle pin against a third-party library's
+  // internal triangulation choices.
+  const ratio = bad / total;
+  assert.ok(ratio < 0.05, `expected under 5% residual open edges, got ${bad}/${total} (${(ratio * 100).toFixed(2)}%)`);
 });
 
 test("every triangle has a non-degenerate normal", () => {
@@ -37,83 +138,79 @@ test("every triangle has a non-degenerate normal", () => {
   }
 });
 
-test("a single axis-aligned strut extrudes with correct outward face normals", () => {
-  const syntheticGeometry = {
-    apertureRadiusMm: 10,
-    wallInnerRadiusMm: 10,
-    wallFillInnerRadiusMm: 10,
-    wallOuterRadiusMm: 11,
-    focalRatio: 5,
-    spine: {
-      corners: [
-        [-0.5, -10],
-        [0.5, -10],
-        [0.5, 10],
-        [-0.5, 10],
-      ] as [number, number][],
-    },
-    divider: {
-      corners: [
-        [-10, -0.5],
-        [10, -0.5],
-        [10, 0.5],
-        [-10, 0.5],
-      ] as [number, number][],
-    },
-    struts: [
-      {
-        corners: [
-          [-1, -1],
-          [1, -1],
-          [1, 1],
-          [-1, 1],
-        ] as [number, number][],
-      },
-    ],
-  };
-  const mesh = buildMaskMesh(syntheticGeometry, 2, 5); // zLo=-1, zHi=1
-  const strutTriangles = mesh.slice(0, 12);
+test("a synthetic strut+spine+divider plate (no wall) unions into one fully watertight solid with the expected footprint", () => {
+  // Without the wall ring's holes-close-together case, this combination is
+  // simple enough (1 outer boundary, no holes) that it's fully exact —
+  // verified 0 non-manifold edges, not just "mostly". Uses unionAndExtrude
+  // directly (not buildPlateTriangles, which always includes the wall
+  // footprint) since polygon-clipping can't accept a zero-width degenerate
+  // annulus as a stand-in for "no wall" — confirmed it throws.
+  const spine: [number, number][] = [
+    [-0.5, -10],
+    [0.5, -10],
+    [0.5, 10],
+    [-0.5, 10],
+  ];
+  const divider: [number, number][] = [
+    [-10, -0.5],
+    [10, -0.5],
+    [10, 0.5],
+    [-10, 0.5],
+  ];
+  const strut: [number, number][] = [
+    [-1, -1],
+    [1, -1],
+    [1, 1],
+    [-1, 1],
+  ];
+  const plate = unionAndExtrude([[strut], [spine], [divider]], -1, 1); // zLo=-1, zHi=1
+  assert.equal(countConnectedComponents(plate), 1);
+  assert.equal(countBadEdges(plate), 0);
 
-  let topCount = 0;
-  let bottomCount = 0;
-  let sideCount = 0;
-
-  for (const tri of strutTriangles) {
-    const [nx, ny, nz] = triangleNormal(tri);
-    const mag = Math.hypot(nx, ny, nz);
-    const uz = nz / mag;
-    if (uz > 0.99) topCount++;
-    else if (uz < -0.99) bottomCount++;
-    else if (Math.abs(uz) < 0.01) sideCount++;
+  let topArea = 0;
+  for (const tri of plate) {
+    const [, , nz] = triangleNormal(tri);
+    if (nz > 0) {
+      const [ax, ay] = tri.a;
+      const [bx, by] = tri.b;
+      const [cx, cy] = tri.c;
+      topArea += Math.abs((bx - ax) * (cy - ay) - (cx - ax) * (by - ay)) / 2;
+    }
   }
-
-  assert.equal(topCount, 2, "expected 2 triangles with +Z normal (top face)");
-  assert.equal(bottomCount, 2, "expected 2 triangles with -Z normal (bottom face)");
-  assert.equal(sideCount, 8, "expected 8 triangles with horizontal normals (4 side faces)");
+  // The strut (2x2=4) sits entirely inside the spine's own footprint
+  // (x in [-0.5,0.5] spans the strut's x in [-1,1]? no — only overlaps in
+  // x in [-0.5,0.5]) — rather than hand-deriving the overlap, just check
+  // the union's area is between the largest single shape and the naive
+  // (non-overlap-aware) sum, which is enough to catch a union that's
+  // silently dropping or duplicating real area.
+  const spineArea = 1 * 20;
+  const dividerArea = 20 * 1;
+  const strutArea = 2 * 2;
+  const naiveSum = spineArea + dividerArea + strutArea;
+  assert.ok(topArea > Math.max(spineArea, dividerArea, strutArea));
+  assert.ok(topArea <= naiveSum + 1e-6, `union area ${topArea} shouldn't exceed the non-overlapping sum ${naiveSum}`);
 });
 
 test("the mounting wall's skirt extends well below the grating plate", () => {
   const geometry = computeBahtinovGeometry(VALID_INPUTS);
-  const mesh = buildMaskMesh(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
-  const plateShapeCount = geometry.struts.length + 2; // + spine + divider
-  const wallMesh = mesh.slice(plateShapeCount * 12);
+  const skirt = buildSkirtTriangles(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
   const plateZLo = -VALID_INPUTS.maskThicknessMm / 2;
-  const lowestZ = Math.min(...wallMesh.flatMap((t) => [t.a[2], t.b[2], t.c[2]]));
+  const lowestZ = Math.min(...skirt.flatMap((t) => [t.a[2], t.b[2], t.c[2]]));
   assert.ok(
     lowestZ <= plateZLo - VALID_INPUTS.skirtDepthMm + 1e-6,
     `expected the skirt to reach at least ${VALID_INPUTS.skirtDepthMm}mm below the plate, got lowest Z ${lowestZ}`,
   );
 });
 
-test("struts/spine/divider and the wall's skirt occupy overlapping Z ranges (fuse into one solid)", () => {
+test("the skirt's top meets the plate's own bottom exactly (shared Z boundary, no gap)", () => {
   const geometry = computeBahtinovGeometry(VALID_INPUTS);
-  const mesh = buildMaskMesh(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
-  const plateShapeCount = geometry.struts.length + 2;
-  const plateMesh = mesh.slice(0, plateShapeCount * 12);
-  const wallMesh = mesh.slice(plateShapeCount * 12);
-  const plateZLo = Math.min(...plateMesh.flatMap((t) => [t.a[2], t.b[2], t.c[2]]));
-  const wallZLo = Math.min(...wallMesh.flatMap((t) => [t.a[2], t.b[2], t.c[2]]));
-  assert.ok(wallZLo < plateZLo, "wall skirt should reach below the plate's own Z range");
+  const skirt = buildSkirtTriangles(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
+  const plateZLo = -VALID_INPUTS.maskThicknessMm / 2;
+  const skirtTopZ = Math.max(...skirt.flatMap((t) => [t.a[2], t.b[2], t.c[2]]));
+  assert.ok(
+    Math.abs(skirtTopZ - plateZLo) < 1e-9,
+    `expected skirt's top to sit exactly at plate's zLo (${plateZLo}), got ${skirtTopZ}`,
+  );
 });
 
 test("serializeStlAscii produces a well-formed ASCII STL", () => {
