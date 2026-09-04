@@ -191,6 +191,24 @@ test("a synthetic strut+spine+divider plate (no wall) unions into one fully wate
   assert.ok(topArea <= naiveSum + 1e-6, `union area ${topArea} shouldn't exceed the non-overlapping sum ${naiveSum}`);
 });
 
+test("the skirt is a single, fully watertight solid (no per-segment seams)", () => {
+  // Regression test for a real bug found via a live 3D viewer + trimesh:
+  // buildSkirtTriangles used to build the mounting collar as WALL_SEGMENTS
+  // (96) independently-closed prism boxes (via a since-removed
+  // buildWallTriangles/extrudeQuad pair), each duplicating its own radial
+  // end-caps rather than sharing one real boundary with its neighbour —
+  // 384 non-manifold edges out of 3456 (~11%) on this exact geometry,
+  // several with real multi-mm lengths (not degenerate slivers), visible
+  // in a 3D viewer as gaps/creases running down the collar. Routing the
+  // skirt through the same earcut-based unionAndExtrude the plate uses
+  // (see buildSkirtTriangles) fixes this to a fully exact 0 bad edges,
+  // verified with Python's trimesh on the real default geometry.
+  const geometry = computeBahtinovGeometry(VALID_INPUTS);
+  const skirt = buildSkirtTriangles(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
+  assert.equal(countConnectedComponents(skirt), 1);
+  assert.equal(countBadEdges(skirt), 0, "the skirt (a single annulus, no close-together holes) should be exactly watertight, unlike the plate's small documented residual");
+});
+
 test("the mounting wall's skirt extends well below the grating plate", () => {
   const geometry = computeBahtinovGeometry(VALID_INPUTS);
   const skirt = buildSkirtTriangles(geometry, VALID_INPUTS.maskThicknessMm, VALID_INPUTS.skirtDepthMm);
