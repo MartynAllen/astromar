@@ -207,7 +207,7 @@ const DEG = Math.PI / 180;
 // divider, or wall at a single point is exactly the failure mode this
 // design replaces; a real volumetric overlap is what actually fuses two
 // independently-triangulated solids into one printable part.
-const CONNECT_OVERLAP_MM = 2;
+export const CONNECT_OVERLAP_MM = 2;
 
 export function computeBahtinovGeometry(inputs: BahtinovInputs): BahtinovGeometry {
   const {
@@ -324,17 +324,35 @@ export function computeBahtinovGeometry(inputs: BahtinovInputs): BahtinovGeometr
       // Clip at both edges of the strut band, not just its centerline —
       // the circle constraint is nonlinear in d, so clipping only at
       // dCenter would let the outer edge's corners poke past whichever
-      // boundary is curved. Using the tighter of the two edges keeps the
-      // whole rectangle safely inside the true (non-rectangular) clipped
-      // region, at the cost of a strut that's a hair shorter than
-      // theoretically possible at one edge.
-      const [tLo, tHi] = intersect3(
-        clipZone(dInner, theta, strutClipRadius, zone),
-        clipZone(dOuter, theta, strutClipRadius, zone),
-        [-Infinity, Infinity],
-      );
+      // boundary is curved. Each edge's own clipZone() call already
+      // correctly accounts for the curved boundary at that edge's own
+      // d-offset, so each edge is used independently here rather than
+      // merged into one shared t-range.
+      //
+      // An earlier version intersected the two edges' ranges (tLo/tHi =
+      // the tighter of the two) and used that single shared cut for both
+      // — reasoned as "a hair shorter than theoretically possible at one
+      // edge," but that's not what actually happens whenever the two
+      // edges are governed by *different* constraints (e.g. one edge
+      // reaches the spine, the other the divider, near the spine/divider
+      // corner). The shared cut is only as generous as whichever edge's
+      // own constraint is tighter — dragging the *other* edge's corner
+      // to that same point overshoots past its own target, well beyond
+      // CONNECT_OVERLAP_MM's intended 2mm, right out the far side of
+      // where it needs to reach. Confirmed on the real default geometry:
+      // corners that should embed 2mm into the spine were landing as
+      // shallow as 0.27mm — thin enough to look, in a 3D viewer, like
+      // the strut doesn't fully connect to the central bar. Clipping
+      // each edge to its own bound instead means every corner reaches
+      // its own full intended overlap, at the cost of the strut's end
+      // being a slight bevel (dInner and dOuter no longer share the same
+      // t) rather than a perfect perpendicular cut — invisible at print
+      // scale and never a problem for a solid, ≥2mm-wide strut.
+      const [tLoInner, tHiInner] = clipZone(dInner, theta, strutClipRadius, zone);
+      const [tLoOuter, tHiOuter] = clipZone(dOuter, theta, strutClipRadius, zone);
 
-      if (!(tLo < tHi) || !Number.isFinite(tLo) || !Number.isFinite(tHi)) continue;
+      if (!(tLoInner < tHiInner) || !Number.isFinite(tLoInner) || !Number.isFinite(tHiInner)) continue;
+      if (!(tLoOuter < tHiOuter) || !Number.isFinite(tLoOuter) || !Number.isFinite(tHiOuter)) continue;
 
       // Every slat is now anchored to solid structure at both ends by
       // construction (see clipZone), but a slat can still come out too
@@ -343,10 +361,10 @@ export function computeBahtinovGeometry(inputs: BahtinovInputs): BahtinovGeometr
       // hand a slicer a fragile, near-zero-length fragment.
       const strutWidth = halfStrutWidth * 2;
       const minLength = Math.max(2 * strutWidth, 5);
-      if (tHi - tLo < minLength) continue;
+      if (Math.min(tHiInner - tLoInner, tHiOuter - tLoOuter) < minLength) continue;
 
       struts.push({
-        corners: [toXY(dInner, tLo), toXY(dOuter, tLo), toXY(dOuter, tHi), toXY(dInner, tHi)],
+        corners: [toXY(dInner, tLoInner), toXY(dOuter, tLoOuter), toXY(dOuter, tHiOuter), toXY(dInner, tHiInner)],
       });
     }
   }

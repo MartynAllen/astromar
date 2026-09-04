@@ -4,6 +4,7 @@ import {
   computeBahtinovGeometry,
   validateBahtinovInputs,
   DEFAULT_ADVANCED,
+  CONNECT_OVERLAP_MM,
   type BahtinovInputs,
   type StrutRect,
 } from "./geometry";
@@ -142,6 +143,57 @@ test("every slat is genuinely anchored to the spine, divider, or wall at both en
       endTouchesStructure(endB, geometry, spineHalf, dividerHalf),
       `slat end B ${JSON.stringify(endB)} touches neither spine, divider, nor wall`,
     );
+  }
+});
+
+test("every slat corner near the spine or divider reaches a real, non-hairline overlap depth", () => {
+  // Regression test for a real bug found via a live 3D viewer: "the cross
+  // struts don't fully connect to the central bar." endTouchesStructure
+  // above only checks a corner is *inside* the spine/divider footprint at
+  // all (any depth > 0 passes) — too lenient to catch a corner that
+  // technically overlaps but only by a hairline.
+  //
+  // The actual bug: dInner and dOuter used to be forced through a single
+  // shared t cut (the tighter of the two edges' own constraints). Whenever
+  // that shared constraint came from a *different* member than the one a
+  // given corner was meant to embed into (e.g. one edge's own bound came
+  // from the divider, dragging the spine-bound edge along to the same t),
+  // that corner overshot past its own target depth — confirmed on the real
+  // default geometry: corners meant to embed CONNECT_OVERLAP_MM (2mm) into
+  // the spine landing as shallow as 0.27mm, thin enough to look, in a 3D
+  // viewer, like the strut doesn't reach the bar at all. Each edge is now
+  // clipped independently (see computeBahtinovGeometry), so every corner
+  // whose nearest connection is the spine or divider should reach close to
+  // the full intended depth.
+  const geometry = computeBahtinovGeometry(VALID_INPUTS);
+  const spineHalf = VALID_INPUTS.spineWidthMm / 2;
+  const dividerHalf = VALID_INPUTS.dividerWidthMm / 2;
+  // A generous floor, not the exact 2mm target — some corners legitimately
+  // connect to the wall instead (excluded below), and slat pitch/width can
+  // still trim a corner's own reach a little short of the full overlap
+  // without it being a hairline connection.
+  const MIN_DEPTH_MM = 1;
+
+  for (const strut of geometry.struts) {
+    for (const [x, y] of strut.corners) {
+      const r = Math.hypot(x, y);
+      const touchesWall = r >= geometry.apertureRadiusMm - 1e-6;
+      if (touchesWall) continue; // wall connections aren't this test's concern
+
+      const spineDepth = spineHalf - Math.abs(x);
+      const dividerDepth = dividerHalf - Math.abs(y);
+      const bestDepth = Math.max(spineDepth, dividerDepth);
+      // Only assert on corners that are meant to connect here at all —
+      // an interior corner far from both bars isn't a connection point.
+      if (bestDepth <= 0) continue;
+
+      assert.ok(
+        bestDepth >= MIN_DEPTH_MM,
+        `corner (${x.toFixed(3)}, ${y.toFixed(3)}) only embeds ${bestDepth.toFixed(3)}mm into the spine/divider ` +
+          `(expected at least ${MIN_DEPTH_MM}mm, target ${CONNECT_OVERLAP_MM}mm) — a hairline connection like this ` +
+          "is exactly what looked like a disconnected strut in a real 3D viewer.",
+      );
+    }
   }
 });
 
