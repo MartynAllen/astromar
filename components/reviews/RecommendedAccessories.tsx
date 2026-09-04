@@ -14,7 +14,9 @@ export default function RecommendedAccessories({
         Recommended Accessories
       </p>
       <p className="mt-2 text-sm text-star-500">
-        Worth pairing with this if you&apos;re buying it.
+        {accessories.length > 1
+          ? "Worth pairing with these if you're buying it."
+          : "Worth pairing with this if you're buying it."}
       </p>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         {accessories.map((accessory) => (
