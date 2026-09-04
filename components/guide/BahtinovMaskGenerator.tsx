@@ -187,36 +187,33 @@ function BahtinovPreview({
   const ring = (r: number) =>
     `M ${r},0 A ${r},${r} 0 1,0 ${-r},0 A ${r},${r} 0 1,0 ${r},0 Z`;
 
-  // A stroke-per-shape approach (bridging the antialiasing seam between two
-  // adjacent <polygon>s with a matching-color outline) turned out to still
-  // show a hairline gap in some browsers/zoom levels — stroke width is
-  // screen-space and DPI-dependent, so "thin enough to be invisible, thick
-  // enough to bridge the seam" isn't a fixed value. Rendering every shape as
-  // one combined <path> instead removes the seam at the source: there's no
-  // longer a boundary between separately-antialiased elements at all.
+  // Two approaches were tried and rejected here before this one:
   //
-  // That's only safe with `fillRule="nonzero"` if every subpath winds the
-  // same direction — two overlapping shapes with opposite winding would
-  // otherwise cancel out in their overlap region, creating a real hole
-  // (confirmed: StrutRect's corners are NOT guaranteed consistently wound).
-  // toCCW() normalizes each shape before it's combined.
-  function toCCW(corners: [number, number][]): [number, number][] {
-    let signedArea = 0;
-    for (let i = 0; i < corners.length; i++) {
-      const [x1, y1] = corners[i];
-      const [x2, y2] = corners[(i + 1) % corners.length];
-      signedArea += x1 * y2 - x2 * y1;
-    }
-    return signedArea < 0 ? [...corners].reverse() : corners;
-  }
-  const subpath = (corners: [number, number][]) =>
-    `M ${toCCW(corners)
-      .map(([x, y]) => `${x},${y}`)
-      .join(" L ")} Z`;
-
-  const solidPath = [spine.corners, divider.corners, ...struts.map((s) => s.corners)]
-    .map(subpath)
-    .join(" ");
+  // 1. A stroke-per-shape outline (bridging the antialiasing seam between
+  //    two adjacent, separately-rendered shapes with a matching-color
+  //    stroke) at 0.5mm width — too thin; a real seam remained visible at
+  //    the strut-to-wall connections.
+  // 2. Merging every shape into ONE <path> with multiple subpaths and
+  //    fillRule="nonzero" (avoiding inter-shape seams entirely, since
+  //    there's no longer a boundary between separately-antialiased
+  //    elements) — this actually made things worse: confirmed directly
+  //    (isolating a single strut's own subpath rendered correctly, but the
+  //    same data cut short once combined with the other ~33 subpaths into
+  //    one compound path) that SVG renderers (both librsvg and real
+  //    browsers) can mis-rasterize a single <path> with this many
+  //    subpaths, silently dropping area near the far/complex end of some
+  //    shapes. Not a winding bug — a real rasterizer limitation with large
+  //    multi-subpath fills.
+  //
+  // The fix that's actually robust: keep every shape as its own separate
+  // element (sidestepping the multi-subpath rasterizer issue), and use a
+  // stroke wide enough that no realistic antialiasing seam can survive it.
+  // A stroke is centered on the path, so this only grows each shape's
+  // visible silhouette by half its width in each direction — 0.6mm is
+  // imperceptible against struts that are several mm wide and tens of mm
+  // long, but comfortably larger than any sub-pixel rendering seam.
+  const STROKE_WIDTH = 1.2;
+  const solidShapeProps = { className: "fill-nebula-teal-400 stroke-nebula-teal-400", strokeWidth: STROKE_WIDTH };
 
   return (
     <svg
@@ -234,7 +231,11 @@ function BahtinovPreview({
           fillRule="evenodd"
           className="fill-void-600"
         />
-        <path d={solidPath} fillRule="nonzero" className="fill-nebula-teal-400" />
+        <polygon points={spine.corners.map(([x, y]) => `${x},${y}`).join(" ")} {...solidShapeProps} />
+        <polygon points={divider.corners.map(([x, y]) => `${x},${y}`).join(" ")} {...solidShapeProps} />
+        {struts.map((strut, i) => (
+          <polygon key={i} points={strut.corners.map(([x, y]) => `${x},${y}`).join(" ")} {...solidShapeProps} />
+        ))}
       </g>
     </svg>
   );
