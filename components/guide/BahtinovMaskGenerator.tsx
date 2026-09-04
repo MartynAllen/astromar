@@ -203,19 +203,33 @@ function BahtinovPreview({
           fillRule="evenodd"
           className="fill-void-600"
         />
+        {/* Every shape here genuinely fuses into one solid — confirmed
+            point-for-point against the real geometry — but SVG antialiases
+            each <polygon>'s edges independently, so two shapes that only
+            just touch (rather than overlap by area, as at the strut-to-
+            spine/divider connection points) can still show a hairline seam
+            of background bleeding through between their soft edges. A
+            matching stroke, thin enough to be invisible on any shape's own
+            outer silhouette, closes that seam without needing to merge
+            these into one path (which would risk real holes wherever two
+            overlapping shapes happen to wind in opposite directions —
+            StrutRect's own winding isn't guaranteed). */}
         <polygon
           points={spine.corners.map(([x, y]) => `${x},${y}`).join(" ")}
-          className="fill-nebula-teal-400"
+          className="fill-nebula-teal-400 stroke-nebula-teal-400"
+          strokeWidth={0.5}
         />
         <polygon
           points={divider.corners.map(([x, y]) => `${x},${y}`).join(" ")}
-          className="fill-nebula-teal-400"
+          className="fill-nebula-teal-400 stroke-nebula-teal-400"
+          strokeWidth={0.5}
         />
         {struts.map((strut, i) => (
           <polygon
             key={i}
             points={strut.corners.map(([x, y]) => `${x},${y}`).join(" ")}
-            className="fill-nebula-teal-400"
+            className="fill-nebula-teal-400 stroke-nebula-teal-400"
+            strokeWidth={0.5}
           />
         ))}
       </g>
