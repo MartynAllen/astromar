@@ -31,6 +31,26 @@ test("prefers the FITS header hidden in EXIF over filename parsing", () => {
   assert.equal(typeof result.latitude, "number");
 });
 
+test("resolves a bare Caldwell catalog ID (no ' - common name' in OBJECT) via the lookup table", () => {
+  // Real-world case: an ASIAIR Plus + EQMod mount capture, plate-solved and
+  // stacked in Siril, whose FITS header names the target by its Caldwell
+  // number alone — unlike the Messier/NGC/IC fixture above, OBJECT here
+  // carries no " - Common Name" suffix, so this only resolves if the
+  // catalogue lookup table knows "C 4" (Caldwell 4 = NGC 7023).
+  const header = [
+    "SIMPLE  = T / file does conform to FITS standard",
+    "OBJECT  = 'C 4     '",
+    "EXPTIME = 180",
+    "STACKCNT= 50",
+  ].join("\n");
+  const result = resolveShotDetails("result.jpg", { imageDescription: header });
+
+  assert.equal(result.tier, "fits-header");
+  assert.equal(result.needsReview, false);
+  assert.equal(result.targetCatalogId, "C 4");
+  assert.equal(result.targetCommonName, "Iris Nebula");
+});
+
 test("reads the Seestar MakerNote JSON for Lunar shots", () => {
   const filename = "2026-06-20-221356-Lunar.JPG";
   const makerNote = JSON.stringify({

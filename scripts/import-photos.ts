@@ -15,6 +15,7 @@ import path from "node:path";
 import exifr from "exifr";
 import { writeClient } from "../sanity/client";
 import { resolveShotDetails } from "../lib/astro/resolveShotDetails";
+import { looksLikeFitsHeader } from "../lib/astro/parseFitsHeader";
 import { formatShotSummary } from "../lib/astro/shotDetails";
 import { applyWatermark } from "./lib/watermark";
 
@@ -49,11 +50,26 @@ function formatDateForTitle(iso: string | undefined): string | undefined {
 
 async function extractExif(buf: Buffer) {
   const out = await exifr
-    .parse(buf, { makerNote: true })
+    .parse(buf, { makerNote: true, iptc: true, xmp: true })
     .catch(() => null as Record<string, unknown> | null);
+
+  // Siril's JPEG export dumps the full FITS header as plain text, but not
+  // always into the same field — depending on export settings it's landed in
+  // the standard EXIF ImageDescription tag, the IPTC Caption (hard-capped at
+  // 2000 bytes by the IPTC IIM spec, silently truncating everything after —
+  // including OBJECT on a real capture, which sits past that point), or the
+  // XMP dc:description (no such cap). Prefer whichever source actually looks
+  // like a full FITS header, richest first, so parseFitsHeader's later regex
+  // extraction doesn't silently come up empty against a truncated copy.
+  const xmpDescription = (out?.description as { value?: string } | undefined)?.value;
+  const imageDescription =
+    [xmpDescription, out?.Caption as string | undefined, out?.ImageDescription as string | undefined].find(
+      looksLikeFitsHeader,
+    ) ?? (out?.ImageDescription as string | undefined);
+
   return {
     make: out?.Make as string | undefined,
-    imageDescription: out?.ImageDescription as string | undefined,
+    imageDescription,
     makerNote: out?.makerNote as string | undefined,
     dateTimeOriginal: out?.DateTimeOriginal as string | Date | undefined,
     gpsLatitude: out?.latitude as number | undefined,

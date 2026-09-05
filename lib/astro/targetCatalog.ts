@@ -9,6 +9,7 @@ const COMMON_NAMES: Record<string, string> = {
   "IC 1805": "Heart Nebula",
   "NGC 7380": "Wizard Nebula",
   "NGC 6960": "Western Veil Nebula",
+  "C 4": "Iris Nebula", // Caldwell 4 = NGC 7023, catalogued separately by Siril/PixInsight plate solvers
 };
 
 export function lookupCommonName(catalogId: string): string | undefined {
