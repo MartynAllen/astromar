@@ -6,7 +6,7 @@ const STATIC_ROUTES = [
   "",
   "/gallery",
   "/reviews",
-  "/guide",
+  "/learn",
   "/calendar",
   "/research",
   "/about",
@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       "pathPrefix": select(
         _type == "astroPhoto" => "/gallery",
         _type == "reviewPost" => "/reviews",
-        _type == "guideArticle" => "/guide",
+        _type == "guideArticle" => "/learn",
         _type == "researchProject" => "/research"
       ),
       "slug": slug.current,

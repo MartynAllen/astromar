@@ -22,9 +22,9 @@ const SECTION_TEASERS = [
     color: "group-hover:text-nebula-violet-400",
   },
   {
-    href: "/guide",
-    title: "Beginner's Guide",
-    body: "Starting point for anyone new to astrophotography, written from the smart-telescope side of the hobby.",
+    href: "/learn",
+    title: "Learn",
+    body: "How-to guides for anyone new to astrophotography, plus explainers on the concepts behind the hobby.",
     color: "group-hover:text-nebula-amber-400",
   },
   {

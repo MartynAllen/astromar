@@ -11,7 +11,7 @@ test("isSafeHref accepts ordinary http(s)/mailto/tel links", () => {
 
 test("isSafeHref accepts relative paths and in-page anchors", () => {
   assert.equal(isSafeHref("/gallery"), true);
-  assert.equal(isSafeHref("/guide/your-first-telescope"), true);
+  assert.equal(isSafeHref("/learn/your-first-telescope"), true);
   assert.equal(isSafeHref("#section"), true);
 });
 

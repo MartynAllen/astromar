@@ -39,6 +39,16 @@ export default defineType({
       type: "string",
       options: { list: ["Beginner", "Intermediate", "Advanced"] },
     }),
+    defineField({
+      name: "contentType",
+      title: "Content type",
+      type: "string",
+      options: { list: ["How-To", "Explainer"] },
+      initialValue: "How-To",
+      validation: (r) => r.required(),
+      description:
+        'How-To: task-oriented, "how do I focus with a Bahtinov mask". Explainer: conceptual, "what\'s the difference between an emission and reflection nebula". Drives the filter pills on /learn.',
+    }),
     defineField({ name: "summary", title: "Summary", type: "text", rows: 2 }),
     defineField({
       name: "body",

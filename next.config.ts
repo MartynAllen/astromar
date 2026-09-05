@@ -39,6 +39,12 @@ const nextConfig: NextConfig = {
     loader: "custom",
     loaderFile: "./lib/sanityLoader.ts",
   },
+  async redirects() {
+    // The Guide section was renamed to Learn (to make room for conceptual
+    // explainer posts alongside the existing how-to guides) — this keeps
+    // any indexed/bookmarked /guide links working rather than 404ing.
+    return [{ source: "/guide/:path*", destination: "/learn/:path*", permanent: true }];
+  },
   async headers() {
     return [
       {

@@ -29,12 +29,12 @@ export default defineType({
       name: "relatedGuideHref",
       title: "Related guide link",
       type: "string",
-      description: 'Optional internal link, e.g. "/guide/bahtinov-mask-focusing", shown as "See our guide". Must start with "/" — without it, this renders as a link relative to the review\'s own page instead of the site root, and 404s (this happened for real on the Askar 71F review).',
+      description: 'Optional internal link, e.g. "/learn/bahtinov-mask-focusing", shown as "See our guide". Must start with "/" — without it, this renders as a link relative to the review\'s own page instead of the site root, and 404s (this happened for real on the Askar 71F review).',
       validation: (r) =>
         r.custom((value: string | undefined) =>
           !value || value.startsWith("/")
             ? true
-            : 'Must start with "/" (e.g. "/guide/bahtinov-mask-focusing") — otherwise it links relative to this review\'s own page and 404s.',
+            : 'Must start with "/" (e.g. "/learn/bahtinov-mask-focusing") — otherwise it links relative to this review\'s own page and 404s.',
         ),
     }),
   ],

@@ -16,19 +16,19 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata(props: PageProps<"/guide/[slug]">): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<"/learn/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
   const article = await getGuideArticleBySlug(slug);
   if (!article) return {};
   return buildMetadata({
     title: article.seo?.metaTitle || article.title,
     description: article.seo?.metaDescription || article.summary,
-    path: `/guide/${slug}`,
+    path: `/learn/${slug}`,
     image: article.seo?.ogImage,
   });
 }
 
-export default async function GuideArticlePage(props: PageProps<"/guide/[slug]">) {
+export default async function LearnArticlePage(props: PageProps<"/learn/[slug]">) {
   const { slug } = await props.params;
   const article = await getGuideArticleBySlug(slug);
   if (!article) notFound();
@@ -39,21 +39,20 @@ export default async function GuideArticlePage(props: PageProps<"/guide/[slug]">
         data={articleJsonLd({
           headline: article.title,
           description: article.summary,
-          path: `/guide/${slug}`,
+          path: `/learn/${slug}`,
           datePublished: article.publishedAt,
         })}
       />
       <Breadcrumbs
         items={[
-          { name: "Guide", path: "/guide" },
-          { name: article.title, path: `/guide/${slug}` },
+          { name: "Learn", path: "/learn" },
+          { name: article.title, path: `/learn/${slug}` },
         ]}
       />
-      <BackLink href="/guide" label="Guide" />
+      <BackLink href="/learn" label="Learn" />
 
       <p className="mt-4 font-mono text-xs uppercase tracking-widest text-nebula-amber-400">
-        {article.section}
-        {article.difficulty ? ` · ${article.difficulty}` : ""}
+        {[article.contentType, article.section, article.difficulty].filter(Boolean).join(" · ")}
       </p>
       <h1 className="mt-2 font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{article.title}</h1>
       {article.summary && <p className="mt-3 text-star-500">{article.summary}</p>}

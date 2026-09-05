@@ -320,6 +320,7 @@ export async function getReviewBySlug(
 }
 
 export type GuideDifficulty = "Beginner" | "Intermediate" | "Advanced";
+export type GuideContentType = "How-To" | "Explainer";
 
 export interface GuideArticleSummary {
   _id: string;
@@ -328,6 +329,7 @@ export interface GuideArticleSummary {
   section: string;
   order?: number;
   difficulty?: GuideDifficulty;
+  contentType?: GuideContentType;
   summary?: string;
 }
 
@@ -344,7 +346,7 @@ export interface GuideArticleDetail extends GuideArticleSummary {
 export async function getAllGuideArticles(): Promise<GuideArticleSummary[]> {
   return client.fetch(
     /* groq */ `*[_type == "guideArticle"] | order(section asc, order asc) {
-      _id, title, slug, section, order, difficulty, summary
+      _id, title, slug, section, order, difficulty, contentType, summary
     }`,
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },
@@ -364,7 +366,7 @@ export async function getGuideArticleBySlug(
 ): Promise<GuideArticleDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "guideArticle" && slug.current == $slug][0]{
-      _id, title, slug, section, order, difficulty, summary, body, publishedAt, seo
+      _id, title, slug, section, order, difficulty, contentType, summary, body, publishedAt, seo
     }`,
     { slug },
     { next: { revalidate: REVALIDATE_SECONDS } },
