@@ -112,7 +112,7 @@ export default async function AboutPage() {
       </div>
 
       {about?.gear && about.gear.length > 0 && (
-        <div className="mt-12">
+        <div className="mx-auto mt-12 max-w-2xl">
           <h2 className="font-mono text-3xl uppercase tracking-wide text-star-100">The gear</h2>
           <div className="mt-4">
             <AffiliateDisclosureBanner />
@@ -208,7 +208,7 @@ export default async function AboutPage() {
         </div>
       )}
 
-      <div className="mt-12 border-t border-void-700 pt-8">
+      <div className="mx-auto mt-12 max-w-2xl border-t border-void-700 pt-8">
         <h2 className="font-mono text-3xl uppercase tracking-wide text-star-100">Support the site</h2>
         <p className="mt-3 text-star-500">
           Astromar doesn&apos;t run ads, and the odd affiliate link barely dents the cost
