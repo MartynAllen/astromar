@@ -94,6 +94,18 @@ export default async function AboutPage() {
       <div className="mx-auto max-w-2xl">
         <Breadcrumbs items={[{ name: "About", path: "/about" }]} />
         <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">About</h1>
+        {about?.gear && about.gear.length > 0 && (
+          <p className="mt-3 font-mono text-xs uppercase tracking-widest text-star-500">
+            Jump to:{" "}
+            <a href="#the-gear" className="underline hover:text-nebula-teal-400">
+              The gear
+            </a>{" "}
+            ·{" "}
+            <a href="#support-the-site" className="underline hover:text-nebula-teal-400">
+              Support the site
+            </a>
+          </p>
+        )}
       </div>
 
       {heroBlock &&
@@ -112,8 +124,12 @@ export default async function AboutPage() {
       </div>
 
       {about?.gear && about.gear.length > 0 && (
-        <div className="mx-auto mt-12 max-w-2xl">
+        <div id="the-gear" className="mx-auto mt-12 max-w-2xl scroll-mt-24">
           <h2 className="font-mono text-3xl uppercase tracking-wide text-star-100">The gear</h2>
+          <p className="mt-3 text-star-500">
+            Everything the two rigs above are actually built from, camera to cabling — with
+            a link to buy the exact thing wherever there&apos;s one worth pointing at.
+          </p>
           <div className="mt-4">
             <AffiliateDisclosureBanner />
           </div>
@@ -167,7 +183,7 @@ export default async function AboutPage() {
                               <p className="mt-1 text-sm text-star-500">{item.notes}</p>
                             )}
                             {item.items && item.items.length > 0 && (
-                              <ul className="mt-2 space-y-1 text-sm text-star-300">
+                              <ul className="mt-2 grid grid-cols-1 gap-x-6 gap-y-1 text-sm text-star-300 sm:grid-cols-2">
                                 {item.items.map((sub) => (
                                   <li key={sub.label} className="flex gap-2">
                                     <span className="text-star-700">·</span>
@@ -180,7 +196,7 @@ export default async function AboutPage() {
                                             href={sub.affiliateLink.url}
                                             target="_blank"
                                             rel="noopener noreferrer sponsored"
-                                            className={`whitespace-nowrap font-mono text-xs uppercase tracking-widest underline underline-offset-2 opacity-80 transition-opacity hover:opacity-100 ${textColor}`}
+                                            className={`whitespace-nowrap font-mono text-xs uppercase tracking-widest underline underline-offset-2 hover:brightness-125 ${textColor}`}
                                           >
                                             Buy →
                                           </a>
@@ -208,7 +224,10 @@ export default async function AboutPage() {
         </div>
       )}
 
-      <div className="mx-auto mt-12 max-w-2xl border-t border-void-700 pt-8">
+      <div
+        id="support-the-site"
+        className="mx-auto mt-12 max-w-2xl scroll-mt-24 border-t border-void-700 pt-8"
+      >
         <h2 className="font-mono text-3xl uppercase tracking-wide text-star-100">Support the site</h2>
         <p className="mt-3 text-star-500">
           Astromar doesn&apos;t run ads, and the odd affiliate link barely dents the cost
