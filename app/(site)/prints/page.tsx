@@ -5,14 +5,27 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
 import { getPrintablePhotos, getPrintProducts } from "@/lib/sanity.queries";
 import { cheapestPrintPriceGBP } from "@/lib/print";
+import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Prints",
-  description:
-    "Fine-art prints of Astromar's own astrophotography — nebulae, galaxies, the moon and the aurora, made to order and shipped UK-wide.",
-};
+const TITLE = "Prints";
+const DESCRIPTION =
+  "Fine-art prints of Astromar's own astrophotography — nebulae, galaxies, the moon and the aurora, made to order and shipped UK-wide.";
+const HERO_SLUG = "aurora-northlew-2024-10-10-twin-pillars";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const photos = await getPrintablePhotos();
+  const heroPhoto =
+    photos.find((p) => p.slug.current === HERO_SLUG) ?? photos.find((p) => p.featured) ?? photos[0];
+  return buildMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    path: "/prints",
+    image: heroPhoto?.mainImage,
+    cropBottom: true,
+  });
+}
 
 export default async function PrintsPage() {
   // A plain .catch(() => []) previously collapsed a genuine fetch failure
@@ -40,7 +53,7 @@ export default async function PrintsPage() {
   // at all, so the page still has a sensible hero if this one is ever
   // pulled from the print catalog.
   const heroPhoto =
-    photos.find((p) => p.slug.current === "aurora-northlew-2024-10-10-twin-pillars") ??
+    photos.find((p) => p.slug.current === HERO_SLUG) ??
     photos.find((p) => p.featured) ??
     photos[0] ??
     null;

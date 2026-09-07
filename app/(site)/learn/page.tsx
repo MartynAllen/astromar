@@ -4,14 +4,24 @@ import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import LearnFilter from "@/components/learn/LearnFilter";
 import { getAllGuideArticles, getHeroPhoto } from "@/lib/sanity.queries";
+import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Learn",
-  description:
-    "Practical how-to guides and explainers on the concepts behind astrophotography, from the smart-telescope side of the hobby.",
-};
+const TITLE = "Learn";
+const DESCRIPTION =
+  "Practical how-to guides and explainers on the concepts behind astrophotography, from the smart-telescope side of the hobby.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const heroPhoto = await getHeroPhoto(2);
+  return buildMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    path: "/learn",
+    image: heroPhoto?.mainImage,
+    cropBottom: true,
+  });
+}
 
 export default async function LearnPage() {
   const [articles, heroPhoto] = await Promise.all([

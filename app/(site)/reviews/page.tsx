@@ -3,14 +3,23 @@ import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import ReviewSearch from "@/components/reviews/ReviewSearch";
 import { getAllReviews, getHeroPhoto } from "@/lib/sanity.queries";
+import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Reviews",
-  description:
-    "Gear reviews for telescopes, filters, and imaging software, from real use.",
-};
+const TITLE = "Reviews";
+const DESCRIPTION = "Gear reviews for telescopes, filters, and imaging software, from real use.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const heroPhoto = await getHeroPhoto(1);
+  return buildMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    path: "/reviews",
+    image: heroPhoto?.mainImage,
+    cropBottom: true,
+  });
+}
 
 export default async function ReviewsPage() {
   const [reviews, heroPhoto] = await Promise.all([

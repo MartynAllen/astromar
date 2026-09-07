@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import PhotoCard from "@/components/gallery/PhotoCard";
@@ -5,8 +6,35 @@ import { heroCropUrl } from "@/sanity/image";
 import { getFeaturedPhotos, getPrintProducts } from "@/lib/sanity.queries";
 import { cheapestPrintPriceGBP } from "@/lib/print";
 import { formatCaptureDate, formatShotSummary } from "@/lib/astro/shotDetails";
+import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
+
+const TITLE = "Astromar";
+const DESCRIPTION =
+  "Deep-sky photography, gear reviews, and beginner's notes from a garden observer.";
+const HERO_SLUG = "andromeda-galaxy-2026-08-12";
+
+// The root domain is the single most-shared link on the whole site (bio
+// links, socials, anywhere someone just says "check out my site") — it's
+// the one page that most needs a real image when it's shared, not just a
+// bare title/description. Root layout.tsx has no default openGraph/twitter
+// block, so without this override the homepage would share with no image
+// at all.
+export async function generateMetadata(): Promise<Metadata> {
+  const featured = await getFeaturedPhotos();
+  const heroPhoto = featured.find((p) => p.slug.current === HERO_SLUG) ?? featured[0];
+  const meta = buildMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    path: "/",
+    image: heroPhoto?.mainImage,
+    cropBottom: true,
+  });
+  // buildMetadata's plain string title would otherwise run through root
+  // layout's "%s — Astromar" template and render as "Astromar — Astromar".
+  return { ...meta, title: { absolute: TITLE } };
+}
 
 const SECTION_TEASERS = [
   {
@@ -52,7 +80,7 @@ export default async function HomePage() {
   // frames, which suit the grid below instead. Falls back to the newest
   // featured photo if that one's ever unfeatured.
   const heroPhoto =
-    featured.find((p) => p.slug.current === "andromeda-galaxy-2026-08-12") ?? featured[0];
+    featured.find((p) => p.slug.current === HERO_SLUG) ?? featured[0];
   const gridPhotos = featured.filter((p) => p._id !== heroPhoto?._id);
   const heroSummary = heroPhoto?.shotDetails
     ? formatShotSummary(heroPhoto.shotDetails)

@@ -11,13 +11,27 @@ import { urlFor, heroCropUrl } from "@/sanity/image";
 import { getAboutPage, getFeaturedPhotos, getSiteSettings, type GearItem } from "@/lib/sanity.queries";
 import { SUPPORT_URL } from "@/lib/navigation";
 import { isSafeHref } from "@/lib/safeUrl";
+import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "About",
-  description: "Who's behind Astromar, and the gear used to make the images.",
-};
+const TITLE = "About";
+const DESCRIPTION = "Who's behind Astromar, and the gear used to make the images.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const about = await getAboutPage();
+  // heroPhoto is a real gallery photo (watermarked, so cropBottom keeps the
+  // signature in frame); the plain heroImage fallback is a direct upload
+  // with no watermark to protect.
+  const image = about?.heroPhoto?.mainImage ?? about?.heroImage;
+  return buildMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    path: "/about",
+    image,
+    cropBottom: Boolean(about?.heroPhoto?.mainImage),
+  });
+}
 
 type GearCategory = GearItem["category"];
 

@@ -3,14 +3,23 @@ import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import ResearchProjectCard from "@/components/research/ResearchProjectCard";
 import { getAllResearchProjects, getHeroPhoto } from "@/lib/sanity.queries";
+import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Research",
-  description:
-    "Applying Python, computer vision and image analysis to the astrophotography.",
-};
+const TITLE = "Research";
+const DESCRIPTION = "Applying Python, computer vision and image analysis to the astrophotography.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const heroPhoto = await getHeroPhoto(3);
+  return buildMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    path: "/research",
+    image: heroPhoto?.mainImage,
+    cropBottom: true,
+  });
+}
 
 export default async function ResearchPage() {
   const [projects, heroPhoto] = await Promise.all([

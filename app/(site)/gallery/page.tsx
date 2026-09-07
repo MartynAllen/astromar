@@ -6,13 +6,23 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import GallerySearch from "@/components/gallery/GallerySearch";
 import { getAllPhotos, getHeroPhoto, getPrintProducts, getSiteSettings } from "@/lib/sanity.queries";
 import { cheapestPrintPriceGBP } from "@/lib/print";
+import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Gallery",
-  description: "Deep-sky, lunar and wide-field astrophotography.",
-};
+const TITLE = "Gallery";
+const DESCRIPTION = "Deep-sky, lunar and wide-field astrophotography.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const heroPhoto = await getHeroPhoto(0);
+  return buildMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    path: "/gallery",
+    image: heroPhoto?.mainImage,
+    cropBottom: true,
+  });
+}
 
 export default async function GalleryPage() {
   const [photos, heroPhoto, settings, printProducts] = await Promise.all([

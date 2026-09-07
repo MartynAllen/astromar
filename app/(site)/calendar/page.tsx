@@ -7,19 +7,29 @@ import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import JsonLd from "@/components/seo/JsonLd";
 import { getUpcomingCalendarEvents, getPhotoBySlug } from "@/lib/sanity.queries";
-import { eventJsonLd } from "@/lib/seo";
+import { buildMetadata, eventJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "Astronomy Calendar",
-  description: "Moon phase, upcoming meteor showers, and observing plans.",
-};
+const TITLE = "Astronomy Calendar";
+const DESCRIPTION = "Moon phase, upcoming meteor showers, and observing plans.";
+const HERO_SLUG = "east-veil-nebula-2026-08-22";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const heroPhoto = await getPhotoBySlug(HERO_SLUG);
+  return buildMetadata({
+    title: TITLE,
+    description: DESCRIPTION,
+    path: "/calendar",
+    image: heroPhoto?.mainImage,
+    cropBottom: true,
+  });
+}
 
 export default async function CalendarPage() {
   const [events, heroPhoto] = await Promise.all([
     getUpcomingCalendarEvents(),
-    getPhotoBySlug("east-veil-nebula-2026-08-22"),
+    getPhotoBySlug(HERO_SLUG),
   ]);
 
   return (
