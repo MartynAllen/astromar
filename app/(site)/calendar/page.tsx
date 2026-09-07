@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import MoonPhaseWidget from "@/components/calendar/MoonPhaseWidget";
 import MeteorShowerList from "@/components/calendar/MeteorShowerList";
 import VisibilityFinder from "@/components/calendar/VisibilityFinder";
+import SkyMap from "@/components/calendar/SkyMap";
 import EventCard from "@/components/calendar/EventCard";
 import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
@@ -59,7 +60,9 @@ export default async function CalendarPage() {
       </PageHero>
 
       <div className="mx-auto max-w-4xl px-6 py-10">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <SkyMap />
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <MoonPhaseWidget />
           <MeteorShowerList />
         </div>
