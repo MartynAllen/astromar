@@ -48,6 +48,12 @@ export default async function AboutPage() {
   // out a stored javascript:/data: scheme executing on click.
   const rawShopUrl = settings?.shopUrl;
   const shopUrl = isSafeHref(rawShopUrl) ? rawShopUrl : undefined;
+  // Same lookup Footer.tsx uses — the sign-off at the true end of the page
+  // (below) re-links Instagram rather than hardcoding a URL that could
+  // drift from the one actually configured in Studio.
+  const instagramUrl = (settings?.socialLinks ?? []).find(
+    (s) => s.platform.toLowerCase() === "instagram" && isSafeHref(s.url),
+  )?.url;
   // A handful of other featured shots to scatter around the hero — never
   // the hero photo itself twice over, and capped at 4 (2 per side; see
   // FeaturedPhotoCluster).
@@ -260,6 +266,15 @@ export default async function AboutPage() {
             </Link>
           )}
         </div>
+        {instagramUrl && (
+          <p className="mt-8 text-star-500">
+            I hope you enjoy my content, and if you do, feel free to follow me on{" "}
+            <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-star-300">
+              Instagram
+            </a>
+            .
+          </p>
+        )}
       </div>
     </div>
   );
