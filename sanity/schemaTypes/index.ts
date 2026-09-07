@@ -13,6 +13,7 @@ import shotDetails from "./objects/shotDetails";
 import seo from "./objects/seo";
 import affiliateLink from "./objects/affiliateLink";
 import gearItem from "./objects/gearItem";
+import gearMiscItem from "./objects/gearMiscItem";
 import bodyImage from "./objects/bodyImage";
 import bodyImageRow from "./objects/bodyImageRow";
 import reviewGalleryImage from "./objects/reviewGalleryImage";
@@ -37,6 +38,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     seo,
     affiliateLink,
     gearItem,
+    gearMiscItem,
     bodyImage,
     bodyImageRow,
     reviewGalleryImage,

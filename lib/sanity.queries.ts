@@ -459,12 +459,17 @@ export async function getUpcomingCalendarEvents(): Promise<CalendarEvent[]> {
   );
 }
 
+export interface GearMiscItem {
+  label: string;
+  affiliateLink?: AffiliateLink;
+}
+
 export interface GearItem {
   name: string;
   category: "telescope" | "camera" | "accessory" | "software";
   image?: SanityImageWithDimensions;
   notes?: string;
-  items?: string[];
+  items?: GearMiscItem[];
   affiliateLink?: AffiliateLink;
 }
 

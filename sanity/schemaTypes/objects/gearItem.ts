@@ -35,9 +35,9 @@ export default defineType({
       name: "items",
       title: "Included items",
       type: "array",
-      of: [{ type: "string" }],
+      of: [{ type: "gearMiscItem" }],
       description:
-        "Optional — for a catch-all tile (e.g. \"Miscellaneous\") listing several small things at once.",
+        "Optional — for a catch-all tile (e.g. \"Miscellaneous\") listing several small things at once, each with its own optional buy link.",
     }),
     defineField({
       name: "affiliateLink",

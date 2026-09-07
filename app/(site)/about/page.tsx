@@ -169,9 +169,24 @@ export default async function AboutPage() {
                             {item.items && item.items.length > 0 && (
                               <ul className="mt-2 space-y-1 text-sm text-star-300">
                                 {item.items.map((sub) => (
-                                  <li key={sub} className="flex gap-2">
+                                  <li key={sub.label} className="flex gap-2">
                                     <span className="text-star-700">·</span>
-                                    {sub}
+                                    <span>
+                                      {sub.label}
+                                      {sub.affiliateLink && isSafeHref(sub.affiliateLink.url) && (
+                                        <>
+                                          {" "}
+                                          <a
+                                            href={sub.affiliateLink.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer sponsored"
+                                            className={`whitespace-nowrap font-mono text-xs uppercase tracking-widest underline underline-offset-2 opacity-80 transition-opacity hover:opacity-100 ${textColor}`}
+                                          >
+                                            Buy →
+                                          </a>
+                                        </>
+                                      )}
+                                    </span>
                                   </li>
                                 ))}
                               </ul>
