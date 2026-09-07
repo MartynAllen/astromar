@@ -9,14 +9,20 @@ const COLORS = {
   grid: "#1b1e2c", // void-700
   compass: "#8a90a6", // star-500
   compassFacing: "#f5f7fa", // star-100 — the exact direction centred
-  constellationLine: "rgba(143, 178, 245, 0.32)", // nebula-indigo-400 at low opacity
-  constellationLabel: "rgba(143, 178, 245, 0.6)",
+  constellationLine: "rgba(143, 178, 245, 0.4)", // nebula-indigo-400
+  constellationLabel: "#c3d3f7", // a lighter indigo tint — carries the same
+  // brand hue as the line colour above (see DESIGN.md's Section Colour
+  // Rule — indigo is Calendar's own accent) but light enough to hold real
+  // contrast against the daytime sky's blue, not just against night black.
   star: "#f5f7fa", // star-100
   planet: "#f0c26f", // nebula-amber-400
   moonBase: "#e8eaf0",
   moonShadow: "#05060a",
   moonEdge: "#565b6e",
   sun: "#e2543f", // nebula-rose-400
+  textHalo: "rgba(5, 6, 10, 0.55)", // void-950 — the outline behind every
+  // label, so text reads on any sky colour from midnight black to midday
+  // blue without needing a different palette per time of day.
 };
 
 // A wide-but-not-fisheye field of view, like looking ahead rather than up —
@@ -28,6 +34,15 @@ const FOV_AZIMUTH = 120;
 const ALT_MIN = -8;
 const ALT_MAX = 82;
 const ALT_RANGE = ALT_MAX - ALT_MIN;
+// How much stars/constellations fade when it's too bright to actually see
+// them — the Sun, Moon and planets stay at full strength (a bright planet
+// or the Moon itself can be genuinely visible in a daytime sky; the faint
+// background stars can't).
+const DAYLIGHT_STAR_OPACITY = 0.32;
+// Labels never start closer to a canvas edge than this, and are skipped
+// outright if they'd still run past it — the first version let text start
+// just inside the field of view and then clip mid-word at the boundary.
+const EDGE_MARGIN = 6;
 
 const COMPASS_POINTS: [string, number][] = [
   ["N", 0],
@@ -51,11 +66,21 @@ function project(
   facing: number,
   width: number,
   height: number,
-): { x: number; y: number; dAz: number } {
+): { x: number; y: number } {
   const dAz = angleDiff(azimuth, facing);
   const x = width / 2 + (dAz / (FOV_AZIMUTH / 2)) * (width / 2);
   const y = height - ((altitude - ALT_MIN) / ALT_RANGE) * height;
-  return { x, y, dAz };
+  return { x, y };
+}
+
+/** Fill text with a dark halo behind it (stroke-then-fill) so it reads on
+ * any background — night black, twilight orange, or midday blue — without
+ * needing a different colour per sky condition. */
+function haloText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number) {
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = COLORS.textHalo;
+  ctx.strokeText(text, x, y);
+  ctx.fillText(text, x, y);
 }
 
 function drawMoon(
@@ -92,18 +117,19 @@ function drawMoon(
 }
 
 // Greedy label placement: each candidate is only drawn if its bounding box
-// doesn't overlap one already placed. Callers add candidates in priority
-// order (Sun/Moon/planets first, then brightest stars, then constellation
-// names last) so a crowded patch of sky quietly drops the least important
-// label instead of stacking illegible text — the exact complaint a first
-// pass of this map got.
-function makeLabelPlacer() {
+// doesn't overlap one already placed, or run past either canvas edge.
+// Callers add candidates in priority order (Sun/Moon/planets first, then
+// brightest stars, then constellation names last) so a crowded patch of
+// sky quietly drops the least important label instead of stacking
+// illegible text, and no label ever clips mid-word at the frame's edge.
+function makeLabelPlacer(canvasWidth: number) {
   const placed: { x0: number; y0: number; x1: number; y1: number }[] = [];
   return function tryPlace(x: number, y: number, width: number, height: number): boolean {
     const x0 = x;
     const y0 = y - height / 2;
     const x1 = x + width;
     const y1 = y + height / 2;
+    if (x0 < EDGE_MARGIN || x1 > canvasWidth - EDGE_MARGIN) return false;
     for (const p of placed) {
       if (x0 < p.x1 && x1 > p.x0 && y0 < p.y1 && y1 > p.y0) return false;
     }
@@ -115,9 +141,11 @@ function makeLabelPlacer() {
 export default function SkyMapCanvas({
   snapshot,
   facingAzimuth,
+  onFacingChange,
 }: {
   snapshot: SkySnapshot;
   facingAzimuth: number;
+  onFacingChange: (azimuth: number) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -127,6 +155,8 @@ export default function SkyMapCanvas({
   // in step with FOV_AZIMUTH/ALT_RANGE's own 120:90 ratio, so stars read
   // as circles rather than being stretched into ellipses.
   const [width, setWidth] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragState = useRef<{ pointerId: number; startX: number; startFacing: number } | null>(null);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -138,6 +168,32 @@ export default function SkyMapCanvas({
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  // Drag-to-look-around — the natural way to explore a sky view (Stellarium,
+  // Star Walk, Google Street View all work this way), rather than only
+  // clicking small arrow buttons repeatedly. Pointer Events cover mouse and
+  // touch with one code path. touch-action: pan-y (on the canvas below)
+  // hands vertical page-scroll gestures back to the browser while claiming
+  // horizontal drags for panning here.
+  function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragState.current = { pointerId: e.pointerId, startX: e.clientX, startFacing: facingAzimuth };
+    setIsDragging(true);
+  }
+  function handlePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+    const drag = dragState.current;
+    if (!drag || drag.pointerId !== e.pointerId || !width) return;
+    // Dragging right pulls the sky right, revealing what's further left —
+    // the content follows the cursor, so the facing direction moves the
+    // opposite way, exactly like panning a photo or a map.
+    const deltaX = e.clientX - drag.startX;
+    const deltaDeg = (deltaX / width) * FOV_AZIMUTH;
+    onFacingChange(((drag.startFacing - deltaDeg) % 360 + 360) % 360);
+  }
+  function endDrag(e: React.PointerEvent<HTMLCanvasElement>) {
+    if (dragState.current?.pointerId === e.pointerId) dragState.current = null;
+    setIsDragging(false);
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -152,6 +208,7 @@ export default function SkyMapCanvas({
     ctx.clearRect(0, 0, width, height);
 
     const horizonY = height - ((0 - ALT_MIN) / ALT_RANGE) * height;
+    const starOpacityScale = snapshot.isDarkEnoughToSeeStars ? 1 : DAYLIGHT_STAR_OPACITY;
 
     // Sky above the horizon line, real colour for the actual time of day.
     ctx.fillStyle = skyBackgroundColor(snapshot.sun.altitude);
@@ -184,21 +241,23 @@ export default function SkyMapCanvas({
     ctx.font = `${Math.max(10, width * 0.022)}px ui-monospace, monospace`;
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
+    ctx.lineWidth = 3;
     COMPASS_POINTS.forEach(([label, az]) => {
       const dAz = angleDiff(az, facingAzimuth);
       if (Math.abs(dAz) > FOV_AZIMUTH / 2 + 5) return;
       const x = width / 2 + (dAz / (FOV_AZIMUTH / 2)) * (width / 2);
       const isFacing = Math.abs(dAz) < 1;
-      ctx.strokeStyle = isFacing ? COLORS.compassFacing : COLORS.compass;
+      const color = isFacing ? COLORS.compassFacing : COLORS.compass;
+      ctx.strokeStyle = color;
       ctx.beginPath();
       ctx.moveTo(x, horizonY - 6);
       ctx.lineTo(x, horizonY + 6);
       ctx.stroke();
-      ctx.fillStyle = isFacing ? COLORS.compassFacing : COLORS.compass;
-      ctx.fillText(label, x, horizonY + 22);
+      ctx.fillStyle = color;
+      haloText(ctx, label, x, horizonY + 22);
     });
 
-    const placeLabel = makeLabelPlacer();
+    const placeLabel = makeLabelPlacer(width);
     const fontSize = Math.max(9, width * 0.018);
     const nameFont = `${fontSize}px ui-monospace, monospace`;
 
@@ -207,7 +266,10 @@ export default function SkyMapCanvas({
     // within view are worth the draw call — cheap early-out for the rest
     // of the sky behind/beside the visitor.
     ctx.lineWidth = 1;
-    ctx.strokeStyle = COLORS.constellationLine;
+    ctx.strokeStyle = COLORS.constellationLine.replace(
+      /[\d.]+\)$/,
+      `${0.4 * starOpacityScale})`,
+    );
     const visibleLines = snapshot.constellationLines.filter((seg) => {
       const midAz = (seg.from.azimuth + seg.to.azimuth) / 2;
       return Math.abs(angleDiff(midAz, facingAzimuth)) < FOV_AZIMUTH / 2 + 20;
@@ -221,8 +283,9 @@ export default function SkyMapCanvas({
       ctx.stroke();
     });
 
-    // Sun, Moon and planets first — always shown, always labelled, they're
-    // the whole reason someone opens this.
+    // Sun, Moon and planets first — always shown at full strength (unlike
+    // the faint stars, these can be genuinely visible in a daylight sky
+    // too) and always labelled, they're the whole reason someone opens this.
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
@@ -235,7 +298,7 @@ export default function SkyMapCanvas({
       ctx.fill();
       ctx.font = nameFont;
       ctx.fillStyle = COLORS.sun;
-      if (placeLabel(x + r + 5, y, ctx.measureText("Sun").width, fontSize)) ctx.fillText("Sun", x + r + 5, y);
+      if (placeLabel(x + r + 5, y, ctx.measureText("Sun").width, fontSize)) haloText(ctx, "Sun", x + r + 5, y);
     }
 
     if (Math.abs(angleDiff(snapshot.moon.azimuth, facingAzimuth)) < FOV_AZIMUTH / 2) {
@@ -246,7 +309,7 @@ export default function SkyMapCanvas({
       drawMoon(ctx, x, y, r, snapshot.moon.illuminatedFraction, waxing);
       ctx.font = nameFont;
       ctx.fillStyle = "#c7cbd9";
-      if (placeLabel(x + r + 6, y, ctx.measureText("Moon").width, fontSize)) ctx.fillText("Moon", x + r + 6, y);
+      if (placeLabel(x + r + 6, y, ctx.measureText("Moon").width, fontSize)) haloText(ctx, "Moon", x + r + 6, y);
     }
 
     snapshot.planets.forEach((planet) => {
@@ -260,13 +323,16 @@ export default function SkyMapCanvas({
       ctx.font = nameFont;
       ctx.fillStyle = COLORS.planet;
       if (placeLabel(x + r + 5, y, ctx.measureText(planet.name).width, fontSize)) {
-        ctx.fillText(planet.name, x + r + 5, y);
+        haloText(ctx, planet.name, x + r + 5, y);
       }
     });
 
     // Stars — brightest first, so a genuinely crowded patch keeps the
     // recognisable named stars and quietly drops the fainter ones' labels
     // rather than stacking text. The dot itself always draws regardless.
+    // Both dots and labels fade together when it's too bright to actually
+    // see them (see starOpacityScale above) — real reinforcement of the
+    // "not visible right now" message, not just a caption underneath.
     const visibleStars = snapshot.stars
       .filter((s) => Math.abs(angleDiff(s.azimuth, facingAzimuth)) < FOV_AZIMUTH / 2)
       .sort((a, b) => a.magnitude - b.magnitude);
@@ -274,7 +340,7 @@ export default function SkyMapCanvas({
     visibleStars.forEach((star) => {
       const { x, y } = project(star.altitude, star.azimuth, facingAzimuth, width, height);
       const radius = Math.max(0.9, (2.6 - star.magnitude) * 0.75);
-      const opacity = Math.max(0.3, Math.min(1, (2.6 - star.magnitude) / 3.2));
+      const opacity = Math.max(0.3, Math.min(1, (2.6 - star.magnitude) / 3.2)) * starOpacityScale;
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fillStyle = `rgba(245, 247, 250, ${opacity})`;
@@ -283,15 +349,15 @@ export default function SkyMapCanvas({
         ctx.font = nameFont;
         const w = ctx.measureText(star.name).width;
         if (placeLabel(x + radius + 4, y, w, fontSize)) {
-          ctx.fillStyle = "rgba(199, 203, 217, 0.85)"; // star-300
-          ctx.fillText(star.name, x + radius + 4, y);
+          ctx.fillStyle = `rgba(199, 203, 217, ${0.85 * starOpacityScale})`; // star-300
+          haloText(ctx, star.name, x + radius + 4, y);
         }
       }
     });
 
-    // One faint label per visible constellation, at the average position
-    // of its own currently-drawn points — lowest priority of anything on
-    // the map, so it's the first to be dropped in a crowded region.
+    // One label per visible constellation, at the average position of its
+    // own currently-drawn points — lowest priority of anything on the map,
+    // so it's the first to be dropped in a crowded region.
     const groups = new Map<string, { x: number; y: number; n: number }>();
     visibleLines.forEach((seg) => {
       for (const star of [seg.from, seg.to]) {
@@ -311,8 +377,10 @@ export default function SkyMapCanvas({
       const y = g.y / g.n;
       const w = ctx.measureText(label).width;
       if (placeLabel(x - w / 2, y, w, fontSize)) {
-        ctx.fillStyle = COLORS.constellationLabel;
-        ctx.fillText(label, x, y);
+        ctx.fillStyle = `${COLORS.constellationLabel}${Math.round(starOpacityScale * 255)
+          .toString(16)
+          .padStart(2, "0")}`;
+        haloText(ctx, label, x, y);
       }
     });
   }, [snapshot, width, facingAzimuth]);
@@ -321,9 +389,14 @@ export default function SkyMapCanvas({
     <div ref={containerRef} className="aspect-[4/3] w-full overflow-hidden">
       <canvas
         ref={canvasRef}
-        style={{ width, height: width * (ALT_RANGE / FOV_AZIMUTH) }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        style={{ width, height: width * (ALT_RANGE / FOV_AZIMUTH), touchAction: "pan-y" }}
+        className={isDragging ? "cursor-grabbing" : "cursor-grab"}
         role="img"
-        aria-label={`Sky view facing ${Math.round(facingAzimuth)}°: ${snapshot.stars.length} stars, ${snapshot.planets.length} planet${snapshot.planets.length === 1 ? "" : "s"}, and the Moon (${snapshot.moon.phaseName}), looking out toward the horizon`}
+        aria-label={`Sky view facing ${Math.round(facingAzimuth)}°: ${snapshot.stars.length} stars, ${snapshot.planets.length} planet${snapshot.planets.length === 1 ? "" : "s"}, and the Moon (${snapshot.moon.phaseName}), looking out toward the horizon — drag to look around`}
       />
     </div>
   );

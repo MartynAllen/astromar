@@ -15,10 +15,12 @@ const COMPASS_BUTTONS: [string, number][] = [
   ["W", 270],
   ["NW", 315],
 ];
-const PAN_STEP_DEG = 20;
-
-function normalizeAzimuth(deg: number): number {
-  return ((deg % 360) + 360) % 360;
+/** Nearest of the 8 compass points to a given azimuth — display only
+ * (e.g. "Facing NE · 43°"); the buttons themselves jump to exact values. */
+function nearestCompassLabel(azimuth: number): string {
+  const normalized = ((azimuth % 360) + 360) % 360;
+  const index = Math.round(normalized / 45) % COMPASS_BUTTONS.length;
+  return COMPASS_BUTTONS[index][0];
 }
 
 interface GeocodeResult {
@@ -136,10 +138,6 @@ export default function SkyMap() {
     if (time) setFacingAzimuth(computePolarisAzimuth(time, location));
   }
 
-  function pan(deltaDeg: number) {
-    setFacingAzimuth((current) => normalizeAzimuth((current ?? 0) + deltaDeg));
-  }
-
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!query.trim()) return;
@@ -227,46 +225,18 @@ export default function SkyMap() {
         <>
           <div className="mt-5 flex justify-center">
             <div className="w-full max-w-[720px]">
-              <SkyMapCanvas snapshot={snapshot} facingAzimuth={facingAzimuth} />
+              <SkyMapCanvas
+                snapshot={snapshot}
+                facingAzimuth={facingAzimuth}
+                onFacingChange={setFacingAzimuth}
+              />
             </div>
           </div>
 
-          <div className="mx-auto mt-3 flex max-w-[720px] items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => pan(-PAN_STEP_DEG)}
-              aria-label="Look further left"
-              className="border border-void-600 px-3 py-2 font-mono text-xs text-star-300 hover:border-nebula-indigo-400"
-            >
-              ← Pan
-            </button>
-            <div className="flex flex-wrap justify-center gap-1.5" role="group" aria-label="Face a compass direction">
-              {COMPASS_BUTTONS.map(([label, az]) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => setFacingAzimuth(az)}
-                  aria-pressed={Math.round(facingAzimuth) === az}
-                  className={`min-h-8 rounded-full border px-2.5 py-1 font-mono text-xs transition-colors ${
-                    Math.round(facingAzimuth) === az
-                      ? "border-nebula-indigo-400 bg-nebula-indigo-400/10 text-nebula-indigo-400"
-                      : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => pan(PAN_STEP_DEG)}
-              aria-label="Look further right"
-              className="border border-void-600 px-3 py-2 font-mono text-xs text-star-300 hover:border-nebula-indigo-400"
-            >
-              Pan →
-            </button>
-          </div>
-          <div className="mx-auto mt-2 flex max-w-[720px] justify-center">
+          <div className="mx-auto mt-3 flex max-w-[720px] items-center justify-between gap-2">
+            <p className="font-mono text-xs uppercase tracking-widest text-star-500">
+              Facing {nearestCompassLabel(facingAzimuth)} · {Math.round(facingAzimuth)}°
+            </p>
             <button
               type="button"
               onClick={facePolaris}
@@ -275,6 +245,28 @@ export default function SkyMap() {
               Face Polaris
             </button>
           </div>
+          <div
+            className="mx-auto mt-2 flex max-w-[720px] flex-wrap justify-center gap-1.5"
+            role="group"
+            aria-label="Face a compass direction"
+          >
+            {COMPASS_BUTTONS.map(([label, az]) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setFacingAzimuth(az)}
+                aria-pressed={Math.round(facingAzimuth) === az}
+                className={`min-h-8 rounded-full border px-2.5 py-1 font-mono text-xs transition-colors ${
+                  Math.round(facingAzimuth) === az
+                    ? "border-nebula-indigo-400 bg-nebula-indigo-400/10 text-nebula-indigo-400"
+                    : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-center text-xs text-star-700">Drag the sky to look around</p>
 
           {!snapshot.isDarkEnoughToSeeStars && (
             <p className="mt-3 text-center text-sm text-star-500">
