@@ -151,17 +151,17 @@ export default async function AboutPage() {
                   <p className={`font-mono text-xs uppercase tracking-widest ${textColor}`}>
                     {CATEGORY_LABEL[category]}
                   </p>
-                  {/* Grouped as a loose cluster, not a grid — tiles size to
-                      their own width (not a forced 50/50 split, which left
-                      narrow tiles stretched with dead horizontal padding) so
-                      they can sit genuinely close together, tight within a
-                      category and generous between categories. Height is a
-                      different axis, though: siblings on the same flex line
-                      stretch to match the tallest one (the default
-                      align-items, left unset rather than pinned to
+                  {/* Grouped as a loose cluster, not a grid, but tiles still
+                      fill the row edge-to-edge: sm:flex-1 grows each one
+                      (down to a sm:min-w-[260px] floor before wrapping) so a
+                      1- or 2-tile row's right edge lines up with the
+                      full-width Miscellaneous tile below it, instead of
+                      stopping short at a fixed max-width and leaving a gap
+                      that made the section look unaligned as a whole. Height
+                      stretches to match the tallest tile per row too (the
+                      default align-items, left unset rather than pinned to
                       items-start) so a short tile's border doesn't fall
-                      short of its taller row-mate — a mismatched bottom
-                      edge read as broken, not as intentional variety. */}
+                      short of its taller row-mate either. */}
                   <div className="mt-3 flex flex-wrap gap-4">
                     {items.map((item, i) => {
                       const spanFull = Boolean(item.items && item.items.length > 0);
@@ -171,7 +171,7 @@ export default async function AboutPage() {
                           className={`flex items-start gap-4 border border-l-2 border-void-700 bg-void-900 p-4 ${color} ${
                             spanFull
                               ? "w-full"
-                              : "w-full sm:w-auto sm:min-w-[260px] sm:max-w-[288px]"
+                              : "w-full sm:min-w-[260px] sm:flex-1"
                           }`}
                         >
                           {item.image?.asset ? (
