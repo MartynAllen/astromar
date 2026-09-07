@@ -25,8 +25,8 @@ export default async function ReviewsPage() {
           <Breadcrumbs items={[{ name: "Reviews", path: "/reviews" }]} />
           <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Reviews</h1>
           <p className="mt-2 text-star-500">
-            Gear that&apos;s actually been used to make the photos in the
-            gallery — nothing reviewed sight-unseen.
+            From my first Dobsonian to the rig I run today — reviewed
+            honestly, one upgrade at a time.
           </p>
         </div>
       </PageHero>
