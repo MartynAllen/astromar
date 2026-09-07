@@ -152,13 +152,17 @@ export default async function AboutPage() {
                     {CATEGORY_LABEL[category]}
                   </p>
                   {/* Grouped as a loose cluster, not a grid — tiles size to
-                      their own content (not a forced 50/50 split, which left
-                      short tiles bloated with dead space) so they can sit
-                      genuinely close together, tight within a category and
-                      generous between categories. Tops stay aligned within
-                      a row (an earlier alternating-stagger treatment read as
-                      misaligned rather than intentional, so it's gone). */}
-                  <div className="mt-3 flex flex-wrap items-start gap-4">
+                      their own width (not a forced 50/50 split, which left
+                      narrow tiles stretched with dead horizontal padding) so
+                      they can sit genuinely close together, tight within a
+                      category and generous between categories. Height is a
+                      different axis, though: siblings on the same flex line
+                      stretch to match the tallest one (the default
+                      align-items, left unset rather than pinned to
+                      items-start) so a short tile's border doesn't fall
+                      short of its taller row-mate — a mismatched bottom
+                      edge read as broken, not as intentional variety. */}
+                  <div className="mt-3 flex flex-wrap gap-4">
                     {items.map((item, i) => {
                       const spanFull = Boolean(item.items && item.items.length > 0);
                       return (
