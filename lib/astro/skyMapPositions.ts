@@ -68,6 +68,21 @@ function mergedStarCatalog(): CatalogStar[] {
 }
 
 const STAR_CATALOG = mergedStarCatalog();
+const POLARIS = CONSTELLATION_STARS.find((s) => s.name === "Polaris")!;
+
+/**
+ * Real azimuth of Polaris right now, from this location — the sky map's
+ * default facing direction. Not a hardcoded "just use north": Polaris
+ * isn't exactly at the celestial pole, so its true azimuth wobbles a
+ * degree or two through the day, and from the southern hemisphere it's
+ * below the horizon entirely (this still returns a real azimuth even
+ * then — "roughly north" remains a sensible default heading everywhere
+ * north of the equator, which is this site's whole frame of reference).
+ */
+export function computePolarisAzimuth(date: Date, location: { lat: number; lng: number }): number {
+  const observer = new Observer(location.lat, location.lng, 0);
+  return Horizon(date, observer, POLARIS.raDeg / 15, POLARIS.decDeg, "normal").azimuth;
+}
 
 /** Twilight threshold below which stars start being visible at all — civil
  * dusk (-6°) rather than full astronomical dark (-18°), since the map is

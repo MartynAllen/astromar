@@ -1,9 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { computeSkySnapshot } from "@/lib/astro/skyMapPositions";
+import { computePolarisAzimuth, computeSkySnapshot } from "@/lib/astro/skyMapPositions";
 import { GENERAL_LOCATION } from "@/lib/astro/starPositions";
 import SkyMapCanvas from "./SkyMapCanvas";
+
+const COMPASS_BUTTONS: [string, number][] = [
+  ["N", 0],
+  ["NE", 45],
+  ["E", 90],
+  ["SE", 135],
+  ["S", 180],
+  ["SW", 225],
+  ["W", 270],
+  ["NW", 315],
+];
+const PAN_STEP_DEG = 20;
+
+function normalizeAzimuth(deg: number): number {
+  return ((deg % 360) + 360) % 360;
+}
 
 interface GeocodeResult {
   lat: number;
@@ -55,6 +71,14 @@ export default function SkyMap() {
   // to the real live sky an instant later.
   const [anchor, setAnchor] = useState<Date | null>(null);
   const [time, setTime] = useState<Date | null>(null);
+  const [location, setLocation] = useState<GeoLocation>({
+    ...GENERAL_LOCATION,
+    label: "Devon, UK (default)",
+  });
+  // Which compass direction the view currently faces — defaults to
+  // Polaris (roughly, but not exactly, north) the moment a real "now" is
+  // available. null only very briefly, before the mount effect below runs.
+  const [facingAzimuth, setFacingAzimuth] = useState<number | null>(null);
   useEffect(() => {
     // Deliberate exception to the usual "don't setState synchronously in
     // an effect" guidance: there's no external system to synchronise with
@@ -65,12 +89,14 @@ export default function SkyMap() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setAnchor(now);
     setTime(now);
+    setFacingAzimuth(computePolarisAzimuth(now, location));
+    // location is intentionally read once here, at its mount-time default
+    // — computeAndSetLocation (below) re-centres facing explicitly whenever
+    // the visitor actually changes location, so this doesn't need to react
+    // to `location` itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [location, setLocation] = useState<GeoLocation>({
-    ...GENERAL_LOCATION,
-    label: "Devon, UK (default)",
-  });
   const [query, setQuery] = useState("");
   const [locStatus, setLocStatus] = useState<"idle" | "loading" | "error">("idle");
   const [locError, setLocError] = useState("");
@@ -100,6 +126,18 @@ export default function SkyMap() {
   function computeAndSetLocation(loc: GeoLocation) {
     setLocation(loc);
     setLocStatus("idle");
+    // A new location gets a fresh "face Polaris" default too — an old
+    // facing angle inherited from wherever the map was pointed before
+    // isn't a meaningful direction at a brand new place.
+    if (time) setFacingAzimuth(computePolarisAzimuth(time, loc));
+  }
+
+  function facePolaris() {
+    if (time) setFacingAzimuth(computePolarisAzimuth(time, location));
+  }
+
+  function pan(deltaDeg: number) {
+    setFacingAzimuth((current) => normalizeAzimuth((current ?? 0) + deltaDeg));
   }
 
   async function handleSearch(e: React.FormEvent) {
@@ -149,8 +187,9 @@ export default function SkyMap() {
     <div className="border border-void-700 bg-void-900 p-5">
       <p className="font-mono text-xs uppercase tracking-widest text-nebula-indigo-400">Sky map</p>
       <p className="mt-1 text-sm text-star-500">
-        Real, computed star and planet positions for any place and moment — drag through time or
-        jump to an exact one, and see what&apos;s actually up there.
+        Real, computed star and planet positions for any place and moment — looking out toward the
+        horizon the way you actually would outside. Drag through time, pan to look around, and see
+        what&apos;s actually up there.
       </p>
 
       <form onSubmit={handleSearch} className="mt-4 flex flex-col gap-2 sm:flex-row">
@@ -184,12 +223,57 @@ export default function SkyMap() {
         Showing the sky over <span className="text-star-300">{location.label}</span>
       </p>
 
-      {time && snapshot ? (
+      {time && snapshot && facingAzimuth !== null ? (
         <>
           <div className="mt-5 flex justify-center">
             <div className="w-full max-w-[720px]">
-              <SkyMapCanvas snapshot={snapshot} />
+              <SkyMapCanvas snapshot={snapshot} facingAzimuth={facingAzimuth} />
             </div>
+          </div>
+
+          <div className="mx-auto mt-3 flex max-w-[720px] items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => pan(-PAN_STEP_DEG)}
+              aria-label="Look further left"
+              className="border border-void-600 px-3 py-2 font-mono text-xs text-star-300 hover:border-nebula-indigo-400"
+            >
+              ← Pan
+            </button>
+            <div className="flex flex-wrap justify-center gap-1.5" role="group" aria-label="Face a compass direction">
+              {COMPASS_BUTTONS.map(([label, az]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setFacingAzimuth(az)}
+                  aria-pressed={Math.round(facingAzimuth) === az}
+                  className={`min-h-8 rounded-full border px-2.5 py-1 font-mono text-xs transition-colors ${
+                    Math.round(facingAzimuth) === az
+                      ? "border-nebula-indigo-400 bg-nebula-indigo-400/10 text-nebula-indigo-400"
+                      : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => pan(PAN_STEP_DEG)}
+              aria-label="Look further right"
+              className="border border-void-600 px-3 py-2 font-mono text-xs text-star-300 hover:border-nebula-indigo-400"
+            >
+              Pan →
+            </button>
+          </div>
+          <div className="mx-auto mt-2 flex max-w-[720px] justify-center">
+            <button
+              type="button"
+              onClick={facePolaris}
+              className="font-mono text-xs uppercase tracking-widest text-nebula-indigo-400 underline hover:text-nebula-indigo-300"
+            >
+              Face Polaris
+            </button>
           </div>
 
           {!snapshot.isDarkEnoughToSeeStars && (
@@ -222,7 +306,7 @@ export default function SkyMap() {
               className="mt-2 w-full accent-nebula-indigo-400"
               aria-label="Scrub through time"
             />
-            <div className="flex justify-between font-mono text-[10px] uppercase tracking-widest text-star-700">
+            <div className="flex justify-between font-mono text-xs uppercase tracking-widest text-star-700">
               <span>-24h</span>
               <span>Now</span>
               <span>+48h</span>
@@ -244,7 +328,7 @@ export default function SkyMap() {
       ) : (
         // Matches the canvas's own footprint so nothing shifts once the
         // real sky swaps in an instant after mount (see the effect above).
-        <div className="mx-auto mt-5 flex aspect-square w-full max-w-[720px] items-center justify-center border border-void-700 text-sm text-star-500">
+        <div className="mx-auto mt-5 flex aspect-[4/3] w-full max-w-[720px] items-center justify-center border border-void-700 text-sm text-star-500">
           Loading the sky…
         </div>
       )}
