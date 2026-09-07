@@ -471,6 +471,9 @@ export interface GearItem {
   notes?: string;
   items?: GearMiscItem[];
   affiliateLink?: AffiliateLink;
+  // Overrides the category's generic fallback icon (CategoryIcon.tsx) when
+  // no photo is set — e.g. a mount instead of the generic accessory cog.
+  icon?: "camera" | "telescope" | "guidescope" | "mount" | "controller" | "battery" | "software" | "accessory";
 }
 
 export interface AboutPageContent {

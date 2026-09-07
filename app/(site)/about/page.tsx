@@ -184,7 +184,7 @@ export default async function AboutPage() {
                             />
                           ) : (
                             <div className="flex h-[72px] w-[72px] flex-none items-center justify-center border border-void-700">
-                              <CategoryIcon category={item.category} className="h-8 w-8" />
+                              <CategoryIcon category={item.icon ?? item.category} className="h-8 w-8" />
                             </div>
                           )}
                           <div className="flex-1">
