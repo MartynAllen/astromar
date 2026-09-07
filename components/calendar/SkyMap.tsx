@@ -3,7 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { computePolarisAzimuth, computeSkySnapshot } from "@/lib/astro/skyMapPositions";
 import { GENERAL_LOCATION } from "@/lib/astro/starPositions";
-import SkyMapCanvas from "./SkyMapCanvas";
+import SkyMapCanvas, { type SkyMapLayers } from "./SkyMapCanvas";
+
+const LAYER_TOGGLES: { key: keyof SkyMapLayers; label: string }[] = [
+  { key: "stars", label: "Stars" },
+  { key: "constellations", label: "Constellations" },
+  { key: "planets", label: "Planets" },
+  { key: "deepSky", label: "Deep-sky" },
+];
 
 const COMPASS_BUTTONS: [string, number][] = [
   ["N", 0],
@@ -102,6 +109,22 @@ export default function SkyMap() {
   const [query, setQuery] = useState("");
   const [locStatus, setLocStatus] = useState<"idle" | "loading" | "error">("idle");
   const [locError, setLocError] = useState("");
+
+  // Night view (a fixed, always-readable dark sky) is the default — a
+  // literal daytime blue background looks "realistic" but drops contrast
+  // badly against light text and faint stars for a good chunk of every
+  // day. Live colour is available for anyone curious what the sky
+  // actually looks like right now, not as the practical default.
+  const [nightMode, setNightMode] = useState(true);
+  const [layers, setLayers] = useState<SkyMapLayers>({
+    stars: true,
+    constellations: true,
+    planets: true,
+    deepSky: true,
+  });
+  function toggleLayer(key: keyof SkyMapLayers) {
+    setLayers((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
 
   const snapshot = useMemo(
     () => (time ? computeSkySnapshot(time, location) : null),
@@ -223,12 +246,56 @@ export default function SkyMap() {
 
       {time && snapshot && facingAzimuth !== null ? (
         <>
-          <div className="mt-5 flex justify-center">
+          <div className="mx-auto mt-5 flex max-w-[720px] flex-wrap items-center justify-between gap-3">
+            <div className="flex rounded-full border border-void-700 p-0.5" role="group" aria-label="Sky colour">
+              {(
+                [
+                  ["Night view", true],
+                  ["Live sky colour", false],
+                ] as const
+              ).map(([label, value]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => setNightMode(value)}
+                  aria-pressed={nightMode === value}
+                  className={`min-h-8 rounded-full px-3 py-1 font-mono text-xs transition-colors ${
+                    nightMode === value
+                      ? "bg-nebula-indigo-400/15 text-nebula-indigo-400"
+                      : "text-star-500 hover:text-star-300"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="Show or hide sky layers">
+              {LAYER_TOGGLES.map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => toggleLayer(key)}
+                  aria-pressed={layers[key]}
+                  className={`min-h-8 rounded-full border px-2.5 py-1 font-mono text-xs transition-colors ${
+                    layers[key]
+                      ? "border-nebula-indigo-400 bg-nebula-indigo-400/10 text-nebula-indigo-400"
+                      : "border-void-700 text-star-700 hover:border-void-600 hover:text-star-500"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-3 flex justify-center">
             <div className="w-full max-w-[720px]">
               <SkyMapCanvas
                 snapshot={snapshot}
                 facingAzimuth={facingAzimuth}
                 onFacingChange={setFacingAzimuth}
+                nightMode={nightMode}
+                layers={layers}
               />
             </div>
           </div>

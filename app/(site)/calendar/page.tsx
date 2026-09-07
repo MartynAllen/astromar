@@ -12,8 +12,17 @@ import { buildMetadata, eventJsonLd } from "@/lib/seo";
 
 export const revalidate = 60;
 
-const TITLE = "Astronomy Calendar";
-const DESCRIPTION = "Moon phase, upcoming meteor showers, and observing plans.";
+// H1 deliberately doesn't match the "Calendar" nav label/breadcrumb/URL,
+// unlike every other page on the site — this page outgrew "a calendar" the
+// moment the interactive sky map became its headline feature, and the old
+// title/hero copy still only described the moon phase/meteor/events tools
+// underneath it. Nav label and URL stay "Calendar" on purpose: renaming
+// those too is a bigger IA change nobody's asked for, and this is the one
+// place on the site where the big on-page heading is allowed to say more
+// than the short nav word that got you here.
+const TITLE = "Sky Map & Calendar";
+const DESCRIPTION =
+  "An interactive sky map for any place and moment, plus moon phase, meteor showers and observing plans.";
 const HERO_SLUG = "east-veil-nebula-2026-08-22";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -52,10 +61,8 @@ export default async function CalendarPage() {
       >
         <div className="mx-auto w-full max-w-4xl px-6">
           <Breadcrumbs items={[{ name: "Calendar", path: "/calendar" }]} />
-          <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Astronomy Calendar</h1>
-          <p className="mt-2 text-star-500">
-            Optimal targets for tonight, and what&apos;s coming up in the sky.
-          </p>
+          <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{TITLE}</h1>
+          <p className="mt-2 text-star-500">{DESCRIPTION}</p>
         </div>
       </PageHero>
 

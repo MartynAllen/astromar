@@ -57,8 +57,8 @@ const SECTION_TEASERS = [
   },
   {
     href: "/calendar",
-    title: "Astronomy Calendar",
-    body: "Moon phase, major meteor showers, and upcoming observing plans in one timeline.",
+    title: "Sky Map & Calendar",
+    body: "An interactive sky map for any place and moment, plus moon phase and meteor showers.",
     color: "group-hover:text-nebula-indigo-400",
   },
   {

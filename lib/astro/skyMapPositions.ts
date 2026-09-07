@@ -1,6 +1,7 @@
 import { Body, Equator, Horizon, Illumination, Observer } from "astronomy-engine";
 import { BRIGHT_STAR_CATALOG, type CatalogStar } from "./starCatalog";
 import { CONSTELLATION_STARS, CONSTELLATIONS } from "./constellations";
+import { DEEP_SKY_CATALOG, type DeepSkyType } from "./deepSkyCatalog";
 import { getMoonPhase } from "./moonPhase";
 
 export interface PositionedStar {
@@ -37,10 +38,20 @@ export interface PositionedSun {
   azimuth: number;
 }
 
+export interface PositionedDeepSkyObject {
+  name: string;
+  catalogId: string;
+  type: DeepSkyType;
+  altitude: number;
+  azimuth: number;
+  magnitude: number;
+}
+
 export interface SkySnapshot {
   stars: PositionedStar[];
   constellationLines: ConstellationLineSegment[];
   planets: PositionedPlanet[];
+  deepSkyObjects: PositionedDeepSkyObject[];
   moon: PositionedMoon;
   sun: PositionedSun;
   /** True once the Sun is low enough for stars to actually be visible —
@@ -154,10 +165,26 @@ export function computeSkySnapshot(
   const sunHoriz = Horizon(date, observer, sunEq.ra, sunEq.dec, "normal");
   const sun: PositionedSun = { altitude: sunHoriz.altitude, azimuth: sunHoriz.azimuth };
 
+  // Reuses the same curated Messier-heavy catalog the visibility finder
+  // already ranks by altitude — most of these need binoculars or a scope
+  // to actually see, but that's exactly this site's audience.
+  const deepSkyObjects: PositionedDeepSkyObject[] = DEEP_SKY_CATALOG.map((obj) => {
+    const horiz = Horizon(date, observer, obj.raDeg / 15, obj.decDeg, "normal");
+    return {
+      name: obj.name,
+      catalogId: obj.catalogId,
+      type: obj.type,
+      altitude: horiz.altitude,
+      azimuth: horiz.azimuth,
+      magnitude: obj.magnitude,
+    };
+  }).filter((o) => o.altitude >= minAltitude);
+
   return {
     stars,
     constellationLines,
     planets,
+    deepSkyObjects,
     moon,
     sun,
     isDarkEnoughToSeeStars: sun.altitude <= VISIBLE_SUN_ALTITUDE,

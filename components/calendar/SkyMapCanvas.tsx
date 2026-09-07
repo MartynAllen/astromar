@@ -5,22 +5,26 @@ import type { SkySnapshot } from "@/lib/astro/skyMapPositions";
 
 const COLORS = {
   ground: "#0a0c14", // void-900 — the strip below the horizon
-  horizonLine: "#565b6e", // star-700
+  horizonLine: "#8a90a6", // star-500 — a real, findable line at a glance
   grid: "#1b1e2c", // void-700
   compass: "#8a90a6", // star-500
   compassFacing: "#f5f7fa", // star-100 — the exact direction centred
-  constellationLine: "rgba(143, 178, 245, 0.4)", // nebula-indigo-400
-  constellationLabel: "#c3d3f7", // a lighter indigo tint — carries the same
+  constellationLine: "rgba(143, 178, 245, 0.62)", // nebula-indigo-400
+  constellationLabel: "#d7e2fb", // a lighter indigo tint — carries the same
   // brand hue as the line colour above (see DESIGN.md's Section Colour
   // Rule — indigo is Calendar's own accent) but light enough to hold real
   // contrast against the daytime sky's blue, not just against night black.
   star: "#f5f7fa", // star-100
   planet: "#f0c26f", // nebula-amber-400
+  deepSky: "#f5f7fa", // star-100 — differentiated from stars by shape
+  // (a square outline, since a real DSO is an extended object, not a
+  // point source) rather than by colour, so it doesn't need to compete
+  // with the Section Colour Rule's reserved hues.
   moonBase: "#e8eaf0",
   moonShadow: "#05060a",
   moonEdge: "#565b6e",
   sun: "#e2543f", // nebula-rose-400
-  textHalo: "rgba(5, 6, 10, 0.55)", // void-950 — the outline behind every
+  textHalo: "rgba(5, 6, 10, 0.6)", // void-950 — the outline behind every
   // label, so text reads on any sky colour from midnight black to midday
   // blue without needing a different palette per time of day.
 };
@@ -34,11 +38,25 @@ const FOV_AZIMUTH = 120;
 const ALT_MIN = -8;
 const ALT_MAX = 82;
 const ALT_RANGE = ALT_MAX - ALT_MIN;
-// How much stars/constellations fade when it's too bright to actually see
-// them — the Sun, Moon and planets stay at full strength (a bright planet
-// or the Moon itself can be genuinely visible in a daytime sky; the faint
-// background stars can't).
-const DAYLIGHT_STAR_OPACITY = 0.32;
+// Everything within this many degrees of the exact field of view is worth a
+// draw call — wider than FOV_AZIMUTH/2 alone so a constellation line whose
+// other endpoint is just outside frame still gets drawn (Canvas clips
+// anything past the edge for free); using the SAME margin for every
+// category (stars, lines, planets, deep-sky), checked per endpoint rather
+// than an averaged midpoint, is what actually matters here — the earlier
+// version used a wider, midpoint-based cutoff for lines than the strict
+// per-star cutoff used for star dots, so a line could still be "in view"
+// by that average while the actual star it terminated at wasn't drawn at
+// all, making constellations look like they reshaped themselves while
+// panning. There's nothing to reshape — real positions don't change when
+// you turn your head — that was a filtering bug, not a rendering one.
+const VISIBLE_MARGIN = 15;
+const HALF_VISIBLE = FOV_AZIMUTH / 2 + VISIBLE_MARGIN;
+// How much stars/constellations/deep-sky fade when it's too bright to
+// actually see them — the Sun, Moon and planets stay at full strength (a
+// bright planet or the Moon itself can be genuinely visible in a daytime
+// sky; the faint background stars can't).
+const DAYLIGHT_OPACITY = 0.32;
 // Labels never start closer to a canvas edge than this, and are skipped
 // outright if they'd still run past it — the first version let text start
 // just inside the field of view and then clip mid-word at the boundary.
@@ -55,9 +73,20 @@ const COMPASS_POINTS: [string, number][] = [
   ["NW", 315],
 ];
 
+export interface SkyMapLayers {
+  stars: boolean;
+  constellations: boolean;
+  planets: boolean;
+  deepSky: boolean;
+}
+
 /** Shortest signed angular difference a-b, in (-180, 180]. */
 function angleDiff(a: number, b: number): number {
   return ((((a - b) % 360) + 540) % 360) - 180;
+}
+
+function isRoughlyInView(azimuth: number, facing: number): boolean {
+  return Math.abs(angleDiff(azimuth, facing)) < HALF_VISIBLE;
 }
 
 function project(
@@ -142,10 +171,17 @@ export default function SkyMapCanvas({
   snapshot,
   facingAzimuth,
   onFacingChange,
+  nightMode,
+  layers,
 }: {
   snapshot: SkySnapshot;
   facingAzimuth: number;
   onFacingChange: (azimuth: number) => void;
+  /** Always render a dark, practical background regardless of the real
+   * time of day — the alternative to skyBackgroundColor's own realistic
+   * (but much lower-contrast in daylight) colouring. */
+  nightMode: boolean;
+  layers: SkyMapLayers;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -208,10 +244,14 @@ export default function SkyMapCanvas({
     ctx.clearRect(0, 0, width, height);
 
     const horizonY = height - ((0 - ALT_MIN) / ALT_RANGE) * height;
-    const starOpacityScale = snapshot.isDarkEnoughToSeeStars ? 1 : DAYLIGHT_STAR_OPACITY;
+    const dimScale = snapshot.isDarkEnoughToSeeStars ? 1 : DAYLIGHT_OPACITY;
 
-    // Sky above the horizon line, real colour for the actual time of day.
-    ctx.fillStyle = skyBackgroundColor(snapshot.sun.altitude);
+    // Sky above the horizon line. Night mode always uses the same dark,
+    // readable tone; "live" mode shows the real colour for right now —
+    // genuinely informative (is it actually dark out?), but low-contrast
+    // against light text for a good chunk of the day, which is exactly
+    // why night mode exists as the default.
+    ctx.fillStyle = nightMode ? skyBackgroundColor(-18) : skyBackgroundColor(snapshot.sun.altitude);
     ctx.fillRect(0, 0, width, horizonY);
     // Ground below it — always the same flat dark tone, day or night;
     // this map has nothing useful to say about lit ground.
@@ -241,7 +281,6 @@ export default function SkyMapCanvas({
     ctx.font = `${Math.max(10, width * 0.022)}px ui-monospace, monospace`;
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
-    ctx.lineWidth = 3;
     COMPASS_POINTS.forEach(([label, az]) => {
       const dAz = angleDiff(az, facingAzimuth);
       if (Math.abs(dAz) > FOV_AZIMUTH / 2 + 5) return;
@@ -249,9 +288,10 @@ export default function SkyMapCanvas({
       const isFacing = Math.abs(dAz) < 1;
       const color = isFacing ? COLORS.compassFacing : COLORS.compass;
       ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(x, horizonY - 6);
-      ctx.lineTo(x, horizonY + 6);
+      ctx.moveTo(x, horizonY - 7);
+      ctx.lineTo(x, horizonY + 7);
       ctx.stroke();
       ctx.fillStyle = color;
       haloText(ctx, label, x, horizonY + 22);
@@ -262,34 +302,35 @@ export default function SkyMapCanvas({
     const nameFont = `${fontSize}px ui-monospace, monospace`;
 
     // Constellation lines, drawn before everything else so dots/labels sit
-    // on top of them. Only segments whose midpoint direction is roughly
-    // within view are worth the draw call — cheap early-out for the rest
-    // of the sky behind/beside the visitor.
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = COLORS.constellationLine.replace(
-      /[\d.]+\)$/,
-      `${0.4 * starOpacityScale})`,
-    );
-    const visibleLines = snapshot.constellationLines.filter((seg) => {
-      const midAz = (seg.from.azimuth + seg.to.azimuth) / 2;
-      return Math.abs(angleDiff(midAz, facingAzimuth)) < FOV_AZIMUTH / 2 + 20;
-    });
-    visibleLines.forEach((seg) => {
-      const from = project(seg.from.altitude, seg.from.azimuth, facingAzimuth, width, height);
-      const to = project(seg.to.altitude, seg.to.azimuth, facingAzimuth, width, height);
-      ctx.beginPath();
-      ctx.moveTo(from.x, from.y);
-      ctx.lineTo(to.x, to.y);
-      ctx.stroke();
-    });
+    // on top of them. A segment is worth drawing if EITHER real endpoint
+    // is roughly in view — checked per star, not by averaging the two
+    // azimuths together (that average breaks down completely near the
+    // 0°/360° wraparound, and was the root cause of constellations
+    // appearing to partially vanish/reshape while panning).
+    let visibleLines: typeof snapshot.constellationLines = [];
+    if (layers.constellations) {
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = COLORS.constellationLine.replace(/[\d.]+\)$/, `${0.62 * dimScale})`);
+      visibleLines = snapshot.constellationLines.filter(
+        (seg) => isRoughlyInView(seg.from.azimuth, facingAzimuth) || isRoughlyInView(seg.to.azimuth, facingAzimuth),
+      );
+      visibleLines.forEach((seg) => {
+        const from = project(seg.from.altitude, seg.from.azimuth, facingAzimuth, width, height);
+        const to = project(seg.to.altitude, seg.to.azimuth, facingAzimuth, width, height);
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
+        ctx.stroke();
+      });
+    }
 
-    // Sun, Moon and planets first — always shown at full strength (unlike
-    // the faint stars, these can be genuinely visible in a daylight sky
-    // too) and always labelled, they're the whole reason someone opens this.
+    // Sun, Moon and planets — always shown at full strength (unlike the
+    // faint stars, these can be genuinely visible in a daylight sky too)
+    // and always labelled, they're the whole reason someone opens this.
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
 
-    if (snapshot.sun.altitude >= -2 && Math.abs(angleDiff(snapshot.sun.azimuth, facingAzimuth)) < FOV_AZIMUTH / 2) {
+    if (snapshot.sun.altitude >= -2 && isRoughlyInView(snapshot.sun.azimuth, facingAzimuth)) {
       const { x, y } = project(snapshot.sun.altitude, snapshot.sun.azimuth, facingAzimuth, width, height);
       const r = Math.max(6, width * 0.012);
       ctx.beginPath();
@@ -301,7 +342,7 @@ export default function SkyMapCanvas({
       if (placeLabel(x + r + 5, y, ctx.measureText("Sun").width, fontSize)) haloText(ctx, "Sun", x + r + 5, y);
     }
 
-    if (Math.abs(angleDiff(snapshot.moon.azimuth, facingAzimuth)) < FOV_AZIMUTH / 2) {
+    if (isRoughlyInView(snapshot.moon.azimuth, facingAzimuth)) {
       const { x, y } = project(snapshot.moon.altitude, snapshot.moon.azimuth, facingAzimuth, width, height);
       const r = Math.max(5, width * 0.011);
       const waxing =
@@ -312,78 +353,106 @@ export default function SkyMapCanvas({
       if (placeLabel(x + r + 6, y, ctx.measureText("Moon").width, fontSize)) haloText(ctx, "Moon", x + r + 6, y);
     }
 
-    snapshot.planets.forEach((planet) => {
-      if (Math.abs(angleDiff(planet.azimuth, facingAzimuth)) >= FOV_AZIMUTH / 2) return;
-      const { x, y } = project(planet.altitude, planet.azimuth, facingAzimuth, width, height);
-      const r = Math.max(2.5, width * 0.005);
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = COLORS.planet;
-      ctx.fill();
-      ctx.font = nameFont;
-      ctx.fillStyle = COLORS.planet;
-      if (placeLabel(x + r + 5, y, ctx.measureText(planet.name).width, fontSize)) {
-        haloText(ctx, planet.name, x + r + 5, y);
-      }
-    });
+    if (layers.planets) {
+      snapshot.planets.forEach((planet) => {
+        if (!isRoughlyInView(planet.azimuth, facingAzimuth)) return;
+        const { x, y } = project(planet.altitude, planet.azimuth, facingAzimuth, width, height);
+        const r = Math.max(3, width * 0.007);
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = COLORS.planet;
+        ctx.fill();
+        ctx.font = nameFont;
+        ctx.fillStyle = COLORS.planet;
+        if (placeLabel(x + r + 5, y, ctx.measureText(planet.name).width, fontSize)) {
+          haloText(ctx, planet.name, x + r + 5, y);
+        }
+      });
+    }
+
+    // Deep-sky objects — square outlines, not filled dots: a real DSO is
+    // an extended object, not a point source, and the shape difference
+    // reads as "a different kind of thing" without needing its own hue
+    // (see the Section Colour Rule note on COLORS.deepSky above).
+    if (layers.deepSky) {
+      const visibleDeepSky = snapshot.deepSkyObjects
+        .filter((o) => isRoughlyInView(o.azimuth, facingAzimuth))
+        .sort((a, b) => a.magnitude - b.magnitude);
+      visibleDeepSky.forEach((obj) => {
+        const { x, y } = project(obj.altitude, obj.azimuth, facingAzimuth, width, height);
+        const size = Math.max(2.5, Math.min(7, 9 - obj.magnitude)) * (width / 500);
+        const opacity = Math.max(0.35, Math.min(1, (9 - obj.magnitude) / 5)) * dimScale;
+        ctx.strokeStyle = `rgba(245, 247, 250, ${opacity})`;
+        ctx.lineWidth = 1.25;
+        ctx.strokeRect(x - size / 2, y - size / 2, size, size);
+        ctx.font = nameFont;
+        ctx.fillStyle = `rgba(245, 247, 250, ${opacity})`;
+        if (placeLabel(x + size / 2 + 5, y, ctx.measureText(obj.catalogId).width, fontSize)) {
+          haloText(ctx, obj.catalogId, x + size / 2 + 5, y);
+        }
+      });
+    }
 
     // Stars — brightest first, so a genuinely crowded patch keeps the
     // recognisable named stars and quietly drops the fainter ones' labels
     // rather than stacking text. The dot itself always draws regardless.
     // Both dots and labels fade together when it's too bright to actually
-    // see them (see starOpacityScale above) — real reinforcement of the
-    // "not visible right now" message, not just a caption underneath.
-    const visibleStars = snapshot.stars
-      .filter((s) => Math.abs(angleDiff(s.azimuth, facingAzimuth)) < FOV_AZIMUTH / 2)
-      .sort((a, b) => a.magnitude - b.magnitude);
-    const USEFUL_LABEL_MAG = 2.2;
-    visibleStars.forEach((star) => {
-      const { x, y } = project(star.altitude, star.azimuth, facingAzimuth, width, height);
-      const radius = Math.max(0.9, (2.6 - star.magnitude) * 0.75);
-      const opacity = Math.max(0.3, Math.min(1, (2.6 - star.magnitude) / 3.2)) * starOpacityScale;
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(245, 247, 250, ${opacity})`;
-      ctx.fill();
-      if (star.magnitude <= USEFUL_LABEL_MAG) {
-        ctx.font = nameFont;
-        const w = ctx.measureText(star.name).width;
-        if (placeLabel(x + radius + 4, y, w, fontSize)) {
-          ctx.fillStyle = `rgba(199, 203, 217, ${0.85 * starOpacityScale})`; // star-300
-          haloText(ctx, star.name, x + radius + 4, y);
+    // see them (see dimScale above) — real reinforcement of the "not
+    // visible right now" message, not just a caption underneath.
+    if (layers.stars) {
+      const visibleStars = snapshot.stars
+        .filter((s) => isRoughlyInView(s.azimuth, facingAzimuth))
+        .sort((a, b) => a.magnitude - b.magnitude);
+      const USEFUL_LABEL_MAG = 2.2;
+      visibleStars.forEach((star) => {
+        const { x, y } = project(star.altitude, star.azimuth, facingAzimuth, width, height);
+        const radius = Math.max(1.1, (2.6 - star.magnitude) * 0.85);
+        const opacity = Math.max(0.45, Math.min(1, (2.6 - star.magnitude) / 2.8)) * dimScale;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(245, 247, 250, ${opacity})`;
+        ctx.fill();
+        if (star.magnitude <= USEFUL_LABEL_MAG) {
+          ctx.font = nameFont;
+          const w = ctx.measureText(star.name).width;
+          if (placeLabel(x + radius + 4, y, w, fontSize)) {
+            ctx.fillStyle = `rgba(199, 203, 217, ${0.9 * dimScale})`; // star-300
+            haloText(ctx, star.name, x + radius + 4, y);
+          }
         }
-      }
-    });
+      });
+    }
 
     // One label per visible constellation, at the average position of its
     // own currently-drawn points — lowest priority of anything on the map,
     // so it's the first to be dropped in a crowded region.
-    const groups = new Map<string, { x: number; y: number; n: number }>();
-    visibleLines.forEach((seg) => {
-      for (const star of [seg.from, seg.to]) {
-        const p = project(star.altitude, star.azimuth, facingAzimuth, width, height);
-        const g = groups.get(seg.constellation) ?? { x: 0, y: 0, n: 0 };
-        g.x += p.x;
-        g.y += p.y;
-        g.n += 1;
-        groups.set(seg.constellation, g);
-      }
-    });
-    ctx.font = `${Math.max(9, width * 0.016)}px ui-monospace, monospace`;
-    ctx.textAlign = "center";
-    groups.forEach((g, name) => {
-      const label = name.toUpperCase();
-      const x = g.x / g.n;
-      const y = g.y / g.n;
-      const w = ctx.measureText(label).width;
-      if (placeLabel(x - w / 2, y, w, fontSize)) {
-        ctx.fillStyle = `${COLORS.constellationLabel}${Math.round(starOpacityScale * 255)
-          .toString(16)
-          .padStart(2, "0")}`;
-        haloText(ctx, label, x, y);
-      }
-    });
-  }, [snapshot, width, facingAzimuth]);
+    if (layers.constellations) {
+      const groups = new Map<string, { x: number; y: number; n: number }>();
+      visibleLines.forEach((seg) => {
+        for (const star of [seg.from, seg.to]) {
+          const p = project(star.altitude, star.azimuth, facingAzimuth, width, height);
+          const g = groups.get(seg.constellation) ?? { x: 0, y: 0, n: 0 };
+          g.x += p.x;
+          g.y += p.y;
+          g.n += 1;
+          groups.set(seg.constellation, g);
+        }
+      });
+      ctx.font = `${Math.max(9, width * 0.017)}px ui-monospace, monospace`;
+      ctx.textAlign = "center";
+      groups.forEach((g, name) => {
+        const label = name.toUpperCase();
+        const x = g.x / g.n;
+        const y = g.y / g.n;
+        const w = ctx.measureText(label).width;
+        if (placeLabel(x - w / 2, y, w, fontSize)) {
+          const alpha = Math.round(dimScale * 255).toString(16).padStart(2, "0");
+          ctx.fillStyle = `${COLORS.constellationLabel}${alpha}`;
+          haloText(ctx, label, x, y);
+        }
+      });
+    }
+  }, [snapshot, width, facingAzimuth, nightMode, layers]);
 
   return (
     <div ref={containerRef} className="aspect-[4/3] w-full overflow-hidden">
@@ -404,7 +473,9 @@ export default function SkyMapCanvas({
 
 /** Real daylight vs twilight vs night, read off the Sun's own altitude —
  * not decoration, this is what actually determines whether a real sky
- * looks black, orange, or blue at this exact moment. */
+ * looks black, orange, or blue at this exact moment. Passing a fixed -18
+ * (see nightMode above) always returns the night-sky colour regardless of
+ * the real Sun position. */
 function skyBackgroundColor(sunAltitude: number): string {
   const stops: [number, [number, number, number]][] = [
     [-18, [5, 6, 10]], // astronomical night — void-950
