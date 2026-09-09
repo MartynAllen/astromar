@@ -53,6 +53,13 @@ export default defineType({
         'Optional — e.g. "GLOBAL-CFPM-12X16". Leave empty if this size can\'t be ordered framed; set it and the framing add-on price below to offer it as an add-on in the buy panel.',
     }),
     defineField({
+      name: "photoPaperSku",
+      title: "Gloss/lustre Prodigi SKU",
+      type: "string",
+      description:
+        'Optional — e.g. "GLOBAL-PHO-4X6". Prodigi\'s only genuine finish choice: the fine-art paper above (unframedSku) is fixed to matte, but this separate C-type photo paper line takes a "finish" attribute of gloss or lustre at checkout. Leave empty for sizes where Prodigi has no matching photo-paper SKU (confirmed missing at 11×14 and 12×16, for example) — the buy panel only offers a finish choice when this is set, and charges the same price either way.',
+    }),
+    defineField({
       name: "framingAddonPriceGBP",
       title: "Framing add-on price (pence)",
       type: "number",

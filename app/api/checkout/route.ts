@@ -4,6 +4,7 @@ import { getPhotoBySlug, getPrintProducts } from "@/lib/sanity.queries";
 import { applyPrintCrop, urlFor } from "@/sanity/image";
 import { SITE_URL } from "@/lib/seo";
 import { frameColorLabel, isValidFrameColor } from "@/lib/printFrameColors";
+import { DEFAULT_PRINT_FINISH, isValidPrintFinish, printFinishLabel } from "@/lib/printFinish";
 import { printProductsForPhoto } from "@/lib/print";
 import { getClientIp } from "@/lib/getClientIp";
 import { isSameSiteRequest } from "@/lib/sameSiteRequest";
@@ -47,11 +48,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { photoSlug, printProductId, framed, frameColor } = (body ?? {}) as {
+  const { photoSlug, printProductId, framed, frameColor, finish } = (body ?? {}) as {
     photoSlug?: unknown;
     printProductId?: unknown;
     framed?: unknown;
     frameColor?: unknown;
+    finish?: unknown;
   };
 
   if (
@@ -75,6 +77,15 @@ export async function POST(request: Request) {
   if (framed && !isValidFrameColor(frameColor)) {
     return NextResponse.json({ error: "Missing or invalid frameColor" }, { status: 400 });
   }
+
+  // Optional — defaults to matte (the only finish the base unframedSku
+  // actually has). Only meaningful when the selected size offers a real
+  // gloss/lustre alternative (product.photoPaperSku), checked below once
+  // the product itself has been re-fetched.
+  if (finish !== undefined && !isValidPrintFinish(finish)) {
+    return NextResponse.json({ error: "Invalid finish" }, { status: 400 });
+  }
+  const requestedFinish = isValidPrintFinish(finish) ? finish : DEFAULT_PRINT_FINISH;
 
   const photo = await getPhotoBySlug(photoSlug);
   if (!photo || photo.availableAsPrint !== true) {
@@ -104,7 +115,11 @@ export async function POST(request: Request) {
   }
 
   // Never trust a client-supplied sku or price — both are derived here from
-  // the size + framed flag, against the product doc just re-fetched above.
+  // the size + framed flag + finish, against the product doc just re-fetched
+  // above. A photoPaperSku product never also has a framedSku in today's
+  // catalog (postcard sizes aren't offered framed), so these two branches
+  // don't currently overlap — framed still takes priority if that ever
+  // changes, since framing is the more established, tested path.
   let sku: string;
   let priceGBP: number;
   let productLabel: string;
@@ -118,6 +133,19 @@ export async function POST(request: Request) {
     sku = product.framedSku;
     priceGBP = product.unframedPriceGBP + product.framingAddonPriceGBP;
     productLabel = `${product.title} (Framed — ${frameColorLabel(frameColor as string)})`;
+  } else if (requestedFinish !== "matte") {
+    if (!product.photoPaperSku) {
+      return NextResponse.json(
+        { error: "This finish isn't available for this size" },
+        { status: 400 },
+      );
+    }
+    // Same price as matte — see photoPaperSku's schema description: Prodigi's
+    // photo paper line actually costs slightly less to fulfil than the fine
+    // art line, so charging the same never undercuts margin.
+    sku = product.photoPaperSku;
+    priceGBP = product.unframedPriceGBP;
+    productLabel = `${product.title} (${printFinishLabel(requestedFinish)})`;
   } else {
     sku = product.unframedSku;
     priceGBP = product.unframedPriceGBP;
@@ -178,6 +206,9 @@ export async function POST(request: Request) {
           // DEFAULT_FRAME_COLOR for unframed SKUs, which don't take a
           // colour attribute at all, so this is never actually read there.
           ...(framed ? { frameColor: frameColor as string } : {}),
+          // Only set when sku is actually the photoPaperSku — matte orders
+          // send no finish attribute to Prodigi at all (see webhook).
+          ...(requestedFinish !== "matte" ? { finish: requestedFinish } : {}),
           prodigiStatus: "pending",
         },
       },

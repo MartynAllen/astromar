@@ -6,6 +6,7 @@ import Image from "next/image";
 import { applyPrintCrop, urlFor } from "@/sanity/image";
 import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
 import { FRAME_COLORS, DEFAULT_FRAME_COLOR, frameColorLabel, matWidthIn } from "@/lib/printFrameColors";
+import { PRINT_FINISHES, DEFAULT_PRINT_FINISH, type PrintFinish } from "@/lib/printFinish";
 import {
   cropRatioCss,
   effectiveAspectRatio,
@@ -315,6 +316,7 @@ export default function BuyPrintPanel({
   const [selectedId, setSelectedId] = useState(products[0]?._id);
   const [framed, setFramed] = useState(false);
   const [frameColor, setFrameColor] = useState(DEFAULT_FRAME_COLOR);
+  const [finish, setFinish] = useState<PrintFinish>(DEFAULT_PRINT_FINISH);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -334,6 +336,7 @@ export default function BuyPrintPanel({
   const recommendedId = allFitEqually ? null : products[fitScores.indexOf(bestFitScore)]._id;
   const selected = products.find((p) => p._id === selectedId);
   const canFrame = Boolean(selected?.framedSku && selected?.framingAddonPriceGBP);
+  const canChooseFinish = Boolean(selected?.photoPaperSku);
   const totalGBP = selected
     ? selected.unframedPriceGBP + (framed && canFrame ? (selected.framingAddonPriceGBP ?? 0) : 0)
     : 0;
@@ -341,9 +344,13 @@ export default function BuyPrintPanel({
   function selectProduct(id: string) {
     setSelectedId(id);
     // A size that can't be framed shouldn't silently keep "framed" checked
-    // for the next selection.
+    // for the next selection, and one with no gloss/lustre alternative
+    // shouldn't silently keep a non-matte finish selected either — in
+    // today's catalog these two never overlap anyway (see checkout route),
+    // but each resets independently regardless.
     const next = products.find((p) => p._id === id);
     if (!next?.framedSku || !next?.framingAddonPriceGBP) setFramed(false);
+    if (!next?.photoPaperSku) setFinish(DEFAULT_PRINT_FINISH);
   }
 
   async function handleBuy() {
@@ -359,6 +366,7 @@ export default function BuyPrintPanel({
           printProductId: selected._id,
           framed: framed && canFrame,
           ...(framed && canFrame ? { frameColor } : {}),
+          ...(canChooseFinish ? { finish } : {}),
         }),
       });
       const data = await res.json();
@@ -470,6 +478,36 @@ export default function BuyPrintPanel({
         </>
       )}
 
+      {canChooseFinish && (
+        <div className="mt-3">
+          <p className="text-xs uppercase tracking-widest text-star-500">Finish</p>
+          <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Print finish">
+            {PRINT_FINISHES.map((option) => {
+              const isActive = option.value === finish;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setFinish(option.value)}
+                  aria-pressed={isActive}
+                  className={`min-h-11 rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
+                    isActive
+                      ? "border-nebula-rose-500 bg-nebula-rose-500/10 text-nebula-rose-400"
+                      : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1.5 text-xs text-star-500">
+            Same price either way — matte is Prodigi&apos;s fine-art paper, gloss and lustre are a
+            different photo paper stock.
+          </p>
+        </div>
+      )}
+
       {error && (
         <p className="mt-3 text-sm text-nebula-rose-400" role="alert">
           {error}
@@ -511,7 +549,8 @@ export default function BuyPrintPanel({
         >
           Stripe Climate
         </a>
-        .
+        . The rest goes straight back into this site — new gear to review, and more nights under
+        the stars. A short thank-you note comes in the box.
       </p>
 
       {previewOpen && selected && (

@@ -2,11 +2,24 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { DEFAULT_FRAME_COLOR, isValidFrameColor } from "@/lib/printFrameColors";
+import { isValidPrintFinish } from "@/lib/printFinish";
+import { SITE_URL } from "@/lib/seo";
 
 const PRODIGI_API_BASE_URL = process.env.PRODIGI_API_BASE_URL;
 const PRODIGI_API_KEY = process.env.PRODIGI_API_KEY;
 const ALERT_WEBHOOK_URL = process.env.ALERT_WEBHOOK_URL;
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
+
+// Prodigi's real order-level branding object (confirmed against their
+// Print API reference and a public schema binding published from it) —
+// `postcard` is an A6, single-sided insert shipped inside the package.
+// Prodigi's own servers fetch this URL once per order, so it must always
+// resolve to a real image with no auth gate — see the route itself for why
+// it's generated rather than a static asset. Costs Prodigi £2.00/order
+// (confirmed via their packaging pricing) — absorbed into the catalog's
+// existing prices rather than added as a checkout line item, see the
+// printProduct pricing comment/commit this shipped alongside.
+const THANK_YOU_CARD_URL = `${SITE_URL}/api/print-assets/thank-you-card`;
 
 interface ProdigiOrderResult {
   ok: true;
@@ -33,6 +46,7 @@ async function placeProdigiOrder(params: {
   sku: string;
   imageUrl: string;
   frameColor: string;
+  finish: string | null;
 }): Promise<ProdigiOrderResult | ProdigiOrderFailure> {
   if (!PRODIGI_API_BASE_URL || !PRODIGI_API_KEY) {
     return { ok: false, error: "Prodigi not configured" };
@@ -61,6 +75,11 @@ async function placeProdigiOrder(params: {
         // reorder under the same reference) while this needs to be.
         idempotencyKey: params.merchantReference,
         shippingMethod: "Standard",
+        // Every order ships with the same generated thank-you card — see
+        // THANK_YOU_CARD_URL above. postcard, not packing_slip_color: a
+        // packing slip reads as an invoice/dispatch note, while postcard is
+        // Prodigi's actual "note inside the package" insert.
+        branding: { postcard: { url: THANK_YOU_CARD_URL } },
         recipient: {
           name: params.recipientName,
           email: params.email ?? undefined,
@@ -87,6 +106,13 @@ async function placeProdigiOrder(params: {
             // (see lib/printFrameColors.ts); params.frameColor carries it
             // through from checkout's Stripe metadata.
             ...(params.sku.includes("CFPM") ? { attributes: { color: params.frameColor } } : {}),
+            // The C-type photo paper line (GLOBAL-PHO-*) takes a "finish"
+            // attribute instead — confirmed via a real Products API call
+            // (see lib/printFinish.ts). checkout only ever sets
+            // params.finish when it actually chose this line's SKU.
+            ...(params.sku.includes("PHO") && params.finish
+              ? { attributes: { finish: params.finish } }
+              : {}),
           },
         ],
       }),
@@ -146,6 +172,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const frameColor = isValidFrameColor(paymentIntent.metadata.frameColor)
     ? paymentIntent.metadata.frameColor
     : DEFAULT_FRAME_COLOR;
+  // Only set by checkout for a gloss/lustre order — null (not a default)
+  // when absent, since a matte order must send no finish attribute to
+  // Prodigi at all rather than a made-up fallback value.
+  const finish = isValidPrintFinish(paymentIntent.metadata.finish)
+    ? paymentIntent.metadata.finish
+    : null;
   const shipping = session.collected_information?.shipping_details;
   const addressLine1 = shipping?.address.line1;
   const addressCountry = shipping?.address.country;
@@ -176,6 +208,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     sku,
     imageUrl,
     frameColor,
+    finish,
   });
 
   if (result.ok) {
