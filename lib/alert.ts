@@ -11,7 +11,10 @@ export async function sendOpsAlert(message: string): Promise<void> {
     await fetch(ALERT_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: message }),
+      // `content` is Discord's field, `text` is Slack's — sending both means
+      // the same URL works with either without a provider setting. Each
+      // service uses its own key and ignores the other.
+      body: JSON.stringify({ content: message, text: message }),
     });
   } catch (err) {
     console.error("Ops alert failed:", err);
