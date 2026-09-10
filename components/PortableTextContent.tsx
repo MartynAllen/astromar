@@ -2,6 +2,7 @@ import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/image";
 import { isSafeHref } from "@/lib/safeUrl";
+import { isAffiliateUrl } from "@/lib/affiliateLinks";
 import ProductTierBlock from "@/components/guide/ProductTierBlock";
 
 const components: PortableTextComponents = {
@@ -33,7 +34,10 @@ const components: PortableTextComponents = {
         <a
           href={value.href}
           target="_blank"
-          rel="noopener noreferrer"
+          // Affiliate links get "sponsored nofollow" per Amazon's Associates
+          // terms and Google's link-spam guidance; ordinary references stay
+          // plain so the site can still vouch for what it links to.
+          rel={isAffiliateUrl(value.href) ? "noopener noreferrer sponsored nofollow" : "noopener noreferrer"}
           className="text-nebula-teal-400 underline decoration-nebula-teal-700 underline-offset-2 hover:text-nebula-teal-300"
         >
           {children}

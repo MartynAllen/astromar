@@ -6,9 +6,11 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BackLink from "@/components/BackLink";
 import BahtinovMaskGenerator from "@/components/guide/BahtinovMaskGenerator";
 import BahtinovMaskFieldGuide from "@/components/guide/BahtinovMaskFieldGuide";
+import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
 import { getGuideArticleBySlug, getGuideSlugs } from "@/lib/sanity.queries";
 import { buildMetadata, articleJsonLd } from "@/lib/seo";
 import { estimateReadingMinutes, readingTimeLabel } from "@/lib/readingTime";
+import { bodyHasAffiliateLink } from "@/lib/affiliateLinks";
 
 export const revalidate = 60;
 
@@ -50,6 +52,7 @@ export default async function LearnArticlePage(props: PageProps<"/learn/[slug]">
     article.publishedAt ? formatPublishedDate(article.publishedAt) : null,
     readingTimeLabel(article.body),
   ].filter(Boolean);
+  const hasAffiliateLink = bodyHasAffiliateLink(article.body);
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
@@ -69,6 +72,12 @@ export default async function LearnArticlePage(props: PageProps<"/learn/[slug]">
         ]}
       />
       <BackLink href="/learn" label="Learn" />
+
+      {hasAffiliateLink && (
+        <div className="mt-4">
+          <AffiliateDisclosureBanner />
+        </div>
+      )}
 
       <p className="mt-4 font-mono text-xs uppercase tracking-widest text-nebula-amber-400">
         {[article.contentType, article.section, article.difficulty].filter(Boolean).join(" · ")}

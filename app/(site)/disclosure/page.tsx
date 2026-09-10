@@ -20,9 +20,9 @@ export default function DisclosurePage() {
           earns from qualifying purchases.
         </p>
         <p>
-          In practice: some links on the Reviews and About/Gear pages point to Amazon or
-          other retailers. If you buy something after clicking one of those links, Astromar
-          may earn a small commission — at no extra cost to you.
+          In practice: some links on the Reviews, About/Gear and Learn pages point to Amazon
+          or other retailers. If you buy something after clicking one of those links,
+          Astromar may earn a small commission — at no extra cost to you.
         </p>
         <p>
           This never affects what gets reviewed or how. Every piece of gear covered here has
