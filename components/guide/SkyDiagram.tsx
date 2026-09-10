@@ -32,12 +32,7 @@ function starRadius(mag: number) {
 }
 
 function Dot({ x, y, r }: { x: number; y: number; r: number }) {
-  return (
-    <>
-      <circle cx={x} cy={y} r={r * 2.2} className="fill-star-100/10" />
-      <circle cx={x} cy={y} r={r} className="fill-star-100" />
-    </>
-  );
+  return <circle cx={x} cy={y} r={r} className="fill-star-100" />;
 }
 
 function Text({
@@ -71,8 +66,8 @@ function Text({
       className={cls}
       fontSize={size}
       style={{ paintOrder: "stroke" }}
-      stroke="var(--color-void-950)"
-      strokeWidth={2.6}
+      stroke="#05060a"
+      strokeWidth={1}
       strokeLinejoin="round"
     >
       {children}
@@ -155,11 +150,16 @@ function FindingPolaris() {
   const merak = project(165.46, 56.38);
   const dubhe = project(165.93, 61.75);
   const polaris = project(37.95, 89.26);
-  const t = 5.4;
-  const ext = { x: merak.x + (dubhe.x - merak.x) * t, y: merak.y + (dubhe.y - merak.y) * t };
+  // Carry the Merak->Dubhe line on until it's swept past Polaris — the real
+  // pointer rule misses by ~1.5deg, so this genuinely runs right beside it.
+  const dir = { x: dubhe.x - merak.x, y: dubhe.y - merak.y };
+  const dlen = Math.hypot(dir.x, dir.y);
+  const reach = Math.hypot(polaris.x - merak.x, polaris.y - merak.y) + 9;
+  const ext = { x: merak.x + (dir.x / dlen) * reach, y: merak.y + (dir.y / dlen) * reach };
+  const lbl = { x: merak.x + (ext.x - merak.x) * 0.4, y: merak.y + (ext.y - merak.y) * 0.4 };
 
   return (
-    <svg viewBox="-94 -58 192 166" className="mx-auto w-full max-w-[450px]">
+    <svg viewBox="-83 -62 152 159" className="mx-auto w-full max-w-[440px]">
       <Constellation stars={CASSIOPEIA} lines={CASSIOPEIA_LINES} />
       <Constellation stars={LITTLE_DIPPER} lines={LITTLE_DIPPER_LINES} />
       <Constellation stars={PLOUGH} lines={PLOUGH_LINES} />
@@ -180,10 +180,10 @@ function FindingPolaris() {
       <Text x={polaris.x + 12} y={polaris.y + 2.2} tone="bright">Polaris — true north</Text>
       <Text x={merak.x - 5} y={merak.y + 8} anchor="end">Merak</Text>
       <Text x={dubhe.x - 5} y={dubhe.y - 1} anchor="end">Dubhe</Text>
-      <Text x={project(196, 52).x} y={project(196, 52).y + 15} anchor="middle" tone="dim">The Plough</Text>
-      <Text x={project(16, 58).x} y={project(16, 58).y + 15} anchor="middle" tone="dim">Cassiopeia</Text>
+      <Text x={-30} y={92} anchor="middle" tone="dim">The Plough</Text>
+      <Text x={22} y={-33} anchor="middle" tone="dim">Cassiopeia</Text>
       <Text x={project(236, 73).x + 8} y={project(236, 73).y + 4} tone="dim" size={5.4}>Little Dipper</Text>
-      <Text x={(merak.x + ext.x) / 2 + 6} y={(merak.y + ext.y) / 2 - 3} tone="accent" size={5.6}>~5× the gap →</Text>
+      <Text x={lbl.x - 4} y={lbl.y + 3} tone="accent" size={5.6}>~5× the gap</Text>
     </svg>
   );
 }
@@ -225,12 +225,12 @@ function FindingSouth() {
   const horizonY = 146;
 
   return (
-    <svg viewBox="-86 -30 218 202" className="mx-auto w-full max-w-[440px]">
+    <svg viewBox="-68 -22 200 190" className="mx-auto w-full max-w-[440px]">
       {/* constructions, under the stars */}
       <line x1={gacrux.x} y1={gacrux.y} x2={axisEnd.x} y2={axisEnd.y} className="stroke-nebula-amber-400" strokeWidth={1.4} strokeDasharray="4 3" />
       <line x1={pMid.x} y1={pMid.y} x2={bisEnd.x} y2={bisEnd.y} className="stroke-nebula-amber-400/70" strokeWidth={1.1} strokeDasharray="2 3" />
       <line x1={scp.x} y1={scp.y} x2={scp.x} y2={horizonY} className="stroke-star-500" strokeWidth={1} strokeDasharray="3 3" />
-      <line x1={-74} y1={horizonY} x2={108} y2={horizonY} className="stroke-star-500" strokeWidth={1.3} />
+      <line x1={-80} y1={horizonY} x2={130} y2={horizonY} className="stroke-star-500" strokeWidth={1.3} />
 
       <line x1={delta.x} y1={delta.y} x2={mimosa.x} y2={mimosa.y} className="stroke-void-600" strokeWidth={1} />
       <line x1={gacrux.x} y1={gacrux.y} x2={acrux.x} y2={acrux.y} className="stroke-void-600" strokeWidth={1} />
@@ -250,8 +250,8 @@ function FindingSouth() {
       <Text x={scp.x + 12} y={scp.y - 1} tone="bright">South celestial pole</Text>
       <Text x={scp.x + 12} y={scp.y + 7} tone="dim" size={5}>no star marks it</Text>
       <Text x={mimosa.x + 7} y={mimosa.y + 3}>Crux</Text>
-      <Text x={pMid.x} y={pMid.y + 16} anchor="middle">The Pointers</Text>
-      <Text x={pMid.x} y={pMid.y + 23} anchor="middle" tone="dim" size={5}>α &amp; β Centauri</Text>
+      <Text x={pMid.x} y={pMid.y + 20} anchor="middle">The Pointers</Text>
+      <Text x={pMid.x} y={pMid.y + 27} anchor="middle" tone="dim" size={5}>α &amp; β Centauri</Text>
       <Text x={0} y={horizonY + 12} anchor="middle" tone="bright">due south</Text>
       <Text x={axisLabel.x + 8} y={axisLabel.y} tone="accent" size={5.6}>~4.5× the cross</Text>
     </svg>

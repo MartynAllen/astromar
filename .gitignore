@@ -50,3 +50,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local scratch — user photos dropped in the repo root for processing (may carry GPS EXIF)
+/IMG_*.jpeg
+/IMG_*.jpg
+/IMG_*.JPEG
+/IMG_*.JPG
