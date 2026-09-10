@@ -3,147 +3,10 @@ import type Stripe from "stripe";
 import { stripe, stripeConfigured } from "@/lib/stripe";
 import { DEFAULT_FRAME_COLOR, isValidFrameColor } from "@/lib/printFrameColors";
 import { isValidPrintFinish } from "@/lib/printFinish";
-import { SITE_URL } from "@/lib/seo";
+import { placeProdigiOrder } from "@/lib/prodigi";
+import { sendOpsAlert } from "@/lib/alert";
 
-const PRODIGI_API_BASE_URL = process.env.PRODIGI_API_BASE_URL;
-const PRODIGI_API_KEY = process.env.PRODIGI_API_KEY;
-const ALERT_WEBHOOK_URL = process.env.ALERT_WEBHOOK_URL;
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
-
-// Prodigi's real order-level branding object (confirmed against their
-// Print API reference and a public schema binding published from it) —
-// `postcard` is an A6, single-sided insert shipped inside the package.
-// Prodigi's own servers fetch this URL once per order, so it must always
-// resolve to a real image with no auth gate — see the route itself for why
-// it's generated rather than a static asset. Costs Prodigi £2.00/order
-// (confirmed via their packaging pricing) — absorbed into the catalog's
-// existing prices rather than added as a checkout line item, see the
-// printProduct pricing comment/commit this shipped alongside.
-const THANK_YOU_CARD_URL = `${SITE_URL}/api/print-assets/thank-you-card`;
-
-interface ProdigiOrderResult {
-  ok: true;
-  orderId: string;
-}
-interface ProdigiOrderFailure {
-  ok: false;
-  error: string;
-}
-
-async function placeProdigiOrder(params: {
-  merchantReference: string;
-  recipientName: string;
-  email: string | null;
-  phone: string | null;
-  address: {
-    line1: string;
-    line2?: string | null;
-    city?: string | null;
-    state?: string | null;
-    postalCode?: string | null;
-    country: string;
-  };
-  sku: string;
-  imageUrl: string;
-  frameColor: string;
-  finish: string | null;
-}): Promise<ProdigiOrderResult | ProdigiOrderFailure> {
-  if (!PRODIGI_API_BASE_URL || !PRODIGI_API_KEY) {
-    return { ok: false, error: "Prodigi not configured" };
-  }
-
-  try {
-    const res = await fetch(`${PRODIGI_API_BASE_URL}/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": PRODIGI_API_KEY,
-      },
-      body: JSON.stringify({
-        merchantReference: params.merchantReference,
-        // Closes a real race window in the idempotency guard below: two
-        // near-simultaneous webhook deliveries for the same session (a
-        // Stripe retry landing before the first invocation has written
-        // prodigiStatus: "created" back to the PaymentIntent) would
-        // otherwise both read "not yet created" and both place a real
-        // order. Prodigi's own idempotencyKey exists specifically for
-        // this — a duplicate submission returns the *original* order
-        // (outcome: "alreadyExists", still HTTP 200) instead of creating
-        // a second one, so session.id is reused here rather than
-        // merchantReference precisely because Prodigi's own docs note
-        // merchantReference isn't unique-per-request (a merchant might
-        // reorder under the same reference) while this needs to be.
-        idempotencyKey: params.merchantReference,
-        shippingMethod: "Standard",
-        // Every order ships with the same generated thank-you card — see
-        // THANK_YOU_CARD_URL above. postcard, not packing_slip_color: a
-        // packing slip reads as an invoice/dispatch note, while postcard is
-        // Prodigi's actual "note inside the package" insert.
-        branding: { postcard: { url: THANK_YOU_CARD_URL } },
-        recipient: {
-          name: params.recipientName,
-          email: params.email ?? undefined,
-          phoneNumber: params.phone ?? undefined,
-          address: {
-            line1: params.address.line1,
-            line2: params.address.line2 ?? undefined,
-            townOrCity: params.address.city ?? undefined,
-            stateOrCounty: params.address.state ?? undefined,
-            postalOrZipCode: params.address.postalCode ?? undefined,
-            countryCode: params.address.country,
-          },
-        },
-        items: [
-          {
-            sku: params.sku,
-            copies: 1,
-            sizing: "fillPrintArea",
-            assets: [{ printArea: "default", url: params.imageUrl }],
-            // Prodigi's Classic Framed Print line (GLOBAL-CFPM-*) requires a
-            // frame color attribute — confirmed via a real sandbox order
-            // that came back 400 ValidationFailed/MissingRequiredAttributes
-            // without it. The buy panel now offers a real colour choice
-            // (see lib/printFrameColors.ts); params.frameColor carries it
-            // through from checkout's Stripe metadata.
-            ...(params.sku.includes("CFPM") ? { attributes: { color: params.frameColor } } : {}),
-            // The C-type photo paper line (GLOBAL-PHO-*) takes a "finish"
-            // attribute instead — confirmed via a real Products API call
-            // (see lib/printFinish.ts). checkout only ever sets
-            // params.finish when it actually chose this line's SKU.
-            ...(params.sku.includes("PHO") && params.finish
-              ? { attributes: { finish: params.finish } }
-              : {}),
-          },
-        ],
-      }),
-    });
-
-    const data = await res.json().catch(() => null);
-    if (!res.ok) {
-      return { ok: false, error: `Prodigi ${res.status}: ${JSON.stringify(data).slice(0, 300)}` };
-    }
-    const orderId = data?.order?.id;
-    if (!orderId) {
-      return { ok: false, error: `Prodigi order created but no id in response: ${JSON.stringify(data).slice(0, 300)}` };
-    }
-    return { ok: true, orderId };
-  } catch (err) {
-    return { ok: false, error: `Prodigi request failed: ${String(err).slice(0, 300)}` };
-  }
-}
-
-async function sendAlert(message: string) {
-  if (!ALERT_WEBHOOK_URL) return;
-  try {
-    await fetch(ALERT_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: message }),
-    });
-  } catch (err) {
-    console.error("Alert webhook failed:", err);
-  }
-}
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   if (session.payment_status !== "paid") return NextResponse.json({ received: true });
@@ -158,9 +21,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
   // Idempotency guard — no database, so the PaymentIntent's own metadata is
-  // the ledger. A Stripe retry of an event we've already fulfilled should
-  // be a silent no-op, not a second Prodigi order.
-  if (paymentIntent.metadata.prodigiStatus === "created") {
+  // the ledger. Once an order exists at Prodigi it carries a prodigiOrderId;
+  // a Stripe retry then is a silent no-op, not a second order. A "failed"
+  // status has no orderId, so those still (re)attempt — which is the point
+  // of returning 500 on failure.
+  if (paymentIntent.metadata.prodigiOrderId) {
     return NextResponse.json({ received: true });
   }
 
@@ -188,7 +53,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     await stripe.paymentIntents.update(paymentIntentId, {
       metadata: { ...paymentIntent.metadata, prodigiStatus: "failed", prodigiError: error },
     });
-    await sendAlert(`⚠️ Astromar print order ${session.id} couldn't be placed: ${error}`);
+    await sendOpsAlert(`⚠️ Astromar print order ${session.id} couldn't be placed: ${error}`);
     return NextResponse.json({ error }, { status: 500 });
   }
 
@@ -234,7 +99,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   await stripe.paymentIntents.update(paymentIntentId, {
     metadata: { ...paymentIntent.metadata, prodigiStatus: "failed", prodigiError: result.error.slice(0, 450) },
   });
-  await sendAlert(
+  await sendOpsAlert(
     `⚠️ Astromar print order paid but Prodigi order failed — check PaymentIntent ${paymentIntentId} in the Stripe Dashboard for details.`,
   );
   return NextResponse.json(
