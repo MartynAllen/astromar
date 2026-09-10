@@ -58,6 +58,7 @@ export default defineType({
         { type: "block" },
         { type: "bodyImage" },
         { type: "bodyImageRow" },
+        { type: "skyDiagram" },
         { type: "code", options: { withFilename: true } },
         { type: "productTier" },
       ],

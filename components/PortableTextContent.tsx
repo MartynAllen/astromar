@@ -4,6 +4,7 @@ import { urlFor } from "@/sanity/image";
 import { isSafeHref } from "@/lib/safeUrl";
 import { isAffiliateUrl } from "@/lib/affiliateLinks";
 import ProductTierBlock from "@/components/guide/ProductTierBlock";
+import SkyDiagram from "@/components/guide/SkyDiagram";
 
 const components: PortableTextComponents = {
   block: {
@@ -97,6 +98,7 @@ const components: PortableTextComponents = {
       );
     },
     productTier: ({ value }) => <ProductTierBlock value={value} />,
+    skyDiagram: ({ value }) => <SkyDiagram kind={value?.kind} caption={value?.caption} />,
     code: ({ value }) => (
       <div className="mt-6 overflow-hidden border border-void-700 bg-void-900">
         {(value?.filename || value?.language) && (

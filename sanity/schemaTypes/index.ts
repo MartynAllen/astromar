@@ -16,6 +16,7 @@ import gearItem from "./objects/gearItem";
 import gearMiscItem from "./objects/gearMiscItem";
 import bodyImage from "./objects/bodyImage";
 import bodyImageRow from "./objects/bodyImageRow";
+import skyDiagram from "./objects/skyDiagram";
 import reviewGalleryImage from "./objects/reviewGalleryImage";
 import printableAccessory from "./objects/printableAccessory";
 import recommendedAccessory from "./objects/recommendedAccessory";
@@ -41,6 +42,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     gearMiscItem,
     bodyImage,
     bodyImageRow,
+    skyDiagram,
     reviewGalleryImage,
     printableAccessory,
     recommendedAccessory,
