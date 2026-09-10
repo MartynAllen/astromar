@@ -157,6 +157,17 @@ export async function GET() {
         </div>
       </div>
     ),
-    { width: WIDTH, height: HEIGHT },
+    {
+      width: WIDTH,
+      height: HEIGHT,
+      // This route is public and unauthenticated (Prodigi's servers fetch
+      // it with no key), and every response is byte-for-byte identical
+      // until the next deploy. Let the CDN serve it so a flood of requests
+      // can't rack up Satori render time on the origin — the image only
+      // needs to be fresh within a day of a copy edit.
+      headers: {
+        "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400",
+      },
+    },
   );
 }
