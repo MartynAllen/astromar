@@ -26,6 +26,20 @@ export default defineType({
       type: "string",
       description: "Optional small caption shown under the image.",
     }),
+    defineField({
+      name: "size",
+      title: "Size",
+      type: "string",
+      options: {
+        list: [
+          { title: "Regular (full column width)", value: "regular" },
+          { title: "Small (centred, narrower)", value: "small" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "regular",
+      description: "Use Small for a supporting illustration that shouldn't dominate the section.",
+    }),
   ],
   preview: {
     select: { title: "alt", media: "image" },

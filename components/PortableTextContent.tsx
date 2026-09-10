@@ -51,25 +51,28 @@ const components: PortableTextComponents = {
     ),
   },
   types: {
-    bodyImage: ({ value }) => (
-      <figure className="mt-6">
-        <span className="block overflow-hidden border border-void-700">
-          <Image
-            src={urlFor(value.image).width(1200).url()}
-            alt={value?.alt ?? ""}
-            width={1200}
-            height={800}
-            sizes="(min-width: 1024px) 672px, 100vw"
-            className="h-auto w-full"
-          />
-        </span>
-        {value?.caption && (
-          <figcaption className="mt-2 text-center text-sm text-star-500">
-            {value.caption}
-          </figcaption>
-        )}
-      </figure>
-    ),
+    bodyImage: ({ value }) => {
+      const small = value?.size === "small";
+      return (
+        <figure className={small ? "mx-auto mt-6 max-w-[420px]" : "mt-6"}>
+          <span className="block overflow-hidden border border-void-700">
+            <Image
+              src={urlFor(value.image).width(small ? 840 : 1200).url()}
+              alt={value?.alt ?? ""}
+              width={small ? 840 : 1200}
+              height={small ? 560 : 800}
+              sizes={small ? "(min-width: 460px) 420px, 100vw" : "(min-width: 1024px) 672px, 100vw"}
+              className="h-auto w-full"
+            />
+          </span>
+          {value?.caption && (
+            <figcaption className="mt-2 text-center text-sm text-star-500">
+              {value.caption}
+            </figcaption>
+          )}
+        </figure>
+      );
+    },
     bodyImageRow: ({ value }) => {
       const images: { image: Parameters<typeof urlFor>[0]; alt?: string; caption?: string }[] =
         value?.images ?? [];
