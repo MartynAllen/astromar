@@ -150,13 +150,14 @@ function FindingPolaris() {
   const merak = project(165.46, 56.38);
   const dubhe = project(165.93, 61.75);
   const polaris = project(37.95, 89.26);
-  // Carry the Merak->Dubhe line on until it's swept past Polaris — the real
-  // pointer rule misses by ~1.5deg, so this genuinely runs right beside it.
+  // The Merak->Dubhe line, carried on to Polaris. Stop it just inside the
+  // marker ring rather than overshooting into the label. (The real pointer
+  // rule misses Polaris by ~1.5deg — close enough that the straight line
+  // runs right through the ring.)
   const dir = { x: dubhe.x - merak.x, y: dubhe.y - merak.y };
   const dlen = Math.hypot(dir.x, dir.y);
-  const reach = Math.hypot(polaris.x - merak.x, polaris.y - merak.y) + 9;
+  const reach = Math.hypot(polaris.x - merak.x, polaris.y - merak.y) - 4;
   const ext = { x: merak.x + (dir.x / dlen) * reach, y: merak.y + (dir.y / dlen) * reach };
-  const lbl = { x: merak.x + (ext.x - merak.x) * 0.4, y: merak.y + (ext.y - merak.y) * 0.4 };
 
   return (
     <svg viewBox="-83 -62 152 159" className="mx-auto w-full max-w-[440px]">
@@ -183,7 +184,6 @@ function FindingPolaris() {
       <Text x={-30} y={92} anchor="middle" tone="dim">The Plough</Text>
       <Text x={22} y={-33} anchor="middle" tone="dim">Cassiopeia</Text>
       <Text x={project(236, 73).x + 8} y={project(236, 73).y + 4} tone="dim" size={5.4}>Little Dipper</Text>
-      <Text x={lbl.x - 4} y={lbl.y + 3} tone="accent" size={5.6}>~5× the gap</Text>
     </svg>
   );
 }
