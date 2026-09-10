@@ -472,6 +472,9 @@ export interface GearItem {
   notes?: string;
   items?: GearMiscItem[];
   affiliateLink?: AffiliateLink;
+  /** Renders as a compact, de-emphasised tile, sorted after the full ones
+   * in its category — for kept-but-superseded gear. */
+  minimised?: boolean;
   // Overrides the category's generic fallback icon (CategoryIcon.tsx) when
   // no photo is set — e.g. a mount instead of the generic accessory cog.
   icon?: "camera" | "telescope" | "guidescope" | "mount" | "controller" | "battery" | "software" | "accessory";

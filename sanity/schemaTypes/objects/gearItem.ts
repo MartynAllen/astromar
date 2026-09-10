@@ -51,6 +51,14 @@ export default defineType({
     }),
     defineField({ name: "notes", title: "Notes", type: "text", rows: 2 }),
     defineField({
+      name: "minimised",
+      title: "Minimised tile",
+      type: "boolean",
+      initialValue: false,
+      description:
+        "Show as a compact, de-emphasised tile — for gear that's kept in the list but is no longer the main choice. Minimised tiles sort after the full ones within their category.",
+    }),
+    defineField({
       name: "items",
       title: "Included items",
       type: "array",

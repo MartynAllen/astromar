@@ -157,7 +157,9 @@ export default async function AboutPage() {
             {CATEGORY_ORDER.filter((category) =>
               about.gear!.some((item) => item.category === category),
             ).map((category) => {
-              const items = about.gear!.filter((item) => item.category === category);
+              const allItems = about.gear!.filter((item) => item.category === category);
+              const items = allItems.filter((item) => !item.minimised);
+              const minItems = allItems.filter((item) => item.minimised);
               const color = CATEGORY_COLOR[category];
               const [textColor] = color.split(" ");
               return (
@@ -241,6 +243,39 @@ export default async function AboutPage() {
                       );
                     })}
                   </div>
+
+                  {/* Minimised tiles: kept-but-superseded gear, shown compact
+                      and dimmer below the current picks. Fixed narrow width
+                      (sm:flex-none) so they read as secondary rather than
+                      stretching to match a full tile. */}
+                  {minItems.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      {minItems.map((item, i) => (
+                        <div
+                          key={`${item.name}-min-${i}`}
+                          className={`flex w-full items-start gap-3 border border-l-2 border-void-700 bg-void-900 p-3 sm:w-[300px] sm:flex-none ${color}`}
+                        >
+                          <div className="flex h-11 w-11 flex-none items-center justify-center border border-void-700">
+                            <CategoryIcon category={item.icon ?? item.category} className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-mono text-sm uppercase tracking-wide text-star-300">{item.name}</p>
+                            {item.notes && <p className="mt-1 text-xs text-star-500">{item.notes}</p>}
+                            {item.affiliateLink && isSafeHref(item.affiliateLink.url) && (
+                              <a
+                                href={item.affiliateLink.url}
+                                target="_blank"
+                                rel="noopener noreferrer sponsored"
+                                className={`mt-2 inline-block font-mono text-xs uppercase tracking-widest underline underline-offset-2 hover:brightness-125 ${textColor}`}
+                              >
+                                {item.affiliateLink.label} →
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
