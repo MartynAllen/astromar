@@ -114,6 +114,8 @@ export function articleJsonLd(input: {
   description?: string;
   path: string;
   datePublished?: string;
+  /** Whole minutes — emitted as an ISO 8601 duration (e.g. "PT4M"). */
+  readingMinutes?: number;
 }) {
   return {
     "@context": "https://schema.org",
@@ -123,6 +125,7 @@ export function articleJsonLd(input: {
     url: `${SITE_URL}${input.path}`,
     author: { "@type": "Person", name: "Martyn" },
     datePublished: input.datePublished,
+    ...(input.readingMinutes ? { timeRequired: `PT${input.readingMinutes}M` } : {}),
   };
 }
 

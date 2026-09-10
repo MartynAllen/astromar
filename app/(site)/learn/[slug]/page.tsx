@@ -8,8 +8,20 @@ import BahtinovMaskGenerator from "@/components/guide/BahtinovMaskGenerator";
 import BahtinovMaskFieldGuide from "@/components/guide/BahtinovMaskFieldGuide";
 import { getGuideArticleBySlug, getGuideSlugs } from "@/lib/sanity.queries";
 import { buildMetadata, articleJsonLd } from "@/lib/seo";
+import { estimateReadingMinutes, readingTimeLabel } from "@/lib/readingTime";
 
 export const revalidate = 60;
+
+// e.g. "10 September 2026" — matches the site's one long-date format (see
+// lib/astro/shotDetails.ts's formatCaptureDate).
+function formatPublishedDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
 
 export async function generateStaticParams() {
   const slugs = await getGuideSlugs();
@@ -33,6 +45,12 @@ export default async function LearnArticlePage(props: PageProps<"/learn/[slug]">
   const article = await getGuideArticleBySlug(slug);
   if (!article) notFound();
 
+  const readingMinutes = estimateReadingMinutes(article.body);
+  const metaParts = [
+    article.publishedAt ? formatPublishedDate(article.publishedAt) : null,
+    readingTimeLabel(article.body),
+  ].filter(Boolean);
+
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
       <JsonLd
@@ -41,6 +59,7 @@ export default async function LearnArticlePage(props: PageProps<"/learn/[slug]">
           description: article.summary,
           path: `/learn/${slug}`,
           datePublished: article.publishedAt,
+          readingMinutes,
         })}
       />
       <Breadcrumbs
@@ -56,6 +75,8 @@ export default async function LearnArticlePage(props: PageProps<"/learn/[slug]">
       </p>
       <h1 className="mt-2 font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{article.title}</h1>
       {article.summary && <p className="mt-3 text-star-500">{article.summary}</p>}
+
+      <p className="mt-3 font-mono text-xs text-star-500">{metaParts.join(" · ")}</p>
 
       <PortableTextContent value={article.body} />
 
