@@ -12,7 +12,7 @@
     "import": "node --env-file=.env.local --import tsx scripts/import-photos.ts"
   },
   "dependencies": {
-    "@portabletext/react": "^7.0.1",
+    "@portabletext/react": "^8.0.1",
     "@sanity/code-input": "^7.3.5",
     "@sanity/icons": "^5.2.1",
     "@sanity/image-url": "^2.1.1",
