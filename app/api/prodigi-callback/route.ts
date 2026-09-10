@@ -12,6 +12,7 @@ import {
 } from "@/lib/prodigi";
 import { createRateLimiter } from "@/lib/rateLimiter";
 import { getClientIp } from "@/lib/getClientIp";
+import { printShippedEmailConfigured, sendPrintShippedEmail } from "@/lib/resend";
 
 // Prodigi POSTs here whenever one of our orders changes status. Its
 // callbacks carry no signature (unlike Stripe's), so this route treats the
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
 
   let session: Stripe.Checkout.Session;
   try {
-    session = await stripe.checkout.sessions.retrieve(ref);
+    session = await stripe.checkout.sessions.retrieve(ref, { expand: ["line_items"] });
   } catch (err) {
     // An order whose merchantReference isn't one of our Checkout sessions
     // (a manual Prodigi order, say) — nothing to reconcile, just ack.
@@ -118,6 +119,38 @@ export async function POST(request: Request) {
     if (fulfilment.trackingUrl) nextMeta.trackingUrl = fulfilment.trackingUrl;
     if (fulfilment.carrier) nextMeta.carrier = fulfilment.carrier;
     changed = true;
+  }
+
+  // "Your print is on its way" — once, when the order ships. Prodigi's
+  // white-label fulfilment tells the customer nothing, and Stripe only
+  // sends a payment receipt. Dormant until ORDERS_FROM_EMAIL is set (needs
+  // a verified Resend domain). On failure we don't set the flag, so a
+  // later "Complete" callback retries, and we alert so it can be sent by
+  // hand.
+  const customerEmail = session.customer_details?.email;
+  if (
+    fulfilment.status === "shipped" &&
+    nextMeta.printShippedEmailSent !== "1" &&
+    printShippedEmailConfigured &&
+    customerEmail
+  ) {
+    const itemDescription =
+      session.line_items?.data?.[0]?.description ?? "Your Astromar print";
+    const sent = await sendPrintShippedEmail({
+      to: customerEmail,
+      itemDescription,
+      carrier: fulfilment.carrier,
+      trackingNumber: fulfilment.trackingNumber,
+      trackingUrl: fulfilment.trackingUrl,
+    });
+    if (sent.ok) {
+      nextMeta.printShippedEmailSent = "1";
+      changed = true;
+    } else {
+      alerts.push(
+        `⚠️ Order ${prodigiOrderId} shipped but the customer email didn't send (${sent.error}) — ${customerEmail}, tracking ${fulfilment.trackingUrl ?? fulfilment.trackingNumber ?? "n/a"}.`,
+      );
+    }
   }
 
   if (fulfilment.status === "cancelled" && prevStatus !== "cancelled") {
