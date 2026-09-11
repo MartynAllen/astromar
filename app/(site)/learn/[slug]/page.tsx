@@ -85,7 +85,7 @@ export default async function LearnArticlePage(props: PageProps<"/learn/[slug]">
       <h1 className="mt-2 font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{article.title}</h1>
       {article.summary && <p className="mt-3 text-star-500">{article.summary}</p>}
 
-      <p className="mt-3 font-mono text-xs text-star-500">{metaParts.join(" · ")}</p>
+      <p className="mt-3 font-mono text-xs font-bold text-star-500">{metaParts.join(" · ")}</p>
 
       <PortableTextContent value={article.body} />
 
