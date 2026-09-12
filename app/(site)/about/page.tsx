@@ -147,8 +147,8 @@ export default async function AboutPage() {
         <div id="the-gear" className="mx-auto mt-12 max-w-2xl scroll-mt-24">
           <h2 className="font-mono text-3xl uppercase tracking-wide text-star-100">The gear</h2>
           <p className="mt-3 text-star-500">
-            The camera, mount, and everything else that goes into the two rigs above — each
-            linked to buy, wherever there&apos;s a decent option.
+            Camera, mount, cables — everything that goes into both rigs above, linked if you
+            want to go and buy the exact same thing.
           </p>
           <div className="mt-4">
             <AffiliateDisclosureBanner />
