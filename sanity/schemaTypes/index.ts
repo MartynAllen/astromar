@@ -22,6 +22,8 @@ import printableAccessory from "./objects/printableAccessory";
 import recommendedAccessory from "./objects/recommendedAccessory";
 import productTier from "./objects/productTier";
 import processingTool from "./objects/processingTool";
+import specComparison from "./objects/specComparison";
+import specComparisonRow from "./objects/specComparisonRow";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -48,5 +50,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     recommendedAccessory,
     productTier,
     processingTool,
+    specComparison,
+    specComparisonRow,
   ],
 };

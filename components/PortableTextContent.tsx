@@ -101,6 +101,35 @@ const components: PortableTextComponents = {
       );
     },
     productTier: ({ value }) => <ProductTierBlock value={value} />,
+    specComparison: ({ value }) => {
+      const rows: { label: string; valueA: string; valueB: string }[] = value?.rows ?? [];
+      return (
+        <div className="mt-6 overflow-x-auto border border-void-700 bg-void-900">
+          <table className="w-full min-w-[480px] border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-void-700">
+                <th className="w-1/3" />
+                <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
+                  {value?.deviceA}
+                </th>
+                <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-nebula-amber-400">
+                  {value?.deviceB}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => (
+                <tr key={i} className={i > 0 ? "border-t border-void-700" : undefined}>
+                  <td className="px-4 py-3 font-mono text-xs uppercase tracking-wide text-star-500">{row.label}</td>
+                  <td className="px-4 py-3 text-star-300">{row.valueA}</td>
+                  <td className="px-4 py-3 text-star-300">{row.valueB}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    },
     skyDiagram: ({ value }) => <SkyDiagram kind={value?.kind} caption={value?.caption} />,
     code: ({ value }) => (
       <div className="mt-6 overflow-hidden border border-void-700 bg-void-900">

@@ -61,6 +61,7 @@ export default defineType({
         { type: "skyDiagram" },
         { type: "code", options: { withFilename: true } },
         { type: "productTier" },
+        { type: "specComparison" },
       ],
     }),
     defineField({
