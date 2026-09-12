@@ -87,27 +87,42 @@ const components: PortableTextComponents = {
     },
     productTier: ({ value }) => <ProductTierBlock value={value} />,
     specComparison: ({ value }) => {
-      const rows: { label: string; valueA: string; valueB: string }[] = value?.rows ?? [];
+      const devices: string[] = value?.devices ?? [];
+      const rows: { label: string; values: string[] }[] = value?.rows ?? [];
+      // Cycled rather than picked per-device — this block is reused across
+      // however many comparisons the site ends up with, so there's no fixed
+      // "this device is always teal" mapping to maintain.
+      const headerColors = [
+        "text-nebula-teal-400",
+        "text-nebula-amber-400",
+        "text-nebula-violet-400",
+        "text-nebula-rose-400",
+      ];
       return (
         <div className="mt-6 overflow-x-auto border border-void-700 bg-void-900">
           <table className="w-full min-w-[480px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-void-700">
-                <th className="w-1/3" />
-                <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-nebula-teal-400">
-                  {value?.deviceA}
-                </th>
-                <th className="px-4 py-3 text-left font-mono text-xs uppercase tracking-widest text-nebula-amber-400">
-                  {value?.deviceB}
-                </th>
+                <th className="w-1/4" />
+                {devices.map((device, i) => (
+                  <th
+                    key={i}
+                    className={`px-4 py-3 text-left font-mono text-xs uppercase tracking-widest ${headerColors[i % headerColors.length]}`}
+                  >
+                    {device}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {rows.map((row, i) => (
                 <tr key={i} className={i > 0 ? "border-t border-void-700" : undefined}>
                   <td className="px-4 py-3 font-mono text-xs uppercase tracking-wide text-star-500">{row.label}</td>
-                  <td className="px-4 py-3 text-star-300">{row.valueA}</td>
-                  <td className="px-4 py-3 text-star-300">{row.valueB}</td>
+                  {row.values.map((v, j) => (
+                    <td key={j} className="px-4 py-3 text-star-300">
+                      {v}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
