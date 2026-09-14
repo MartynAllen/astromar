@@ -22,7 +22,7 @@ export const revalidate = 60;
 // purpose: renaming those too is a bigger IA change nobody's asked for,
 // and this is the one place on the site where the big on-page heading is
 // allowed to say more than the short nav word that got you here.
-const TITLE = "Sky Map & Calendar";
+const TITLE = "Calendar & Sky Map";
 const DESCRIPTION =
   "An interactive sky map for any place and moment, plus moon phase, meteor showers and observing plans.";
 const HERO_SLUG = "east-veil-nebula-2026-08-22";

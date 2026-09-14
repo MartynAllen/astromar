@@ -57,7 +57,7 @@ const SECTION_TEASERS = [
   },
   {
     href: "/calendar",
-    title: "Sky Map & Calendar",
+    title: "Calendar & Sky Map",
     body: "An interactive sky map for any place and moment, plus moon phase and meteor showers.",
     color: "group-hover:text-nebula-indigo-400",
   },
