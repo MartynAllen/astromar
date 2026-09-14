@@ -13,13 +13,15 @@ import { buildMetadata, eventJsonLd } from "@/lib/seo";
 export const revalidate = 60;
 
 // H1 deliberately doesn't match the "Calendar" nav label/breadcrumb/URL,
-// unlike every other page on the site — this page outgrew "a calendar" the
-// moment the interactive sky map became its headline feature, and the old
-// title/hero copy still only described the moon phase/meteor/events tools
-// underneath it. Nav label and URL stay "Calendar" on purpose: renaming
-// those too is a bigger IA change nobody's asked for, and this is the one
-// place on the site where the big on-page heading is allowed to say more
-// than the short nav word that got you here.
+// unlike every other page on the site — the interactive sky map is still
+// a genuine headline feature of this page even though it now sits at the
+// bottom rather than up top (moved there so it doesn't draw focus away
+// from the calendar/moon-phase content most visitors actually came for),
+// and the old title/hero copy still only described the moon phase/meteor/
+// events tools underneath it. Nav label and URL stay "Calendar" on
+// purpose: renaming those too is a bigger IA change nobody's asked for,
+// and this is the one place on the site where the big on-page heading is
+// allowed to say more than the short nav word that got you here.
 const TITLE = "Sky Map & Calendar";
 const DESCRIPTION =
   "An interactive sky map for any place and moment, plus moon phase, meteor showers and observing plans.";
@@ -67,9 +69,7 @@ export default async function CalendarPage() {
       </PageHero>
 
       <div className="mx-auto max-w-4xl px-6 py-10">
-        <SkyMap />
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <MoonPhaseWidget />
           <MeteorShowerList />
         </div>
@@ -93,6 +93,13 @@ export default async function CalendarPage() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Sky map last, not first — a genuinely nice tool, but it drew
+            focus away from the calendar/moon-phase content most visitors
+            actually came for when it led the page. */}
+        <div className="mt-10">
+          <SkyMap />
         </div>
       </div>
     </>
