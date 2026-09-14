@@ -87,14 +87,29 @@ export default async function AboutPage() {
           photo instead of a private, unwatermarked one. object-position
           biased right covers the narrower mobile box too (h-64, ~1.3:1) —
           some further cropping still happens there, but toward the left
-          edge (aurora sky, not the signature) rather than centred. */}
-      <div className="relative h-64 overflow-hidden border border-void-700 sm:h-80">
+          edge (aurora sky, not the signature) rather than centred.
+
+          A plain heroImage (no heroPhoto gallery ref) gets a taller, less
+          extreme box instead: astro landscapes tolerate a wide 2.1:1 crop
+          fine, but a personal photo can have subjects spread through the
+          full frame — the Roadford Trail Races shot this replaced the
+          Aurora hero with has a runner's face near the top and a dog near
+          the bottom, which a 2.1:1 crop can't hold onto both ends of no
+          matter where the focal point sits (the max height a 2.1:1 crop
+          can keep from a near-square source is well under half of it).
+          1600x1000 (1.6:1) at this box's own taller height leaves enough
+          vertical room for both. */}
+      <div className={`relative overflow-hidden border border-void-700 ${about!.heroPhoto ? "h-64 sm:h-80" : "h-72 sm:h-[26rem]"}`}>
         <Image
-          src={heroCropUrl(about!.heroPhoto?.mainImage ?? about!.heroImage!, 1344, 640)}
-          alt={about!.heroPhoto ? about!.heroPhoto.title : "Martyn's imaging setup"}
+          src={heroCropUrl(
+            about!.heroPhoto?.mainImage ?? about!.heroImage!,
+            about!.heroPhoto ? 1344 : 1600,
+            about!.heroPhoto ? 640 : 1000,
+          )}
+          alt={about!.heroPhoto ? about!.heroPhoto.title : "Martyn with his dog Persephone at the Roadford Trail Races"}
           fill
           sizes="(min-width: 672px) 672px, 100vw"
-          className="object-cover object-right sm:object-center"
+          className={`object-cover ${about!.heroPhoto ? "object-right sm:object-center" : "object-center"}`}
         />
       </div>
       {about!.heroPhoto && (

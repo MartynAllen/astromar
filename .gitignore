@@ -44,6 +44,12 @@ yarn-error.log*
 /scripts/seed-assets/*
 !/scripts/seed-assets/.gitkeep
 
+# Non-astro personal photos (About page, etc.) staged locally before a
+# one-off upload to Sanity — same reasoning as seed-assets above, just not
+# consumed by import-photos.ts.
+/scripts/personal-assets/*
+!/scripts/personal-assets/.gitkeep
+
 # vercel
 .vercel
 
