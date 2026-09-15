@@ -60,7 +60,8 @@ export default defineType({
       type: "image",
       options: { hotspot: true, metadata: ["blurhash", "lqip", "palette"] },
       description:
-        "Optional — shown as a thumbnail on the /learn index. Reuse a real photo or diagram from the article's own body rather than uploading something new; articles without one just show as a plain text row, which is fine for a How-To with no natural photo.",
+        "Shown as a thumbnail on the /learn index. Reuse a real photo or diagram from the article's own body rather than uploading something new. Required going forward — a design review flagged that some articles having one and others not made the index read as unfinished rather than designed. Two existing articles (Your First Telescope; Turning Your Telescope Into an Astrophotography Rig) predate this rule and have none yet — add a real one here next time either is edited.",
+      validation: (r) => r.required(),
     }),
     defineField({
       name: "body",

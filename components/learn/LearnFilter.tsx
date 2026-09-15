@@ -91,6 +91,15 @@ export default function LearnFilter({ articles }: { articles: GuideArticleSummar
         })}
       </div>
 
+      {/* Always mounted (not conditionally rendered) so aria-live actually
+          fires on a text change rather than an element appearing — a
+          filter that empties a whole section out of view otherwise gives
+          no acknowledgment at all that anything happened, sighted or not. */}
+      <p aria-live="polite" className="mt-3 text-sm text-star-500">
+        {contentType &&
+          `Showing ${filtered.length} ${filtered.length === 1 ? "article" : "articles"} tagged ${contentType}.`}
+      </p>
+
       {filtered.length === 0 ? (
         <p className="mt-16 text-center text-star-500">No articles match this filter yet.</p>
       ) : (
@@ -106,12 +115,17 @@ export default function LearnFilter({ articles }: { articles: GuideArticleSummar
                   .filter((a) => a.section === section)
                   .map((article) => (
                     <li key={article._id} className="py-4">
-                      <Link href={`/learn/${article.slug.current}`} className="group flex items-start gap-4">
+                      {/* items-center, not items-start: a short thumbnail
+                          next to a title+meta+summary block that wraps to
+                          4-6 lines on mobile otherwise leaves the dead
+                          space concentrated below the image, reading as a
+                          failed image load rather than a design choice. */}
+                      <Link href={`/learn/${article.slug.current}`} className="group flex items-center gap-4">
                         {article.coverImage?.asset && (
                           <span className="block h-20 w-20 flex-none overflow-hidden border border-void-700 sm:h-24 sm:w-24">
                             <Image
                               src={urlFor(article.coverImage).width(192).height(192).fit("crop").url()}
-                              alt=""
+                              alt={`Cover image for ${article.title}`}
                               width={192}
                               height={192}
                               sizes="96px"
@@ -123,13 +137,13 @@ export default function LearnFilter({ articles }: { articles: GuideArticleSummar
                           <h3 className="font-mono text-lg uppercase tracking-wide text-star-100 group-hover:text-nebula-amber-400">
                             {article.title}
                           </h3>
-                          <p className="mt-1 font-mono text-xs uppercase tracking-widest">
-                            <span className="text-nebula-amber-400">
-                              {[article.contentType, article.difficulty].filter(Boolean).join(" · ")}
-                            </span>
-                            {article.readingTime && (
-                              <span className="text-star-500"> · {article.readingTime}</span>
-                            )}
+                          {/* star-500 throughout, not amber — amber is the
+                              section heading's colour above; sharing it
+                              here blurred the two hierarchy tiers together
+                              on a fast scan (a design-review finding). */}
+                          <p className="mt-1 font-mono text-xs uppercase tracking-widest text-star-500">
+                            {[article.contentType, article.difficulty].filter(Boolean).join(" · ")}
+                            {article.readingTime && ` · ${article.readingTime}`}
                           </p>
                           {article.summary && <p className="mt-1 text-sm text-star-500">{article.summary}</p>}
                         </div>
