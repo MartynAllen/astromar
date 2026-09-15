@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { urlFor } from "@/sanity/image";
 import type { GuideArticleSummary, GuideContentType } from "@/lib/sanity.queries";
 
 const CONTENT_TYPES: { label: string; value: GuideContentType | undefined }[] = [
@@ -10,6 +12,33 @@ const CONTENT_TYPES: { label: string; value: GuideContentType | undefined }[] = 
   { label: "How-To", value: "How-To" },
   { label: "Explainer", value: "Explainer" },
 ];
+
+// Sections don't have a real ordering field of their own — this is the one
+// place that decides how they're sequenced on the page, deliberately
+// (buying decisions first, then understanding the sky itself, then
+// hands-on operating technique) rather than leaving it to whatever order
+// the query's plain alphabetical sort happens to produce. Add a new
+// section here (and to guideArticle.ts's section field options) together;
+// anything not listed still renders, alphabetised, after all of these,
+// rather than silently vanishing.
+const SECTION_ORDER = ["Buying Gear", "The Night Sky", "Technique"];
+
+const SECTION_DESCRIPTIONS: Record<string, string> = {
+  "Buying Gear": "What to actually buy, and in what order, as the hobby gets more serious.",
+  "The Night Sky": "Understanding what you're actually looking at, and what your own sky lets you see.",
+  Technique: "Hands-on skills for getting more out of the gear you've already got.",
+};
+
+function sortSections(sections: string[]): string[] {
+  return [...sections].sort((a, b) => {
+    const ai = SECTION_ORDER.indexOf(a);
+    const bi = SECTION_ORDER.indexOf(b);
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+}
 
 // Read client-side rather than as a server prop — keeps /learn itself
 // static (see page.tsx); reading searchParams on the server would opt the
@@ -29,7 +58,10 @@ export default function LearnFilter({ articles }: { articles: GuideArticleSummar
     () => articles.filter((a) => !contentType || a.contentType === contentType),
     [articles, contentType],
   );
-  const sections = useMemo(() => Array.from(new Set(filtered.map((a) => a.section))), [filtered]);
+  const sections = useMemo(
+    () => sortSections(Array.from(new Set(filtered.map((a) => a.section)))),
+    [filtered],
+  );
 
   function selectContentType(value: GuideContentType | undefined) {
     setContentType(value);
@@ -66,23 +98,41 @@ export default function LearnFilter({ articles }: { articles: GuideArticleSummar
           {sections.map((section) => (
             <div key={section}>
               <h2 className="font-mono text-xl uppercase tracking-wide text-nebula-amber-400">{section}</h2>
+              {SECTION_DESCRIPTIONS[section] && (
+                <p className="mt-1 text-sm text-star-500">{SECTION_DESCRIPTIONS[section]}</p>
+              )}
               <ul className="mt-3 divide-y divide-void-700">
                 {filtered
                   .filter((a) => a.section === section)
                   .map((article) => (
                     <li key={article._id} className="py-4">
-                      <Link href={`/learn/${article.slug.current}`} className="group block">
-                        <div className="flex items-center gap-2">
+                      <Link href={`/learn/${article.slug.current}`} className="group flex items-start gap-4">
+                        {article.coverImage?.asset && (
+                          <span className="block h-20 w-20 flex-none overflow-hidden border border-void-700 sm:h-24 sm:w-24">
+                            <Image
+                              src={urlFor(article.coverImage).width(192).height(192).fit("crop").url()}
+                              alt=""
+                              width={192}
+                              height={192}
+                              sizes="96px"
+                              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
+                            />
+                          </span>
+                        )}
+                        <div className="min-w-0 flex-1">
                           <h3 className="font-mono text-lg uppercase tracking-wide text-star-100 group-hover:text-nebula-amber-400">
                             {article.title}
                           </h3>
-                          {article.difficulty && (
-                            <span className="rounded-full border border-void-600 px-2 py-0.5 text-xs text-star-500">
-                              {article.difficulty}
+                          <p className="mt-1 font-mono text-xs uppercase tracking-widest">
+                            <span className="text-nebula-amber-400">
+                              {[article.contentType, article.difficulty].filter(Boolean).join(" · ")}
                             </span>
-                          )}
+                            {article.readingTime && (
+                              <span className="text-star-500"> · {article.readingTime}</span>
+                            )}
+                          </p>
+                          {article.summary && <p className="mt-1 text-sm text-star-500">{article.summary}</p>}
                         </div>
-                        {article.summary && <p className="mt-1 text-sm text-star-500">{article.summary}</p>}
                       </Link>
                     </li>
                   ))}

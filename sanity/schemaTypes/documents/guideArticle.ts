@@ -24,7 +24,11 @@ export default defineType({
       name: "section",
       title: "Section",
       type: "string",
-      description: 'e.g. "Getting Started", "Processing", "Target Planning"',
+      options: {
+        list: ["Buying Gear", "The Night Sky", "Technique"],
+      },
+      description:
+        "Which section this appears under on /learn. Sections display in a fixed order there (see SECTION_ORDER in LearnFilter.tsx) — add a new one to that list too if you add one here.",
       validation: (r) => r.required(),
     }),
     defineField({
@@ -50,6 +54,14 @@ export default defineType({
         'How-To: task-oriented, "how do I focus with a Bahtinov mask". Explainer: conceptual, "what\'s the difference between an emission and reflection nebula". Drives the filter pills on /learn.',
     }),
     defineField({ name: "summary", title: "Summary", type: "text", rows: 2 }),
+    defineField({
+      name: "coverImage",
+      title: "Cover image",
+      type: "image",
+      options: { hotspot: true, metadata: ["blurhash", "lqip", "palette"] },
+      description:
+        "Optional — shown as a thumbnail on the /learn index. Reuse a real photo or diagram from the article's own body rather than uploading something new; articles without one just show as a plain text row, which is fine for a How-To with no natural photo.",
+    }),
     defineField({
       name: "body",
       title: "Body",

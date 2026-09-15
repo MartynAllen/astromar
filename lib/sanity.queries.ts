@@ -1,5 +1,6 @@
 import { client } from "@/sanity/client";
 import type { SanityImageSource } from "@sanity/image-url";
+import { readingTimeLabel } from "@/lib/readingTime";
 
 export const REVALIDATE_SECONDS = 60;
 
@@ -332,6 +333,12 @@ export interface GuideArticleSummary {
   difficulty?: GuideDifficulty;
   contentType?: GuideContentType;
   summary?: string;
+  coverImage?: SanityImageWithDimensions;
+  /** Precomputed server-side from the article's own body (see
+   * getAllGuideArticles) — the /learn index only needs the label, not the
+   * full body driving it, so it's stripped back out before this shape
+   * reaches the client-side filter component. */
+  readingTime?: string;
 }
 
 export interface GuideArticleDetail extends GuideArticleSummary {
@@ -345,13 +352,14 @@ export interface GuideArticleDetail extends GuideArticleSummary {
 }
 
 export async function getAllGuideArticles(): Promise<GuideArticleSummary[]> {
-  return client.fetch(
+  const articles = await client.fetch<(Omit<GuideArticleSummary, "readingTime"> & { body?: unknown[] })[]>(
     /* groq */ `*[_type == "guideArticle"] | order(section asc, order asc) {
-      _id, title, slug, section, order, difficulty, contentType, summary
+      _id, title, slug, section, order, difficulty, contentType, summary, coverImage, body
     }`,
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },
   );
+  return articles.map(({ body, ...rest }) => ({ ...rest, readingTime: readingTimeLabel(body ?? []) }));
 }
 
 export async function getGuideSlugs(): Promise<string[]> {
