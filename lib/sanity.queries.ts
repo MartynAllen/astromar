@@ -40,6 +40,14 @@ export interface AstroPhotoSummary {
   featured?: boolean;
   availableAsPrint?: boolean;
   shotDetails?: ShotDetails;
+  // Free text, e.g. "Nikon D5300 · Askar 71F · ... ZWO ASI533MC Pro" — there's
+  // no dedicated "camera" field (see shotDetails.telescope's own comment: it
+  // predates the second rig), so the Gallery catalogue view's ASI533MC Pro
+  // lead-thumbnail rule reads this and telescope as free text rather than a
+  // structured field. Already fetched for every photo detail page; adding it
+  // to the summary projection too costs nothing (it's a short string) and
+  // saves a second query shape just for the catalogue grouping.
+  gearNotes?: string;
 }
 
 export interface ProcessingTool {
@@ -56,7 +64,6 @@ export interface PrintCrop {
 
 export interface AstroPhotoDetail extends AstroPhotoSummary {
   story?: unknown[];
-  gearNotes?: string;
   processingTools?: ProcessingTool[];
   // Rotates the print/Quick-View crop only, never the gallery image — see
   // the schema field's own description for why some targets need this.
@@ -94,7 +101,7 @@ export interface SiteSettings {
 }
 
 const photoSummaryProjection = /* groq */ `{
-  _id, title, slug, category, caption, featured, availableAsPrint, shotDetails,
+  _id, title, slug, category, caption, featured, availableAsPrint, shotDetails, gearNotes,
   "mainImage": mainImage{..., "dimensions": asset->metadata.dimensions}
 }`;
 

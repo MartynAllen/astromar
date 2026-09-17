@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PhotoGrid from "./PhotoGrid";
+import CatalogueGrid from "./CatalogueGrid";
 import type { AstroPhotoSummary, PhotoCategory } from "@/lib/sanity.queries";
 
 const CATEGORIES: { label: string; value: PhotoCategory | undefined }[] = [
@@ -12,6 +13,12 @@ const CATEGORIES: { label: string; value: PhotoCategory | undefined }[] = [
   { label: "Planetary", value: "planetary" },
   { label: "Wide Field", value: "wide-field" },
   { label: "Gear", value: "gear" },
+];
+
+type ViewMode = "grid" | "catalogue";
+const VIEWS: { label: string; value: ViewMode }[] = [
+  { label: "Grid", value: "grid" },
+  { label: "Catalogue", value: "catalogue" },
 ];
 
 // Read client-side rather than as a server prop — the whole point is to
@@ -27,6 +34,15 @@ function useInitialCategory(): PhotoCategory | undefined {
 function useInitialPrintsOnly(): boolean {
   const searchParams = useSearchParams();
   return searchParams.get("prints") === "true";
+}
+
+// Defaults to grid on a fresh visit rather than remembering the last choice
+// — a plain, unparameterised /gallery link (shared, bookmarked, or linked
+// from elsewhere on the site) should always land on the familiar view.
+// Sharing a `?view=catalogue` link still round-trips correctly.
+function useInitialView(): ViewMode {
+  const searchParams = useSearchParams();
+  return searchParams.get("view") === "catalogue" ? "catalogue" : "grid";
 }
 
 function matches(photo: AstroPhotoSummary, query: string) {
@@ -55,9 +71,11 @@ export default function GallerySearch({
   const searchParams = useSearchParams();
   const initialCategory = useInitialCategory();
   const initialPrintsOnly = useInitialPrintsOnly();
+  const initialView = useInitialView();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<PhotoCategory | undefined>(initialCategory);
   const [printsOnly, setPrintsOnly] = useState(initialPrintsOnly);
+  const [view, setView] = useState<ViewMode>(initialView);
 
   // Kept in sync with the address bar by updateUrl() below (category/prints
   // only — the free-text query box is deliberately not persisted there), so
@@ -77,27 +95,65 @@ export default function GallerySearch({
     });
   }, [photos, category, printsOnly, query]);
 
-  function updateUrl(nextCategory: PhotoCategory | undefined, nextPrintsOnly: boolean) {
+  function updateUrl(
+    nextCategory: PhotoCategory | undefined,
+    nextPrintsOnly: boolean,
+    nextView: ViewMode,
+  ) {
     const params = new URLSearchParams();
     if (nextCategory) params.set("category", nextCategory);
     if (nextPrintsOnly) params.set("prints", "true");
+    if (nextView === "catalogue") params.set("view", nextView);
     const qs = params.toString();
     router.replace(qs ? `/gallery?${qs}` : "/gallery", { scroll: false });
   }
 
   function selectCategory(value: PhotoCategory | undefined) {
     setCategory(value);
-    updateUrl(value, printsOnly);
+    updateUrl(value, printsOnly, view);
   }
 
   function togglePrintsOnly() {
     const next = !printsOnly;
     setPrintsOnly(next);
-    updateUrl(category, next);
+    updateUrl(category, next, view);
+  }
+
+  function selectView(value: ViewMode) {
+    setView(value);
+    updateUrl(category, printsOnly, value);
   }
 
   return (
     <div>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="flex gap-2" role="group" aria-label="Gallery view">
+          {VIEWS.map((v) => {
+            const isActive = v.value === view;
+            return (
+              <button
+                key={v.value}
+                type="button"
+                onClick={() => selectView(v.value)}
+                aria-pressed={isActive}
+                className={`min-h-11 rounded-full border px-4 py-1.5 font-mono text-xs uppercase tracking-widest transition-colors ${
+                  isActive
+                    ? "border-nebula-teal-500 bg-nebula-teal-500/10 text-nebula-teal-400"
+                    : "border-void-700 text-star-500 hover:border-void-600 hover:text-star-300"
+                }`}
+              >
+                {v.label}
+              </button>
+            );
+          })}
+        </div>
+        <span className="text-sm text-star-500">
+          {view === "catalogue"
+            ? "Grouped by object — one entry per target, however many times it's been shot."
+            : "Every photo, newest first."}
+        </span>
+      </div>
+
       <div className="flex flex-wrap items-center gap-3">
         <label className="min-w-0 flex-1 sm:max-w-xs">
           <span className="sr-only">Search the gallery</span>
@@ -150,7 +206,11 @@ export default function GallerySearch({
       )}
 
       <div className="mt-6">
-        <PhotoGrid photos={filtered} fromPriceGBP={fromPriceGBP} returnTo={returnTo} />
+        {view === "catalogue" ? (
+          <CatalogueGrid photos={filtered} returnTo={returnTo} />
+        ) : (
+          <PhotoGrid photos={filtered} fromPriceGBP={fromPriceGBP} returnTo={returnTo} />
+        )}
       </div>
     </div>
   );
