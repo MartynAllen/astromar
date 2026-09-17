@@ -64,7 +64,7 @@ const SECTION_TEASERS = [
   {
     href: "/research",
     title: "Research",
-    body: "Colour tracking, computer vision, exoplanet detection — turning the gallery into a dataset with Python.",
+    body: "A Bahtinov mask generator, an auto-captioning tool, and whatever else gets built along the way.",
     color: "group-hover:text-nebula-green-400",
   },
 ];
