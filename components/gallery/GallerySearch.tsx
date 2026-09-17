@@ -36,13 +36,13 @@ function useInitialPrintsOnly(): boolean {
   return searchParams.get("prints") === "true";
 }
 
-// Defaults to grid on a fresh visit rather than remembering the last choice
-// — a plain, unparameterised /gallery link (shared, bookmarked, or linked
-// from elsewhere on the site) should always land on the familiar view.
-// Sharing a `?view=catalogue` link still round-trips correctly.
+// Defaults to catalogue on a fresh visit rather than remembering the last
+// choice — a plain, unparameterised /gallery link (shared, bookmarked, or
+// linked from elsewhere on the site) should always land on the same view.
+// Sharing a `?view=grid` link still round-trips correctly.
 function useInitialView(): ViewMode {
   const searchParams = useSearchParams();
-  return searchParams.get("view") === "catalogue" ? "catalogue" : "grid";
+  return searchParams.get("view") === "grid" ? "grid" : "catalogue";
 }
 
 function matches(photo: AstroPhotoSummary, query: string) {
@@ -103,7 +103,7 @@ export default function GallerySearch({
     const params = new URLSearchParams();
     if (nextCategory) params.set("category", nextCategory);
     if (nextPrintsOnly) params.set("prints", "true");
-    if (nextView === "catalogue") params.set("view", nextView);
+    if (nextView === "grid") params.set("view", nextView);
     const qs = params.toString();
     router.replace(qs ? `/gallery?${qs}` : "/gallery", { scroll: false });
   }
