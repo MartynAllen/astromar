@@ -47,6 +47,7 @@ export default async function ReviewPage(props: PageProps<"/reviews/[slug]">) {
           reviewBody: review.verdict,
           path: `/reviews/${slug}`,
           datePublished: review.publishedAt,
+          image: review.productImages?.[0]?.image,
         })}
       />
       <Breadcrumbs

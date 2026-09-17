@@ -10,8 +10,11 @@ const STATIC_ROUTES = [
   "/calendar",
   "/research",
   "/about",
+  "/prints",
   "/disclosure",
   "/privacy",
+  "/shipping-returns",
+  "/contact",
 ];
 
 interface SlugRow {

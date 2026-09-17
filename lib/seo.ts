@@ -91,11 +91,21 @@ export function reviewJsonLd(input: {
   reviewBody?: string;
   path: string;
   datePublished?: string;
+  /** First product photo, if there is one — gives itemReviewed enough to
+   * qualify for a rich result image, not just the bare product name. */
+  image?: SanityImageSource;
 }) {
+  const itemReviewed: Record<string, unknown> = {
+    "@type": "Product",
+    name: input.productName,
+  };
+  if (input.image) {
+    itemReviewed.image = urlFor(input.image).width(1200).url();
+  }
   return {
     "@context": "https://schema.org",
     "@type": "Review",
-    itemReviewed: { "@type": "Product", name: input.productName },
+    itemReviewed,
     reviewRating: {
       "@type": "Rating",
       ratingValue: input.rating,
@@ -126,6 +136,31 @@ export function articleJsonLd(input: {
     author: { "@type": "Person", name: "Martyn" },
     datePublished: input.datePublished,
     ...(input.readingMinutes ? { timeRequired: `PT${input.readingMinutes}M` } : {}),
+  };
+}
+
+/** Site-wide, rendered once in the (site) route group layout — not
+ * per-page. Ties every page's authorship back to one identifiable person
+ * rather than leaving Astromar as an anonymous domain, which is what
+ * Google's guidance on entity/author recognition actually looks for on
+ * gear-review content. */
+export function personJsonLd(input: { sameAs?: string[] } = {}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Martyn",
+    url: SITE_URL,
+    ...(input.sameAs?.length ? { sameAs: input.sameAs } : {}),
+  };
+}
+
+export function websiteJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    publisher: { "@type": "Person", name: "Martyn" },
   };
 }
 
