@@ -17,8 +17,8 @@ const CATEGORIES: { label: string; value: PhotoCategory | undefined }[] = [
 
 type ViewMode = "grid" | "catalogue";
 const VIEWS: { label: string; value: ViewMode }[] = [
-  { label: "Grid", value: "grid" },
   { label: "Catalogue", value: "catalogue" },
+  { label: "Grid", value: "grid" },
 ];
 
 // Read client-side rather than as a server prop — the whole point is to
