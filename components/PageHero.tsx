@@ -20,6 +20,7 @@ export default function PageHero({
   children,
   imageRotate,
   imagePosition = "object-center",
+  showCaptureDate = true,
 }: {
   photo: AstroPhotoSummary | null;
   className?: string;
@@ -32,8 +33,14 @@ export default function PageHero({
    * squarely on the busiest part of a photo (see the Calendar hero) —
    * override to bias the crop toward a calmer region instead. */
   imagePosition?: string;
+  /** Suppress the auto-appended " — <date>" in the credit chip — for a
+   * pinned photo whose own title already embeds a human-readable date
+   * (disambiguating repeat shots of the same target, e.g. the Gallery's
+   * "Iris Nebula — 4 Sept 2026"), appending the computed date too just
+   * repeats it in a different format right next to itself. */
+  showCaptureDate?: boolean;
 }) {
-  const captureDate = formatCaptureDate(photo?.shotDetails?.captureDate);
+  const captureDate = showCaptureDate ? formatCaptureDate(photo?.shotDetails?.captureDate) : undefined;
 
   return (
     <div className={`relative overflow-hidden border-b border-void-700 ${className}`}>

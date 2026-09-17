@@ -4,7 +4,13 @@ import type { Metadata } from "next";
 import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import GallerySearch from "@/components/gallery/GallerySearch";
-import { getAllPhotos, getHeroPhoto, getPrintProducts, getSiteSettings } from "@/lib/sanity.queries";
+import {
+  getAllPhotos,
+  getHeroPhoto,
+  getPhotoBySlug,
+  getPrintProducts,
+  getSiteSettings,
+} from "@/lib/sanity.queries";
 import { cheapestPrintPriceGBP } from "@/lib/print";
 import { buildMetadata } from "@/lib/seo";
 
@@ -13,8 +19,18 @@ export const revalidate = 60;
 const TITLE = "Gallery";
 const DESCRIPTION = "Deep-sky, lunar and wide-field astrophotography.";
 
+// Pinned to this specific shot rather than the newest-featured rotation
+// getHeroPhoto(0) used to drive — see PINNED_HERO_SLUGS in sanity.queries.ts
+// for why every other pinned page does the same. Falls back to the rotation
+// if this one's ever unpublished.
+const HERO_SLUG = "iris-nebula-2026-09-04";
+
+async function getGalleryHeroPhoto() {
+  return (await getPhotoBySlug(HERO_SLUG)) ?? (await getHeroPhoto(0, [HERO_SLUG]));
+}
+
 export async function generateMetadata(): Promise<Metadata> {
-  const heroPhoto = await getHeroPhoto(0);
+  const heroPhoto = await getGalleryHeroPhoto();
   return buildMetadata({
     title: TITLE,
     description: DESCRIPTION,
@@ -27,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function GalleryPage() {
   const [photos, heroPhoto, settings, printProducts] = await Promise.all([
     getAllPhotos(),
-    getHeroPhoto(0),
+    getGalleryHeroPhoto(),
     getSiteSettings().catch(() => null),
     getPrintProducts().catch(() => []),
   ]);
@@ -36,7 +52,7 @@ export default async function GalleryPage() {
 
   return (
     <>
-      <PageHero photo={heroPhoto}>
+      <PageHero photo={heroPhoto} showCaptureDate={false}>
         <div className="mx-auto w-full max-w-6xl px-6">
           <Breadcrumbs items={[{ name: "Gallery", path: "/gallery" }]} />
           <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Gallery</h1>
