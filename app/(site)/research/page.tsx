@@ -7,7 +7,7 @@ import { buildMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-const TITLE = "Research";
+const TITLE = "Workshop";
 const DESCRIPTION = "Software tools and technical write-ups built around the astrophotography.";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -36,8 +36,8 @@ export default async function ResearchPage() {
     <>
       <PageHero photo={heroPhoto}>
         <div className="mx-auto w-full max-w-3xl px-6">
-          <Breadcrumbs items={[{ name: "Research", path: "/research" }]} />
-          <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Research</h1>
+          <Breadcrumbs items={[{ name: "Workshop", path: "/research" }]} />
+          <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">Workshop</h1>
           <p className="mt-2 text-star-500">
             A log of the software tools and technical projects built alongside
             the astrophotography, in the order they happened.
@@ -48,7 +48,7 @@ export default async function ResearchPage() {
       <div className="mx-auto max-w-3xl px-6 py-10">
         {projects.length === 0 ? (
           <p className="mt-16 text-center text-star-500">
-            No research projects posted yet.
+            Nothing posted here yet.
           </p>
         ) : (
           <ul className="space-y-4">

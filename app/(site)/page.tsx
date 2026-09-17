@@ -63,7 +63,7 @@ const SECTION_TEASERS = [
   },
   {
     href: "/research",
-    title: "Research",
+    title: "Workshop",
     body: "A Bahtinov mask generator, an auto-captioning tool, and whatever else gets built along the way.",
     color: "group-hover:text-nebula-green-400",
   },
@@ -125,8 +125,8 @@ export default async function HomePage() {
           </h1>
           <p className="hero-resolve mt-6 max-w-xl text-base leading-relaxed text-star-500 sm:text-lg">
             Nebulae, galaxies and the moon, captured one stacked exposure at a
-            time — plus the gear reviews, beginner&apos;s notes and research
-            that come with it.
+            time — plus the gear reviews, beginner&apos;s notes and tools that
+            come with it.
           </p>
           {(heroPhoto?.shotDetails?.targetCommonName || heroSummary) && (
             <div className="mt-6 inline-flex flex-wrap items-center gap-x-3 gap-y-1 border border-void-700 bg-void-950/50 px-4 py-2.5 backdrop-blur-sm">

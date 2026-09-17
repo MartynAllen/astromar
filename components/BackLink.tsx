@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 // A lightweight "back to the list" wayfinding link for detail pages
-// (Reviews, Learn, Research, Gallery). Styled as a nav-link, not a button —
+// (Reviews, Learn, Workshop, Gallery). Styled as a nav-link, not a button —
 // this is a secondary wayfinding aid sitting above the H1, not a primary
 // action, so it stays quiet (text-star-500 at rest) rather than competing
 // with the page's real content. The "←" mirrors the site's existing "→"

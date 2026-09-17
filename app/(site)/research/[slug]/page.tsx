@@ -54,11 +54,11 @@ export default async function ResearchProjectPage(
       />
       <Breadcrumbs
         items={[
-          { name: "Research", path: "/research" },
+          { name: "Workshop", path: "/research" },
           { name: project.title, path: `/research/${slug}` },
         ]}
       />
-      <BackLink href="/research" label="Research" />
+      <BackLink href="/research" label="Workshop" />
 
       <div className="mt-4 flex items-center gap-3">
         <h1 className="font-mono text-4xl font-bold uppercase tracking-wide text-star-100">{project.title}</h1>

@@ -3,7 +3,7 @@ import { RocketIcon } from "@sanity/icons/Rocket";
 
 export default defineType({
   name: "researchProject",
-  title: "Research Project",
+  title: "Workshop Project",
   type: "document",
   icon: RocketIcon,
   fields: [
