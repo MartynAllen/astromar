@@ -52,6 +52,25 @@ const CATEGORY_COLOR: Record<GearCategory, string> = {
   software: "text-nebula-indigo-400 border-l-nebula-indigo-400",
 };
 
+// Full-border accent for AffiliateButton specifically (a solid border, not
+// the tiles' own border-l-2) — so a gear tile's own "Buy" button matches its
+// category colour instead of AffiliateButton's rose default, which is only
+// correct in Reviews' own context (primary-CTA rose), not inside a
+// teal/amber/indigo-coded tile here. See critique 2026-09-18.
+const CATEGORY_BUTTON_ACCENT: Record<GearCategory, string> = {
+  telescope: "border-nebula-teal-400 text-nebula-teal-400 hover:bg-nebula-teal-400",
+  camera: "border-nebula-rose-400 text-nebula-rose-400 hover:bg-nebula-rose-400",
+  accessory: "border-nebula-amber-400 text-nebula-amber-400 hover:bg-nebula-amber-400",
+  software: "border-nebula-indigo-400 text-nebula-indigo-400 hover:bg-nebula-indigo-400",
+};
+
+// Shared between the hero <img>'s alt text and its own caption (see
+// heroBlock below) — a plain heroImage (not a gallery heroPhoto reference)
+// otherwise rendered with no visible caption at all, just an invisible alt
+// string. Sighted first-time visitors got zero on-page context for an
+// otherwise-uncaptioned personal photo.
+const PLAIN_HERO_CAPTION = "Martyn with his dog Persephone at the Roadford Trail Races.";
+
 export default async function AboutPage() {
   const [about, settings, featuredPhotos] = await Promise.all([
     getAboutPage(),
@@ -106,13 +125,14 @@ export default async function AboutPage() {
             about!.heroPhoto ? 1344 : 1600,
             about!.heroPhoto ? 640 : 1000,
           )}
-          alt={about!.heroPhoto ? about!.heroPhoto.title : "Martyn with his dog Persephone at the Roadford Trail Races"}
+          alt={about!.heroPhoto ? about!.heroPhoto.title : PLAIN_HERO_CAPTION}
           fill
+          priority
           sizes="(min-width: 672px) 672px, 100vw"
           className={`object-cover ${about!.heroPhoto ? "object-right sm:object-center" : "object-center"}`}
         />
       </div>
-      {about!.heroPhoto && (
+      {about!.heroPhoto ? (
         <p className="mt-2 text-xs text-star-500">
           {about!.heroPhoto.title}
           {about!.heroPhoto.availableAsPrint ? " — prints available." : "."}{" "}
@@ -120,6 +140,8 @@ export default async function AboutPage() {
             View in the gallery →
           </Link>
         </p>
+      ) : (
+        <p className="mt-2 text-xs text-star-500">{PLAIN_HERO_CAPTION}</p>
       )}
     </>
   );
@@ -179,9 +201,9 @@ export default async function AboutPage() {
               const [textColor] = color.split(" ");
               return (
                 <div key={category}>
-                  <p className={`font-mono text-xs uppercase tracking-widest ${textColor}`}>
+                  <h3 className={`font-mono text-xs uppercase tracking-widest ${textColor}`}>
                     {CATEGORY_LABEL[category]}
-                  </p>
+                  </h3>
                   {/* Grouped as a loose cluster, not a grid, but tiles still
                       fill the row edge-to-edge: sm:flex-1 grows each one
                       (down to a sm:min-w-[260px] floor before wrapping) so a
@@ -237,6 +259,7 @@ export default async function AboutPage() {
                                             href={sub.affiliateLink.url}
                                             target="_blank"
                                             rel="noopener noreferrer sponsored"
+                                            aria-label={`Buy ${sub.label}`}
                                             className={`whitespace-nowrap font-mono text-xs uppercase tracking-widest underline underline-offset-2 hover:brightness-125 ${textColor}`}
                                           >
                                             Buy →
@@ -250,7 +273,10 @@ export default async function AboutPage() {
                             )}
                             {item.affiliateLink && (
                               <div className="mt-3">
-                                <AffiliateButton link={item.affiliateLink} />
+                                <AffiliateButton
+                                  link={item.affiliateLink}
+                                  accentClassName={CATEGORY_BUTTON_ACCENT[category]}
+                                />
                               </div>
                             )}
                           </div>
@@ -326,9 +352,13 @@ export default async function AboutPage() {
             Buy me a coffee
           </a>
           {shopUrl && (
+            // Secondary treatment, not a second primary CTA — the coffee
+            // button above is what the paragraph's own copy is actually
+            // asking for; prints is a lower-emphasis "also, if you'd
+            // rather" option, per the closing-section critique.
             <Link
               href={shopUrl}
-              className="inline-flex items-center gap-2 border border-nebula-rose-400 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950"
+              className="inline-flex items-center gap-2 border border-void-600 px-5 py-2.5 font-mono text-xs uppercase tracking-widest text-star-300 transition-colors hover:border-star-100 hover:text-star-100"
             >
               Shop Prints
             </Link>
