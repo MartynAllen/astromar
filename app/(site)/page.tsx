@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import PhotoCard from "@/components/gallery/PhotoCard";
 import { heroCropUrl } from "@/sanity/image";
-import { getFeaturedPhotos, getPrintProducts } from "@/lib/sanity.queries";
+import { getFeaturedPhotos, getPrintProducts, type SanityImageWithDimensions } from "@/lib/sanity.queries";
 import { cheapestPrintPriceGBP } from "@/lib/print";
 import { formatCaptureDate, formatShotSummary } from "@/lib/astro/shotDetails";
 import { buildMetadata } from "@/lib/seo";
@@ -15,6 +15,20 @@ const DESCRIPTION =
   "Deep-sky photography, gear reviews, and beginner's notes from a garden observer.";
 const HERO_SLUG = "andromeda-galaxy-2026-08-12";
 
+// The homepage hero's own frozen copy of that photo, pinned to the exact
+// asset that was live before the gallery/print entry above was swapped for
+// a corrected reprocess (2026-09) — Martyn asked for the homepage look to
+// stay exactly as it was, independent of whatever the live gallery photo
+// becomes later. Sanity assets are immutable and never garbage-collected
+// just because a document stops referencing them, so this reference stays
+// valid indefinitely; hotspot/dimensions copied from the document as they
+// stood at the time of the swap.
+const HOME_HERO_IMAGE: SanityImageWithDimensions = {
+  asset: { _ref: "image-2cebd8fd3e3f4c955c5cbb9105c1f5b4de064ed1-8192x5469-jpg" },
+  hotspot: { x: 0.49, y: 0.48 },
+  dimensions: { width: 8192, height: 5469, aspectRatio: 8192 / 5469 },
+};
+
 // The root domain is the single most-shared link on the whole site (bio
 // links, socials, anywhere someone just says "check out my site") — it's
 // the one page that most needs a real image when it's shared, not just a
@@ -22,13 +36,11 @@ const HERO_SLUG = "andromeda-galaxy-2026-08-12";
 // block, so without this override the homepage would share with no image
 // at all.
 export async function generateMetadata(): Promise<Metadata> {
-  const featured = await getFeaturedPhotos();
-  const heroPhoto = featured.find((p) => p.slug.current === HERO_SLUG) ?? featured[0];
   const meta = buildMetadata({
     title: TITLE,
     description: DESCRIPTION,
     path: "/",
-    image: heroPhoto?.mainImage,
+    image: HOME_HERO_IMAGE,
     cropBottom: true,
   });
   // buildMetadata's plain string title would otherwise run through root
@@ -90,16 +102,14 @@ export default async function HomePage() {
   return (
     <>
       <section className="relative overflow-hidden">
-        {heroPhoto?.mainImage?.asset && (
-          <Image
-            src={heroCropUrl(heroPhoto.mainImage, 2400, 1400)}
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        )}
+        <Image
+          src={heroCropUrl(HOME_HERO_IMAGE, 2400, 1400)}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
         <div className="absolute inset-0 bg-void-950/28" />
         <div className="absolute inset-0 bg-gradient-to-t from-void-950 via-void-950/60 to-transparent" />
         <span className="absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-star-100/60 sm:left-6 sm:top-6" />
