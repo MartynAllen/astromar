@@ -1,5 +1,4 @@
 import Link from "next/link";
-import StatusBadge from "./StatusBadge";
 import type { ResearchProjectSummary, ResearchStatus } from "@/lib/sanity.queries";
 
 // Extends StatusBadge's own colour mapping (gray → amber → teal) to the
@@ -49,12 +48,9 @@ export default function ResearchProjectCard({ project }: { project: ResearchProj
         href={`/research/${project.slug.current}`}
         className={`group block border border-void-700 border-l-2 ${accent.border} bg-void-900 p-5 transition-colors hover:border-t-void-600 hover:border-r-void-600 hover:border-b-void-600 ${accent.hoverBg}`}
       >
-        <div className="flex items-center gap-3">
-          <h3 className={`font-mono text-xl uppercase tracking-wide text-star-100 ${accent.titleHover}`}>
-            {project.title}
-          </h3>
-          <StatusBadge status={project.status} />
-        </div>
+        <h3 className={`font-mono text-xl uppercase tracking-wide text-star-100 ${accent.titleHover}`}>
+          {project.title}
+        </h3>
         {project.summary && (
           <p className="mt-1.5 text-sm text-star-500">{project.summary}</p>
         )}
