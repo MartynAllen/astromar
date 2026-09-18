@@ -11,20 +11,23 @@ import type { ResearchProjectSummary, ResearchStatus } from "@/lib/sanity.querie
 // was exactly the "no differentiation" problem being fixed.
 const STATUS_ACCENT: Record<
   ResearchStatus,
-  { border: string; titleHover: string; tag: string }
+  { border: string; hoverBg: string; titleHover: string; tag: string }
 > = {
   Idea: {
     border: "border-l-void-600",
+    hoverBg: "",
     titleHover: "",
     tag: "border-void-600 text-star-500",
   },
   "In progress": {
     border: "border-l-nebula-amber-400",
+    hoverBg: "hover:bg-nebula-amber-400/5",
     titleHover: "group-hover:text-nebula-amber-400",
     tag: "border-nebula-amber-400/30 text-nebula-amber-400",
   },
   Complete: {
     border: "border-l-nebula-teal-400",
+    hoverBg: "hover:bg-nebula-teal-400/5",
     titleHover: "group-hover:text-nebula-teal-400",
     tag: "border-nebula-teal-400/30 text-nebula-teal-400",
   },
@@ -35,9 +38,16 @@ export default function ResearchProjectCard({ project }: { project: ResearchProj
 
   return (
     <li>
+      {/* hover only brightens the top/right/bottom border, not left — a
+          plain hover:border-void-600 shorthand used to override every
+          side including the status accent, muting it to grey on the one
+          interaction that should make it more noticeable, not less. The
+          accent-coloured background tint is the actual "shows the
+          highlight on hover" cue; the left border itself is untouched by
+          hover and stays exactly as visible as it is at rest. */}
       <Link
         href={`/research/${project.slug.current}`}
-        className={`group block border border-void-700 border-l-2 ${accent.border} bg-void-900 p-5 transition-colors hover:border-void-600`}
+        className={`group block border border-void-700 border-l-2 ${accent.border} bg-void-900 p-5 transition-colors hover:border-t-void-600 hover:border-r-void-600 hover:border-b-void-600 ${accent.hoverBg}`}
       >
         <div className="flex items-center gap-3">
           <h3 className={`font-mono text-xl uppercase tracking-wide text-star-100 ${accent.titleHover}`}>
