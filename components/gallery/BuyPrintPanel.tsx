@@ -8,6 +8,7 @@ import type { AstroPhotoDetail, PrintProduct } from "@/lib/sanity.queries";
 import { FRAME_COLORS, DEFAULT_FRAME_COLOR, frameColorLabel, matWidthIn } from "@/lib/printFrameColors";
 import { PRINT_FINISHES, DEFAULT_PRINT_FINISH, type PrintFinish } from "@/lib/printFinish";
 import {
+  cropRatio,
   cropRatioCss,
   effectiveAspectRatio,
   previewCropWithSignatureExcluded,
@@ -58,12 +59,16 @@ const FRAME_GRAIN = `data:image/svg+xml,${encodeURIComponent(
 function QuickViewModal({
   photo,
   product,
+  products,
   framed,
   frameColor,
   onClose,
 }: {
   photo: AstroPhotoDetail;
   product: PrintProduct;
+  /** Full catalog, not just the selected size — used only to flag when
+   * another size shares this one's exact shape (see sameShapeSizes below). */
+  products: PrintProduct[];
   framed: boolean;
   frameColor: string;
   onClose: () => void;
@@ -95,6 +100,15 @@ function QuickViewModal({
   // photo — see the notice rendered below the frame for exactly that case.
   const sourceIsLandscape = rawAspectRatio(photo) > 1;
   const aspectRatio = cropRatioCss(product, sourceIsLandscape);
+  // Several catalog sizes are just scaled-up versions of the same shape
+  // (8x10/16x20, 5x7/20x28, 12x16/24x32) — a real, correct consequence of
+  // offering standard photo-print ratios, not a bug, but comparing Quick
+  // View between two of them shows a genuinely identical crop with nothing
+  // to distinguish them here. Named explicitly so that reads as "this is
+  // expected" rather than "the preview doesn't respond to size."
+  const sameShapeSizes = products
+    .filter((p) => p._id !== product._id && Math.abs(cropRatio(p, sourceIsLandscape) - cropRatio(product, sourceIsLandscape)) < 0.005)
+    .map((p) => p.title);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(dialogRef, true);
@@ -295,6 +309,12 @@ function QuickViewModal({
         <p className="mt-1 text-center text-xs text-star-500">
           Crop approximates this size&apos;s actual print area — framing, mat and colour may vary slightly.
         </p>
+        {sameShapeSizes.length > 0 && (
+          <p className="mt-1 max-w-sm text-center text-xs text-star-500">
+            Same shape as {sameShapeSizes.join(" and ")} — this preview looks identical between them; only
+            the physical print size differs.
+          </p>
+        )}
         {photo.printRotation && (
           <p className="mt-1 max-w-sm text-center text-xs text-star-500">
             Shown here as it appears on the site — the print itself is rotated to keep the full frame, so it
@@ -557,6 +577,7 @@ export default function BuyPrintPanel({
         <QuickViewModal
           photo={photo}
           product={selected}
+          products={products}
           framed={framed && canFrame}
           frameColor={frameColor}
           onClose={() => setPreviewOpen(false)}

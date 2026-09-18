@@ -69,7 +69,7 @@ const CATEGORY_BUTTON_ACCENT: Record<GearCategory, string> = {
 // otherwise rendered with no visible caption at all, just an invisible alt
 // string. Sighted first-time visitors got zero on-page context for an
 // otherwise-uncaptioned personal photo.
-const PLAIN_HERO_CAPTION = "Martyn with his dog Persephone at the Roadford Trail Races.";
+const PLAIN_HERO_CAPTION = "Myself and one of my astro companions, Sephy, at the Roadford Trail Races.";
 
 export default async function AboutPage() {
   const [about, settings, featuredPhotos] = await Promise.all([

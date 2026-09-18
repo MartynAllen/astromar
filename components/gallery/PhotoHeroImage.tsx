@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useFocusTrap } from "@/lib/useFocusTrap";
 
 // Expand icon echoes the site's own viewfinder-corner-bracket motif (see
 // PageHero) rather than a generic diagonal-arrows glyph — four open
@@ -17,6 +18,14 @@ function ExpandIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
   );
 }
@@ -51,6 +60,15 @@ function ExpandIcon() {
  * true fullscreen is worth having everywhere, not just where space is
  * tight. See img:fullscreen in app/globals.css for why neither cap also
  * applies once actually fullscreened.
+ *
+ * Falls back to a plain CSS full-viewport overlay when the real
+ * Fullscreen API isn't usable — notably iOS Safari added to the home
+ * screen (`display-mode: standalone`): WebKit exposes neither
+ * `requestFullscreen` nor the webkit-prefixed fallback there at all
+ * (there's no browser chrome left for "fullscreen" to hide), so the
+ * button silently did nothing rather than erroring. The same fallback
+ * also covers a `requestFullscreen` call that exists but rejects (e.g. an
+ * embedding iframe missing `allow="fullscreen"`).
  */
 export default function PhotoHeroImage({
   posterUrl,
@@ -68,21 +86,43 @@ export default function PhotoHeroImage({
   compact?: boolean;
 }) {
   const imgRef = useRef<HTMLImageElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const [fallbackOpen, setFallbackOpen] = useState(false);
+  useFocusTrap(overlayRef, fallbackOpen);
 
-  function handleExpand() {
+  useEffect(() => {
+    if (!fallbackOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setFallbackOpen(false);
+    }
+    window.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [fallbackOpen]);
+
+  async function handleExpand() {
     const el = imgRef.current;
-    if (!el) return;
     const request =
-      el.requestFullscreen?.bind(el) ??
-      (el as unknown as { webkitRequestFullscreen?: () => void }).webkitRequestFullscreen?.bind(el);
-    // requestFullscreen() rejects (not throws) when the browser or an
-    // embedding context (an iframe missing allow="fullscreen", some
-    // automated/sandboxed environments) denies the request — swallow that
-    // rather than an unhandled rejection, since there's nothing more this
-    // button can do about it. The older webkit-prefixed fallback returns
-    // void rather than a promise, hence the instanceof guard.
-    const result = request?.();
-    if (result instanceof Promise) result.catch(() => {});
+      el?.requestFullscreen?.bind(el) ??
+      (el as unknown as { webkitRequestFullscreen?: () => void } | null)?.webkitRequestFullscreen?.bind(el);
+    if (!request) {
+      setFallbackOpen(true);
+      return;
+    }
+    try {
+      const result = request();
+      if (result instanceof Promise) await result;
+    } catch {
+      // requestFullscreen() rejects (not throws) when the browser or an
+      // embedding context denies the request — same fallback as the API
+      // not existing at all, rather than an unhandled rejection with the
+      // button otherwise doing nothing.
+      setFallbackOpen(true);
+    }
   }
 
   return (
@@ -115,6 +155,37 @@ export default function PhotoHeroImage({
           >
             <ExpandIcon />
           </button>
+          {fallbackOpen && (
+            <div
+              ref={overlayRef}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-void-950/95 p-4"
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${alt || "Photo"} — full screen`}
+              onClick={() => setFallbackOpen(false)}
+            >
+              <button
+                type="button"
+                onClick={() => setFallbackOpen(false)}
+                aria-label="Exit full screen"
+                className="fixed right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-void-600 bg-void-900 text-star-100 hover:border-nebula-teal-500 hover:text-nebula-teal-400"
+              >
+                <CloseIcon />
+              </button>
+              {/* eslint-disable-next-line @next/next/no-img-element -- a
+                  plain <img>, not next/image: this overlay's whole point is
+                  showing the largest available render at true full-viewport
+                  size, and next/image's `fill`/fixed-size modes both need a
+                  sized ancestor to fill rather than "as large as the actual
+                  viewport allows, capped by the image's own resolution." */}
+              <img
+                src={posterUrl}
+                alt={alt}
+                className="max-h-full max-w-full object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          )}
         </>
       )}
     </div>
