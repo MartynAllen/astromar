@@ -29,28 +29,23 @@ const SECTION_DESCRIPTIONS: Record<string, string> = {
   Technique: "Hands-on skills for getting more out of the gear you've already got.",
 };
 
-// Mirrors ResearchProjectCard's per-status accent pattern: each section gets
-// its own left-border colour so the list reads as differentiated groups
-// while scrolling, not just via the (identically-coloured) heading above
-// each one. A section not listed here — content types not yet given a home
-// in SECTION_ORDER — falls back to a neutral grey border rather than
-// guessing a colour for it.
-//
-// The Night Sky deliberately uses violet, not indigo: indigo is Calendar's
-// reserved section colour (DESIGN.md's Section Colour Rule), and violet was
-// sitting unused in globals.css since the old Discussion section was
-// removed — DESIGN.md names it as the token to reach for on exactly this
-// kind of new, genuinely distinct purpose rather than borrowing Calendar's.
+// Mirrors ResearchProjectCard's per-status accent pattern: each subsection
+// gets its own left-border colour so the list reads as differentiated
+// groups while scrolling, not just via the (identically-coloured) heading
+// above each one. Only rose and teal are used here — the site's two
+// broadly-reusable primary/secondary accents (see DESIGN.md) — rather than
+// a tertiary, section-locked colour: indigo is Calendar's exclusively, and
+// violet already marks Reviews on the homepage's own section teaser plus
+// the shared spec-comparison table, so reusing either here would make that
+// colour mean two different things. The Night Sky falls back to the same
+// neutral grey border a not-yet-mapped section gets — exactly how
+// ResearchProjectCard treats its own "Idea" status — rather than stretching
+// to a third distinct hue this palette doesn't have spare.
 const SECTION_ACCENT: Record<string, { border: string; hoverBg: string; titleHover: string }> = {
   "Buying Gear": {
     border: "border-l-nebula-rose-400",
     hoverBg: "hover:bg-nebula-rose-400/5",
     titleHover: "group-hover:text-nebula-rose-400",
-  },
-  "The Night Sky": {
-    border: "border-l-nebula-violet-400",
-    hoverBg: "hover:bg-nebula-violet-400/5",
-    titleHover: "group-hover:text-nebula-violet-400",
   },
   Technique: {
     border: "border-l-nebula-teal-400",
