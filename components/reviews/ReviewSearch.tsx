@@ -75,9 +75,14 @@ export default function ReviewSearch({ reviews }: { reviews: ReviewSummary[] }) 
         <ul className="mt-6 space-y-4">
           {filtered.map((review) => (
             <li key={review._id}>
+              {/* hover only brightens the top/right/bottom border, not left —
+                  see ResearchProjectCard for why a plain hover:border-void-600
+                  shorthand is wrong here: it overrides every side including
+                  the rose accent, muting it to grey on the one interaction
+                  that should make it more noticeable, not less. */}
               <Link
                 href={`/reviews/${review.slug.current}`}
-                className="group flex gap-4 border border-void-700 border-l-2 border-l-nebula-rose-400 bg-void-900 p-5 transition-colors hover:border-void-600"
+                className="group flex gap-4 border border-void-700 border-l-2 border-l-nebula-rose-400 bg-void-900 p-5 transition-colors hover:border-t-void-600 hover:border-r-void-600 hover:border-b-void-600 hover:bg-nebula-rose-400/5"
               >
                 {coverImage(review)?.asset ? (
                   <Image
