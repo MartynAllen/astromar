@@ -8,7 +8,7 @@ import BahtinovMaskGenerator from "@/components/guide/BahtinovMaskGenerator";
 import BahtinovMaskFieldGuide from "@/components/guide/BahtinovMaskFieldGuide";
 import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
 import { getGuideArticleBySlug, getGuideSlugs } from "@/lib/sanity.queries";
-import { buildMetadata, articleJsonLd } from "@/lib/seo";
+import { buildMetadata, articleJsonLd, howToJsonLd } from "@/lib/seo";
 import { estimateReadingMinutes, readingTimeLabel } from "@/lib/readingTime";
 import { bodyHasAffiliateLink } from "@/lib/affiliateLinks";
 
@@ -57,13 +57,22 @@ export default async function LearnArticlePage(props: PageProps<"/learn/[slug]">
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
       <JsonLd
-        data={articleJsonLd({
-          headline: article.title,
-          description: article.summary,
-          path: `/learn/${slug}`,
-          datePublished: article.publishedAt,
-          readingMinutes,
-        })}
+        data={
+          article.howToSteps && article.howToSteps.length > 0
+            ? howToJsonLd({
+                name: article.title,
+                description: article.summary,
+                path: `/learn/${slug}`,
+                steps: article.howToSteps,
+              })
+            : articleJsonLd({
+                headline: article.title,
+                description: article.summary,
+                path: `/learn/${slug}`,
+                datePublished: article.publishedAt,
+                readingMinutes,
+              })
+        }
       />
       <Breadcrumbs
         items={[

@@ -55,6 +55,15 @@ export default defineType({
     }),
     defineField({ name: "summary", title: "Summary", type: "text", rows: 2 }),
     defineField({
+      name: "howToSteps",
+      title: "How-To steps",
+      type: "array",
+      of: [{ type: "string" }],
+      description:
+        "Optional. Only fill this in when the article is genuinely a numbered procedure the reader follows in order (not every How-To-tagged article is — some are task-oriented explainers with tips/context sections rather than a literal sequence). When set, the article emits schema.org HowTo structured data instead of the generic Article type, in this exact order. Leave empty otherwise; fabricating steps that don't reflect the real body content risks a Google structured-data manual action, not a rich result.",
+      hidden: ({ document }) => document?.contentType !== "How-To",
+    }),
+    defineField({
       name: "coverImage",
       title: "Cover image",
       type: "image",

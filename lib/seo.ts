@@ -164,6 +164,32 @@ export function websiteJsonLd() {
   };
 }
 
+/** Only called when a guideArticle's optional howToSteps field is actually
+ * populated (see the schema field's own description) — most How-To-tagged
+ * articles are task-oriented explainers, not literal numbered procedures,
+ * so defaulting every one of them to HowTo schema would describe content
+ * (tips, background, criteria sections) as sequential steps it isn't. This
+ * only fires for the subset an editor has explicitly confirmed really is
+ * one; everything else keeps the generic articleJsonLd above. */
+export function howToJsonLd(input: {
+  name: string;
+  description?: string;
+  path: string;
+  steps: string[];
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: input.name,
+    description: input.description,
+    step: input.steps.map((text, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      text,
+    })),
+  };
+}
+
 /** Only called for photos with availableAsPrint and at least one eligible
  * size (see printProductsForPhoto) — a photo with nothing currently
  * purchasable has no genuine Product/Offer to describe. AggregateOffer, not

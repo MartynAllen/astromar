@@ -352,6 +352,10 @@ export interface GuideArticleSummary {
 export interface GuideArticleDetail extends GuideArticleSummary {
   body?: unknown[];
   publishedAt?: string;
+  /** Only set when the article is a genuine numbered procedure — see the
+   * schema field's own description. Drives HowTo vs. plain Article JSON-LD
+   * on the article page (see lib/seo.ts's howToJsonLd). */
+  howToSteps?: string[];
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
@@ -383,7 +387,7 @@ export async function getGuideArticleBySlug(
 ): Promise<GuideArticleDetail | null> {
   return client.fetch(
     /* groq */ `*[_type == "guideArticle" && slug.current == $slug][0]{
-      _id, title, slug, section, order, difficulty, contentType, summary, body, publishedAt, seo
+      _id, title, slug, section, order, difficulty, contentType, summary, body, publishedAt, howToSteps, seo
     }`,
     { slug },
     { next: { revalidate: REVALIDATE_SECONDS } },
