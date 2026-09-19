@@ -35,6 +35,12 @@ const SECTION_DESCRIPTIONS: Record<string, string> = {
 // each one. A section not listed here — content types not yet given a home
 // in SECTION_ORDER — falls back to a neutral grey border rather than
 // guessing a colour for it.
+//
+// The Night Sky deliberately uses violet, not indigo: indigo is Calendar's
+// reserved section colour (DESIGN.md's Section Colour Rule), and violet was
+// sitting unused in globals.css since the old Discussion section was
+// removed — DESIGN.md names it as the token to reach for on exactly this
+// kind of new, genuinely distinct purpose rather than borrowing Calendar's.
 const SECTION_ACCENT: Record<string, { border: string; hoverBg: string; titleHover: string }> = {
   "Buying Gear": {
     border: "border-l-nebula-rose-400",
@@ -42,9 +48,9 @@ const SECTION_ACCENT: Record<string, { border: string; hoverBg: string; titleHov
     titleHover: "group-hover:text-nebula-rose-400",
   },
   "The Night Sky": {
-    border: "border-l-nebula-indigo-400",
-    hoverBg: "hover:bg-nebula-indigo-400/5",
-    titleHover: "group-hover:text-nebula-indigo-400",
+    border: "border-l-nebula-violet-400",
+    hoverBg: "hover:bg-nebula-violet-400/5",
+    titleHover: "group-hover:text-nebula-violet-400",
   },
   Technique: {
     border: "border-l-nebula-teal-400",
