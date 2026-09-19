@@ -137,8 +137,11 @@ single-shade accents that each mark exactly one section of the site.
   telescope gear-category accent.
 
 ### Tertiary (section accents — one shade each, used to mark exactly one part of the site)
-- **Nebula Amber** (`#f0c26f`): the Guide section and the "Accessories" gear category.
-- **Nebula Green** (`#8fe0ab`): the Research section only.
+- **Nebula Amber** (`#f0c26f`): the Learn section (renamed from Guide) and the
+  "Accessories" gear category.
+- **Nebula Green** (`#8fe0ab`): the Workshop section only (renamed from Research; the
+  Sanity content type and internal file/route names — `research`, `ResearchProjectCard`
+  — still say "research", left alone rather than a cosmetic rename of working code).
 - **Nebula Indigo** (`#8fb2f5`): the Calendar section and the "Software" gear category.
 
 ### Neutral
@@ -169,17 +172,42 @@ single component at once. A card's border, label, and icon all share the same ac
 they don't each pick a different one.
 
 **The Section Colour Rule.** Amber, green, and indigo each belong to exactly one section
-(Guide, Research, Calendar). Introducing a new top-level section should either reuse an
+(Learn, Workshop, Calendar). Introducing a new top-level section should either reuse an
 existing colour from a related gear category or extend the scale deliberately, never
-borrow another section's colour.
+borrow another section's colour. Rose and Teal sit outside this rule — they're the
+Primary/Secondary accents above, used broadly across CTAs, gear categories, and
+whichever section needs a second differentiating accent for content *within* a page
+(see below), not reserved to one section the way the tertiary three are.
+
+**The Held Accent Rule.** A card family that colour-codes its left border by status or
+subsection (`ResearchProjectCard`'s Idea/In progress/Complete; `ReviewSearch`'s rose
+accent; `LearnFilter`'s per-subsection accent) keeps that border lit on hover — only the
+other three sides brighten (`hover:border-t/r/b-void-600`), plus a `hover:bg-{accent}/5`
+tint and the title recolouring to match. A plain `hover:border-void-600` shorthand was
+tried first in each case and always regressed the same way: it overrides every side
+including the accent, muting the one signal that should get *more* noticeable on
+interaction, not less. When a card family needs more differentiated tiers than Rose/Teal
+can honestly cover without colliding with another section (`LearnFilter` needed a third,
+neutral tier), the extra tier falls back to plain `border-l-void-600` with no hover tint
+or title colour — the same treatment `ResearchProjectCard` gives its own "Idea" status —
+rather than reaching for a tertiary, section-locked colour or inventing a new hue.
 
 ### Currently unused, still defined
-`--color-void-800` (`#12141f`) and `--color-nebula-violet-400` (`#c99ef2`) remain in
-`app/globals.css` but nothing in the current markup references them — violet was the
-Discussion section's accent before that feature was removed entirely. Reuse them for a
-genuinely new purpose or remove them; don't let a future addition treat "violet exists"
-as license to reintroduce a fifth section accent without the Section Colour Rule's
-reasoning behind it.
+`--color-void-800` (`#12141f`) remains in `app/globals.css` but nothing in the current
+markup references it.
+
+`--color-nebula-violet-400` (`#c99ef2`) is *not* fully unused, despite reading that way at
+a glance: it's the homepage's own `SECTION_TEASERS` hover colour for "Gear Reviews"
+(`app/(site)/page.tsx`), and one of four cycled header colours in the shared
+`specComparison` PortableText block (`PortableTextContent.tsx`) — it just has no
+dedicated single-section identity the way amber/green/indigo do, since the Reviews page's
+own cards use Rose instead (this split predates today's work and isn't resolved here;
+worth a look before it's relied on as a reference). Treat violet as **spoken for, not
+spare** — reusing it for a genuinely new purpose (as a first LearnFilter draft did, for
+the Night Sky subsection, before this section's own rewrite) reintroduces the exact
+cross-section ambiguity the Section Colour Rule exists to prevent. If a genuinely new
+accent is ever needed, extend the scale deliberately instead of reaching for violet on
+the assumption it's idle.
 
 ## Typography
 
@@ -225,7 +253,7 @@ not a "just in case" reserve.
 ### Hierarchy
 - **Header** (JetBrains Mono **700**, uppercase, `tracking-wide`): every genuine
   header-level element — the home hero H1 (`text-5xl` mobile → `text-7xl` desktop,
-  `leading-[1.05]`), every other page's H1 (Gallery, Reviews, Guide, Calendar, Research,
+  `leading-[1.05]`), every other page's H1 (Gallery, Reviews, Learn, Calendar, Workshop,
   About, Privacy, Disclosure, article/review/photo detail titles), and the header/footer/
   shutter-intro "Astromar" wordmark (`text-[22px]`, `tracking-[0.15em]` — see the
   compromise above). Bold is reserved for this tier alone, so it still reads as "this is
@@ -272,14 +300,14 @@ button labels, badges, the home page's `01`/`02`/`03` list index, shot-detail ro
 
 Content sits in one of four fixed-width containers depending on the page's density,
 centred with `mx-auto` and `px-6` horizontal padding: `max-w-6xl` for wide, photo-grid
-pages (Home, Gallery), `max-w-3xl` for medium list pages (Reviews, Guide, Research
+pages (Home, Gallery), `max-w-3xl` for medium list pages (Reviews, Learn, Workshop
 index), `max-w-4xl` for Calendar specifically, and `max-w-2xl` for narrow reading pages
 (About, Privacy, Disclosure, and every article/review/photo detail page). The header is
 a fixed `h-20` sticky bar (`bg-void-950/85` with `backdrop-blur`) with a hairline bottom
 border; the same `max-w-6xl` container governs it.
 
 Calendar breaks from its list-page siblings' `max-w-3xl` on purpose: unlike Reviews or
-Guide, it isn't a list of titles, it's a dashboard of widgets (the moon-phase/meteor-
+Learn, it isn't a list of titles, it's a dashboard of widgets (the moon-phase/meteor-
 shower pair, the visibility finder's wrapping per-hour result chips). At `max-w-3xl` the
 finder's chip rows wrapped raggedly — a lone chip stranding itself on its own row with
 a few hundred px of dead space beside it. `max-w-4xl` gives that flex-wrap content
@@ -450,9 +478,14 @@ partial-radius middle state anywhere in the system; introducing `rounded-md` or
 - **Shadow Strategy:** none (see Elevation & Depth).
 - **Border:** `border border-void-700` on most containers. Gear tiles add a 2px accent
   left border (`border-l-2 border-l-{section-color}`) to carry their category colour
-  without a full-surface tint.
+  without a full-surface tint. The same treatment carries whole list-item cards, not just
+  tiles: `ResearchProjectCard` (Workshop, per status), `ReviewSearch`'s review rows
+  (Reviews, rose), and `LearnFilter`'s article rows (Learn, per subsection) all use
+  `border border-void-700 border-l-2 border-l-{accent}` — see The Held Accent Rule for
+  their shared, deliberately asymmetric hover behaviour.
 - **Internal Padding:** `p-4` for compact tiles (gear, moon phase, event card), `p-5` for
-  content-bearing panels (VisibilityFinder, meteor shower list).
+  content-bearing panels (VisibilityFinder, meteor shower list) and accent-bordered list
+  cards (ReviewSearch, LearnFilter).
 
 ### Inputs / Fields
 - **Style:** `border border-void-600`, `bg-void-950`, zero radius, `px-3 py-2`.
@@ -487,7 +520,7 @@ partial-radius middle state anywhere in the system; introducing `rounded-md` or
   header.
 
 ### Photo Hero (signature component)
-Every section index page (Gallery, Reviews, Guide, Calendar, Research) opens with a
+Every section index page (Gallery, Reviews, Learn, Calendar, Workshop) opens with a
 full-bleed photo banner (`PageHero`, `h-64 sm:h-80`) instead of a plain text header: the
 featured photo, a light flat wash (`bg-void-950/20`) plus one top-fading gradient
 (`from-void-950 via-void-950/50 to-transparent`) darkening only the text zone at the
@@ -531,4 +564,6 @@ two CTAs).
 - **Don't** darken a hero photo past the point it reads clearly as a photo. The site's
   entire differentiation depends on real astrophotography being visible, not implied.
 - **Don't** introduce a fifth section accent colour casually — re-read the Section
-  Colour Rule and the note on the orphaned violet token first.
+  Colour Rule and the note on violet ("spoken for, not spare") first.
+- **Don't** override every border side on hover (`hover:border-void-600`) on a card
+  whose left border carries an accent colour — see The Held Accent Rule.
