@@ -29,6 +29,31 @@ const SECTION_DESCRIPTIONS: Record<string, string> = {
   Technique: "Hands-on skills for getting more out of the gear you've already got.",
 };
 
+// Mirrors ResearchProjectCard's per-status accent pattern: each section gets
+// its own left-border colour so the list reads as differentiated groups
+// while scrolling, not just via the (identically-coloured) heading above
+// each one. A section not listed here — content types not yet given a home
+// in SECTION_ORDER — falls back to a neutral grey border rather than
+// guessing a colour for it.
+const SECTION_ACCENT: Record<string, { border: string; hoverBg: string; titleHover: string }> = {
+  "Buying Gear": {
+    border: "border-l-nebula-rose-400",
+    hoverBg: "hover:bg-nebula-rose-400/5",
+    titleHover: "group-hover:text-nebula-rose-400",
+  },
+  "The Night Sky": {
+    border: "border-l-nebula-indigo-400",
+    hoverBg: "hover:bg-nebula-indigo-400/5",
+    titleHover: "group-hover:text-nebula-indigo-400",
+  },
+  Technique: {
+    border: "border-l-nebula-teal-400",
+    hoverBg: "hover:bg-nebula-teal-400/5",
+    titleHover: "group-hover:text-nebula-teal-400",
+  },
+};
+const DEFAULT_SECTION_ACCENT = { border: "border-l-void-600", hoverBg: "", titleHover: "" };
+
 function sortSections(sections: string[]): string[] {
   return [...sections].sort((a, b) => {
     const ai = SECTION_ORDER.indexOf(a);
@@ -104,55 +129,70 @@ export default function LearnFilter({ articles }: { articles: GuideArticleSummar
         <p className="mt-16 text-center text-star-500">No articles match this filter yet.</p>
       ) : (
         <div className="mt-10 space-y-10">
-          {sections.map((section) => (
-            <div key={section}>
-              <h2 className="font-mono text-xl uppercase tracking-wide text-nebula-amber-400">{section}</h2>
-              {SECTION_DESCRIPTIONS[section] && (
-                <p className="mt-1 text-sm text-star-500">{SECTION_DESCRIPTIONS[section]}</p>
-              )}
-              <ul className="mt-3 divide-y divide-void-700">
-                {filtered
-                  .filter((a) => a.section === section)
-                  .map((article) => (
-                    <li key={article._id} className="py-4">
-                      {/* items-center, not items-start: a short thumbnail
-                          next to a title+meta+summary block that wraps to
-                          4-6 lines on mobile otherwise leaves the dead
-                          space concentrated below the image, reading as a
-                          failed image load rather than a design choice. */}
-                      <Link href={`/learn/${article.slug.current}`} className="group flex items-center gap-4">
-                        {article.coverImage?.asset && (
-                          <span className="block h-20 w-20 flex-none overflow-hidden border border-void-700 sm:h-24 sm:w-24">
-                            <Image
-                              src={urlFor(article.coverImage).width(192).height(192).fit("crop").url()}
-                              alt={`Cover image for ${article.title}`}
-                              width={192}
-                              height={192}
-                              sizes="96px"
-                              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
-                            />
-                          </span>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <h3 className="font-mono text-lg uppercase tracking-wide text-star-100 group-hover:text-nebula-amber-400">
-                            {article.title}
-                          </h3>
-                          {/* star-500 throughout, not amber — amber is the
-                              section heading's colour above; sharing it
-                              here blurred the two hierarchy tiers together
-                              on a fast scan (a design-review finding). */}
-                          <p className="mt-1 font-mono text-xs uppercase tracking-widest text-star-500">
-                            {[article.contentType, article.difficulty].filter(Boolean).join(" · ")}
-                            {article.readingTime && ` · ${article.readingTime}`}
-                          </p>
-                          {article.summary && <p className="mt-1 text-sm text-star-500">{article.summary}</p>}
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
-              </ul>
-            </div>
-          ))}
+          {sections.map((section) => {
+            const accent = SECTION_ACCENT[section] ?? DEFAULT_SECTION_ACCENT;
+            return (
+              <div key={section}>
+                <h2 className="font-mono text-xl uppercase tracking-wide text-nebula-amber-400">{section}</h2>
+                {SECTION_DESCRIPTIONS[section] && (
+                  <p className="mt-1 text-sm text-star-500">{SECTION_DESCRIPTIONS[section]}</p>
+                )}
+                <ul className="mt-3 space-y-3">
+                  {filtered
+                    .filter((a) => a.section === section)
+                    .map((article) => (
+                      <li key={article._id}>
+                        {/* items-center, not items-start: a short thumbnail
+                            next to a title+meta+summary block that wraps to
+                            4-6 lines on mobile otherwise leaves the dead
+                            space concentrated below the image, reading as a
+                            failed image load rather than a design choice.
+                            hover only brightens the top/right/bottom border,
+                            not left — see ResearchProjectCard/ReviewSearch
+                            for why a plain hover:border-void-600 shorthand
+                            is wrong here: it overrides every side including
+                            the section accent, muting it to grey on the one
+                            interaction that should make it more noticeable,
+                            not less. */}
+                        <Link
+                          href={`/learn/${article.slug.current}`}
+                          className={`group flex items-center gap-4 border border-void-700 border-l-2 ${accent.border} bg-void-900 p-4 transition-colors hover:border-t-void-600 hover:border-r-void-600 hover:border-b-void-600 ${accent.hoverBg}`}
+                        >
+                          {article.coverImage?.asset && (
+                            <span className="block h-20 w-20 flex-none overflow-hidden border border-void-700 sm:h-24 sm:w-24">
+                              <Image
+                                src={urlFor(article.coverImage).width(192).height(192).fit("crop").url()}
+                                alt={`Cover image for ${article.title}`}
+                                width={192}
+                                height={192}
+                                sizes="96px"
+                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
+                              />
+                            </span>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <h3
+                              className={`font-mono text-lg uppercase tracking-wide text-star-100 ${accent.titleHover}`}
+                            >
+                              {article.title}
+                            </h3>
+                            {/* star-500 throughout, not amber — amber is the
+                                section heading's colour above; sharing it
+                                here blurred the two hierarchy tiers together
+                                on a fast scan (a design-review finding). */}
+                            <p className="mt-1 font-mono text-xs uppercase tracking-widest text-star-500">
+                              {[article.contentType, article.difficulty].filter(Boolean).join(" · ")}
+                              {article.readingTime && ` · ${article.readingTime}`}
+                            </p>
+                            {article.summary && <p className="mt-1 text-sm text-star-500">{article.summary}</p>}
+                          </div>
+                        </Link>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
