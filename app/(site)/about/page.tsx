@@ -133,7 +133,7 @@ export default async function AboutPage() {
         />
       </div>
       {about!.heroPhoto ? (
-        <p className="mt-2 text-xs text-star-500">
+        <p className="mt-2 text-center text-xs text-star-500">
           {about!.heroPhoto.title}
           {about!.heroPhoto.availableAsPrint ? " — prints available." : "."}{" "}
           <Link href={`/gallery/${about!.heroPhoto.slug.current}`} className="underline hover:text-star-300">
@@ -141,7 +141,7 @@ export default async function AboutPage() {
           </Link>
         </p>
       ) : (
-        <p className="mt-2 text-xs text-star-500">{PLAIN_HERO_CAPTION}</p>
+        <p className="mt-2 text-center text-xs text-star-500">{PLAIN_HERO_CAPTION}</p>
       )}
     </>
   );
