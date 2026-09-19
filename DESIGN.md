@@ -197,20 +197,30 @@ rather than reaching for a tertiary, section-locked colour or inventing a new hu
 markup references it.
 
 `--color-nebula-violet-400` (`#c99ef2`) is *not* fully unused, despite reading that way at
-a glance: it's one of four cycled header colours in the shared `specComparison`
-PortableText block (`PortableTextContent.tsx`), rotated across whichever devices a given
-comparison table lists — a generic table-column colour, not a section identity. It used
-to also be the homepage's `SECTION_TEASERS` hover colour for "Gear Reviews"
-(`app/(site)/page.tsx`), which put it at odds with the Reviews page's own cards (Rose) —
-fixed by pointing that teaser at Rose instead, so Reviews now reads the same colour
-everywhere it appears. Treat violet as **available for a genuinely new per-section
-purpose, but not risk-free**: it still surfaces inside `specComparison` tables on any
-article, in any section, so a page that both embeds a spec-comparison table and adopts
-violet as its own section accent would have the same colour meaning two different things
-on one page (this is exactly why `LearnFilter`'s Night Sky subsection settled on a neutral
-grey instead, once an early draft's choice of violet was caught during this review). If a
-genuinely new accent is needed and violet's rotation-table use is an acceptable overlap,
-reach for it; otherwise extend the scale deliberately.
+a glance: it's the homepage's own `SECTION_TEASERS` hover colour for "Gear Reviews"
+(`app/(site)/page.tsx`), and one of four cycled header colours in the shared
+`specComparison` PortableText block (`PortableTextContent.tsx`). It reading as "the
+Reviews colour" while the Reviews page's own cards use Rose looks like a mismatch at
+first glance — a same-day pass tried "fixing" it by pointing the teaser at Rose instead,
+which immediately created a worse, visible problem: Prints' teaser is also Rose (Prints'
+own page, and the rose-accented `BuyPrintPanel` used across every print-eligible photo,
+are both genuinely, deliberately Rose — see the Primary entry above and `BuyPrintPanel`'s
+own "not teal" comment), so the two adjacent teaser rows became indistinguishable. Reverted.
+**The homepage teaser colour is a scannable identity marker for that one list, not a claim
+that the whole section only ever uses that hue** — Workshop's own teaser is Green while its
+project cards are actually accented per-status in Amber/Teal (see The Held Accent Rule),
+the same kind of intentional split. Reviews genuinely uses both Rose (cards, verdict
+blockquotes, rating stars — the same broadly-reused primary/CTA accent Prints also leans
+on) and, only in the one homepage list where five items need to read as distinct at a
+glance, Violet. Don't try to force these back into agreement again.
+
+Treat violet as **available for a new per-section purpose only if nothing else already
+needs Rose or Teal there** — the same broadly-reused Primary/Secondary pair covers most
+new needs first (see the Section Colour Rule above) — and check it isn't already visible
+elsewhere on that same page via a `specComparison` table before adopting it as an accent,
+so it doesn't end up meaning two different things on one page (this is why `LearnFilter`'s
+Night Sky subsection settled on a neutral grey instead, once an early draft's choice of
+violet was caught during this same review).
 
 ## Typography
 
