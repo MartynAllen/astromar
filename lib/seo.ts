@@ -164,6 +164,49 @@ export function websiteJsonLd() {
   };
 }
 
+/** Only called for photos with availableAsPrint and at least one eligible
+ * size (see printProductsForPhoto) — a photo with nothing currently
+ * purchasable has no genuine Product/Offer to describe. AggregateOffer, not
+ * a single Offer, because the real purchasable unit is "this photo, in
+ * whichever of several sizes/framing options" — the same one-product,
+ * multiple-variants shape schema.org's own examples use for size/colour
+ * variants. Framed pricing (unframedPriceGBP + framingAddonPriceGBP) is
+ * folded into the same price range rather than modelled as separate
+ * offers, since Prodigi's framing add-on isn't a distinct sellable SKU on
+ * its own. */
+export function printProductJsonLd(input: {
+  name: string;
+  description?: string;
+  path: string;
+  image: SanityImageSource;
+  products: { unframedPriceGBP: number; framingAddonPriceGBP?: number }[];
+}) {
+  const pricesGBP = input.products.flatMap((p) => {
+    const unframed = p.unframedPriceGBP / 100;
+    return p.framingAddonPriceGBP
+      ? [unframed, unframed + p.framingAddonPriceGBP / 100]
+      : [unframed];
+  });
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: `${input.name} — Fine Art Print`,
+    description: input.description,
+    image: urlFor(input.image).width(1200).url(),
+    url: `${SITE_URL}${input.path}`,
+    brand: { "@type": "Brand", name: SITE_NAME },
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "GBP",
+      lowPrice: Math.min(...pricesGBP).toFixed(2),
+      highPrice: Math.max(...pricesGBP).toFixed(2),
+      offerCount: pricesGBP.length,
+      availability: "https://schema.org/InStock",
+      url: `${SITE_URL}${input.path}`,
+    },
+  };
+}
+
 export function eventJsonLd(input: {
   name: string;
   description?: string;

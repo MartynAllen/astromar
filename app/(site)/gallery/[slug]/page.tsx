@@ -8,7 +8,7 @@ import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BackLink from "@/components/BackLink";
 import { getPhotoBySlug, getPhotoSlugs, getPrintProducts } from "@/lib/sanity.queries";
-import { buildMetadata, imageObjectJsonLd } from "@/lib/seo";
+import { buildMetadata, imageObjectJsonLd, printProductJsonLd } from "@/lib/seo";
 import { printProductsForPhoto } from "@/lib/print";
 
 export const revalidate = 60;
@@ -62,6 +62,17 @@ export default async function PhotoPage(props: PageProps<"/gallery/[slug]">) {
           dateCreated: photo.shotDetails?.captureDate,
         })}
       />
+      {printProducts && printProducts.length > 0 && (
+        <JsonLd
+          data={printProductJsonLd({
+            name: photo.title,
+            description: photo.caption,
+            path: `/gallery/${slug}`,
+            image: photo.mainImage,
+            products: printProducts,
+          })}
+        />
+      )}
       <Breadcrumbs
         items={[
           { name: "Gallery", path: "/gallery" },
