@@ -197,17 +197,20 @@ rather than reaching for a tertiary, section-locked colour or inventing a new hu
 markup references it.
 
 `--color-nebula-violet-400` (`#c99ef2`) is *not* fully unused, despite reading that way at
-a glance: it's the homepage's own `SECTION_TEASERS` hover colour for "Gear Reviews"
-(`app/(site)/page.tsx`), and one of four cycled header colours in the shared
-`specComparison` PortableText block (`PortableTextContent.tsx`) — it just has no
-dedicated single-section identity the way amber/green/indigo do, since the Reviews page's
-own cards use Rose instead (this split predates today's work and isn't resolved here;
-worth a look before it's relied on as a reference). Treat violet as **spoken for, not
-spare** — reusing it for a genuinely new purpose (as a first LearnFilter draft did, for
-the Night Sky subsection, before this section's own rewrite) reintroduces the exact
-cross-section ambiguity the Section Colour Rule exists to prevent. If a genuinely new
-accent is ever needed, extend the scale deliberately instead of reaching for violet on
-the assumption it's idle.
+a glance: it's one of four cycled header colours in the shared `specComparison`
+PortableText block (`PortableTextContent.tsx`), rotated across whichever devices a given
+comparison table lists — a generic table-column colour, not a section identity. It used
+to also be the homepage's `SECTION_TEASERS` hover colour for "Gear Reviews"
+(`app/(site)/page.tsx`), which put it at odds with the Reviews page's own cards (Rose) —
+fixed by pointing that teaser at Rose instead, so Reviews now reads the same colour
+everywhere it appears. Treat violet as **available for a genuinely new per-section
+purpose, but not risk-free**: it still surfaces inside `specComparison` tables on any
+article, in any section, so a page that both embeds a spec-comparison table and adopts
+violet as its own section accent would have the same colour meaning two different things
+on one page (this is exactly why `LearnFilter`'s Night Sky subsection settled on a neutral
+grey instead, once an early draft's choice of violet was caught during this review). If a
+genuinely new accent is needed and violet's rotation-table use is an acceptable overlap,
+reach for it; otherwise extend the scale deliberately.
 
 ## Typography
 
@@ -564,6 +567,6 @@ two CTAs).
 - **Don't** darken a hero photo past the point it reads clearly as a photo. The site's
   entire differentiation depends on real astrophotography being visible, not implied.
 - **Don't** introduce a fifth section accent colour casually — re-read the Section
-  Colour Rule and the note on violet ("spoken for, not spare") first.
+  Colour Rule and the note on violet's `specComparison` overlap first.
 - **Don't** override every border side on hover (`hover:border-void-600`) on a card
   whose left border carries an accent colour — see The Held Accent Rule.
