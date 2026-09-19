@@ -59,7 +59,7 @@ const SECTION_TEASERS = [
     href: "/reviews",
     title: "Gear Reviews",
     body: "Honest write-ups on the telescopes, filters and software actually used to make these images.",
-    color: "group-hover:text-nebula-violet-400",
+    color: "group-hover:text-nebula-rose-400",
   },
   {
     href: "/learn",
