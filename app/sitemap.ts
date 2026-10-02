@@ -23,6 +23,11 @@ interface SlugRow {
   updatedAt: string;
 }
 
+// Without this the sitemap is generated once, at build time, and never
+// again — so anything published in Studio after a deploy (a new photo,
+// review, or shop product) stayed out of it until the next deploy.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const rows: SlugRow[] = await client.fetch(/* groq */ `*[
       (
