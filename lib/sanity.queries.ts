@@ -549,6 +549,13 @@ export async function getAboutPage(): Promise<AboutPageContent | null> {
 // Shop (self-fulfilled 3D-printed products — see sanity/schemaTypes/documents/shopProduct.ts)
 // ---------------------------------------------------------------------------
 
+// A product only counts as "for sale" if it's switched on AND every variant has
+// a price AND there's at least one variant. Studio validation enforces the
+// last two on publish, but a document written through the API (an import, a
+// script) can bypass it — and a priceless variant would render "£NaN" and
+// break checkout's unit_amount, so it's filtered out rather than trusted.
+const SHOP_SELLABLE = /* groq */ `active == true && defined(slug.current) && count(variants) > 0 && count(variants[!defined(pricePence)]) == 0`;
+
 const shopImageProjection = /* groq */ `{
   ..., "image": image{..., "dimensions": asset->metadata.dimensions}
 }`;
@@ -561,7 +568,7 @@ const shopSummaryProjection = /* groq */ `{
 
 export async function getAllShopProducts(): Promise<ShopProductSummary[]> {
   return client.fetch(
-    /* groq */ `*[_type == "shopProduct" && active == true && defined(slug.current)] | order(sortOrder asc, title asc) ${shopSummaryProjection}`,
+    /* groq */ `*[_type == "shopProduct" && ${SHOP_SELLABLE}] | order(sortOrder asc, title asc) ${shopSummaryProjection}`,
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },
   );
@@ -569,7 +576,7 @@ export async function getAllShopProducts(): Promise<ShopProductSummary[]> {
 
 export async function getShopSlugs(): Promise<string[]> {
   return client.fetch(
-    /* groq */ `*[_type == "shopProduct" && active == true && defined(slug.current)].slug.current`,
+    /* groq */ `*[_type == "shopProduct" && ${SHOP_SELLABLE}].slug.current`,
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },
   );
@@ -579,7 +586,7 @@ export async function getShopProductBySlug(
   slug: string,
 ): Promise<ShopProductDetail | null> {
   return client.fetch(
-    /* groq */ `*[_type == "shopProduct" && active == true && slug.current == $slug][0]{
+    /* groq */ `*[_type == "shopProduct" && ${SHOP_SELLABLE} && slug.current == $slug][0]{
       _id, title, slug, category, summary, fulfilment, leadTimeDays, sortOrder,
       description, material, printer, dimensions, affiliateLinks, seo,
       "variants": variants[]{_key, label, sku, pricePence, stock},
@@ -599,7 +606,7 @@ export async function getShopProductBySlug(
  */
 export async function hasActiveShopProducts(): Promise<boolean> {
   const count: number = await client.fetch(
-    /* groq */ `count(*[_type == "shopProduct" && active == true && defined(slug.current)])`,
+    /* groq */ `count(*[_type == "shopProduct" && ${SHOP_SELLABLE}])`,
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },
   );

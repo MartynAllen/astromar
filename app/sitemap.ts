@@ -27,7 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const rows: SlugRow[] = await client.fetch(/* groq */ `*[
       (
         _type == "astroPhoto" || _type == "reviewPost" || _type == "guideArticle" || _type == "researchProject"
-        || (_type == "shopProduct" && active == true)
+        || (_type == "shopProduct" && active == true && count(variants) > 0 && count(variants[!defined(pricePence)]) == 0)
       )
       && defined(slug.current)
     ]{

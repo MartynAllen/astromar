@@ -100,6 +100,18 @@ function priceLine(
     };
   }
 
+  // A variant without a usable price must never be charged: treat it as gone
+  // rather than passing NaN/0 to Stripe. (Studio validation prevents this on
+  // publish; this covers a document written some other way.)
+  if (!Number.isInteger(variant.pricePence) || variant.pricePence <= 0) {
+    return {
+      ...named,
+      unitPence: 0,
+      linePence: 0,
+      issue: { code: "variant_missing", message: "That option is no longer available." },
+    };
+  }
+
   // A product with one "Standard" variant shouldn't read "Clip — Standard".
   const withVariant = {
     ...named,

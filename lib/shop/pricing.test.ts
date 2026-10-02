@@ -199,3 +199,15 @@ test("each valid line reports the quantity ceiling it could be raised to", () =>
   assert.equal(q.lines[0].maxQty, 5);
   assert.equal(q.lines[1].maxQty, 10);
 });
+
+test("a variant with a missing, zero or fractional price is unavailable, never charged", () => {
+  for (const bad of [undefined, 0, -5, 12.5, Number.NaN]) {
+    const p: PricedProduct = {
+      ...CLIP,
+      variants: [{ ...CLIP.variants[0], pricePence: bad as never }],
+    };
+    const q = priceBasket([{ productId: "p-clip", variantKey: "std", qty: 1 }], [p], SETTINGS);
+    assert.equal(q.lines[0].issue?.code, "variant_missing", `price ${String(bad)}`);
+    assert.equal(q.totalPence, 0);
+  }
+});
