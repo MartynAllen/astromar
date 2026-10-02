@@ -85,6 +85,14 @@ export default defineType({
       description: 'Measured, not guessed — e.g. "95mm diameter × 5mm".',
     }),
     defineField({
+      name: "affiliateLinks",
+      title: "Works with (retailer links)",
+      type: "array",
+      of: [defineArrayMember({ type: "affiliateLink" })],
+      description:
+        "Optional. Links to something this product is used with — e.g. the power brick a holder is made for. Shown on the product page with the site's Amazon Associates disclosure. Only link what you've checked it actually fits.",
+    }),
+    defineField({
       name: "fulfilment",
       title: "How it's made",
       type: "string",

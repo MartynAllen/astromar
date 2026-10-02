@@ -1,4 +1,4 @@
-import type { ReviewGalleryImage } from "@/lib/sanity.queries";
+import type { AffiliateLink, ReviewGalleryImage } from "@/lib/sanity.queries";
 
 // Type-only: keeps lib/shop/* pure and unit-testable without Sanity env vars.
 // (sanity/client.ts asserts NEXT_PUBLIC_SANITY_* at import time.)
@@ -33,6 +33,7 @@ export interface ShopProductDetail extends ShopProductSummary {
   material?: string;
   printer?: string;
   dimensions?: string;
+  affiliateLinks?: AffiliateLink[];
   seo?: {
     metaTitle?: string;
     metaDescription?: string;

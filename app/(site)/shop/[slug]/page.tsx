@@ -7,6 +7,8 @@ import PortableTextContent from "@/components/PortableTextContent";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BackLink from "@/components/BackLink";
+import AffiliateButton from "@/components/reviews/AffiliateButton";
+import AffiliateDisclosureBanner from "@/components/reviews/AffiliateDisclosureBanner";
 import { getShopProductBySlug, getShopSettings, getShopSlugs } from "@/lib/sanity.queries";
 import { buildMetadata, shopProductJsonLd } from "@/lib/seo";
 import { formatGBP } from "@/lib/shop/types";
@@ -114,6 +116,27 @@ export default async function ShopProductPage(props: PageProps<"/shop/[slug]">) 
             </Link>
             .
           </p>
+
+          {product.affiliateLinks && product.affiliateLinks.length > 0 && (
+            <div className="mt-8 border-t border-void-700 pt-6">
+              <p className="font-mono text-xs uppercase tracking-widest text-star-500">Works with</p>
+              <div className="mt-3">
+                <AffiliateDisclosureBanner />
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {product.affiliateLinks.map((link) => (
+                  <AffiliateButton
+                    key={link.url}
+                    link={link}
+                    // Neutral, not the rose of "Add to basket": a first-party
+                    // buy action and an outbound affiliate link shouldn't
+                    // look like the same kind of button.
+                    accentClassName="border-void-600 text-star-300 hover:border-star-100 hover:bg-star-100"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {product.description && product.description.length > 0 && (
             <PortableTextContent value={product.description} />

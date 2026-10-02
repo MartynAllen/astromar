@@ -581,7 +581,7 @@ export async function getShopProductBySlug(
   return client.fetch(
     /* groq */ `*[_type == "shopProduct" && active == true && slug.current == $slug][0]{
       _id, title, slug, category, summary, fulfilment, leadTimeDays, sortOrder,
-      description, material, printer, dimensions, seo,
+      description, material, printer, dimensions, affiliateLinks, seo,
       "variants": variants[]{_key, label, sku, pricePence, stock},
       "images": images[]${shopImageProjection}
     }`,
