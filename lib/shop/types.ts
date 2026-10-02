@@ -59,6 +59,8 @@ export interface ShopSettings {
   dispatchMinDays: number;
   dispatchMaxDays: number;
   maxQtyPerLine: number;
+  /** Seller name + address, shown on the policy page and product pages when set. */
+  sellerDetails?: string;
 }
 
 // Used when the shopSettings document hasn't been created yet, so the shop

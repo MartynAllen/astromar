@@ -41,6 +41,14 @@ export default defineType({
       initialValue: 3,
     }),
     defineField({
+      name: "sellerDetails",
+      title: "Seller details (name and address)",
+      type: "text",
+      rows: 4,
+      description:
+        "Optional until you promote the shop, then needed: UK law expects a seller name and a geographic address for consumer sales. Shown on the Shipping & Returns page and under the postage note on each product. Use a business or registered address rather than your home if you prefer. Leave empty to show nothing.",
+    }),
+    defineField({
       name: "maxQtyPerLine",
       title: "Max quantity per item",
       type: "number",

@@ -117,6 +117,12 @@ export default async function ShopProductPage(props: PageProps<"/shop/[slug]">) 
             .
           </p>
 
+          {settings.sellerDetails && (
+            <p className="mt-3 whitespace-pre-line text-sm text-star-500">
+              Sold by {settings.sellerDetails}
+            </p>
+          )}
+
           {product.affiliateLinks && product.affiliateLinks.length > 0 && (
             <div className="mt-8 border-t border-void-700 pt-6">
               <p className="font-mono text-xs uppercase tracking-widest text-star-500">Works with</p>

@@ -100,6 +100,13 @@ export default async function ShippingReturnsPage() {
               </p>
             </section>
 
+            {settings?.sellerDetails && (
+              <section>
+                <SectionHeading>Who&apos;s selling</SectionHeading>
+                <p className="mt-2 whitespace-pre-line">{settings.sellerDetails}</p>
+              </section>
+            )}
+
             <section>
               <SectionHeading>Postage</SectionHeading>
               <p className="mt-2">

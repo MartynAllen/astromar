@@ -633,7 +633,7 @@ export async function getShopProductsByIds(ids: string[]): Promise<PricedProduct
 
 export async function getShopSettings(options: { fresh?: boolean } = {}): Promise<ShopSettings> {
   const query = /* groq */ `*[_type == "shopSettings"][0]{
-    flatShippingPence, freeShippingThresholdPence, dispatchMinDays, dispatchMaxDays, maxQtyPerLine
+    flatShippingPence, freeShippingThresholdPence, dispatchMinDays, dispatchMaxDays, maxQtyPerLine, sellerDetails
   }`;
   const raw: Partial<ShopSettings> | null = options.fresh
     ? await freshClient.fetch(query, {}, { cache: "no-store" })
@@ -645,5 +645,6 @@ export async function getShopSettings(options: { fresh?: boolean } = {}): Promis
     dispatchMinDays: raw?.dispatchMinDays ?? DEFAULT_SHOP_SETTINGS.dispatchMinDays,
     dispatchMaxDays: raw?.dispatchMaxDays ?? DEFAULT_SHOP_SETTINGS.dispatchMaxDays,
     maxQtyPerLine: raw?.maxQtyPerLine ?? DEFAULT_SHOP_SETTINGS.maxQtyPerLine,
+    sellerDetails: raw?.sellerDetails?.trim() || undefined,
   };
 }
