@@ -1,4 +1,11 @@
-import { client } from "@/sanity/client";
+import { client, freshClient } from "@/sanity/client";
+import type {
+  PricedProduct,
+  ShopProductDetail,
+  ShopProductSummary,
+  ShopSettings,
+} from "@/lib/shop/types";
+import { DEFAULT_SHOP_SETTINGS } from "@/lib/shop/types";
 import type { SanityImageSource } from "@sanity/image-url";
 import { readingTimeLabel } from "@/lib/readingTime";
 
@@ -536,4 +543,100 @@ export async function getAboutPage(): Promise<AboutPageContent | null> {
     {},
     { next: { revalidate: REVALIDATE_SECONDS } },
   );
+}
+
+// ---------------------------------------------------------------------------
+// Shop (self-fulfilled 3D-printed products — see sanity/schemaTypes/documents/shopProduct.ts)
+// ---------------------------------------------------------------------------
+
+const shopImageProjection = /* groq */ `{
+  ..., "image": image{..., "dimensions": asset->metadata.dimensions}
+}`;
+
+const shopSummaryProjection = /* groq */ `{
+  _id, title, slug, category, summary, fulfilment, leadTimeDays, sortOrder,
+  "variants": variants[]{_key, label, sku, pricePence, stock},
+  "images": images[0...1]${shopImageProjection}
+}`;
+
+export async function getAllShopProducts(): Promise<ShopProductSummary[]> {
+  return client.fetch(
+    /* groq */ `*[_type == "shopProduct" && active == true && defined(slug.current)] | order(sortOrder asc, title asc) ${shopSummaryProjection}`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export async function getShopSlugs(): Promise<string[]> {
+  return client.fetch(
+    /* groq */ `*[_type == "shopProduct" && active == true && defined(slug.current)].slug.current`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+export async function getShopProductBySlug(
+  slug: string,
+): Promise<ShopProductDetail | null> {
+  return client.fetch(
+    /* groq */ `*[_type == "shopProduct" && active == true && slug.current == $slug][0]{
+      _id, title, slug, category, summary, fulfilment, leadTimeDays, sortOrder,
+      description, material, printer, dimensions, seo,
+      "variants": variants[]{_key, label, sku, pricePence, stock},
+      "images": images[]${shopImageProjection}
+    }`,
+    { slug },
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+}
+
+/**
+ * Whether the shop has anything for sale. Every public touchpoint — the nav
+ * link, homepage teaser, sitemap, llms.txt and the shop sections of the
+ * policy pages — is gated on this, so the shop appears as a whole the
+ * moment the first product is published, and never as an empty placeholder
+ * beforehand.
+ */
+export async function hasActiveShopProducts(): Promise<boolean> {
+  const count: number = await client.fetch(
+    /* groq */ `count(*[_type == "shopProduct" && active == true && defined(slug.current)])`,
+    {},
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+  return count > 0;
+}
+
+/**
+ * Fresh (non-CDN, uncached) read for pricing a basket or starting checkout.
+ * Includes inactive products on purpose so the pricing core can report
+ * "no longer available" rather than the line silently vanishing.
+ */
+export async function getShopProductsByIds(ids: string[]): Promise<PricedProduct[]> {
+  if (ids.length === 0) return [];
+  return freshClient.fetch(
+    /* groq */ `*[_type == "shopProduct" && _id in $ids]{
+      _id, title, slug, "active": active == true, fulfilment, leadTimeDays,
+      "variants": variants[]{_key, label, sku, pricePence, stock},
+      "images": images[0...1]${shopImageProjection}
+    }`,
+    { ids },
+    { cache: "no-store" },
+  );
+}
+
+export async function getShopSettings(options: { fresh?: boolean } = {}): Promise<ShopSettings> {
+  const query = /* groq */ `*[_type == "shopSettings"][0]{
+    flatShippingPence, freeShippingThresholdPence, dispatchMinDays, dispatchMaxDays, maxQtyPerLine
+  }`;
+  const raw: Partial<ShopSettings> | null = options.fresh
+    ? await freshClient.fetch(query, {}, { cache: "no-store" })
+    : await client.fetch(query, {}, { next: { revalidate: REVALIDATE_SECONDS } });
+  return {
+    flatShippingPence: raw?.flatShippingPence ?? DEFAULT_SHOP_SETTINGS.flatShippingPence,
+    freeShippingThresholdPence:
+      raw?.freeShippingThresholdPence ?? DEFAULT_SHOP_SETTINGS.freeShippingThresholdPence,
+    dispatchMinDays: raw?.dispatchMinDays ?? DEFAULT_SHOP_SETTINGS.dispatchMinDays,
+    dispatchMaxDays: raw?.dispatchMaxDays ?? DEFAULT_SHOP_SETTINGS.dispatchMaxDays,
+    maxQtyPerLine: raw?.maxQtyPerLine ?? DEFAULT_SHOP_SETTINGS.maxQtyPerLine,
+  };
 }

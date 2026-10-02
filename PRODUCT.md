@@ -21,8 +21,10 @@ Studio at `/studio`.
 A personal astrophotography blog documenting real deep-sky imaging from a back garden in
 Devon, UK. Sections: a photo gallery (real captures with parsed EXIF/FITS shot details),
 gear reviews (Amazon-affiliate monetised), a beginner's guide, an astronomy calendar
-(moon phase, meteor showers, a sky-visibility finder), and a research section documenting
-Python/computer-vision experiments run against the photo archive. Success means genuinely
+(moon phase, meteor showers, a sky-visibility finder), a research section documenting
+Python/computer-vision experiments run against the photo archive, fine-art prints of the
+photos (made to order through Prodigi), and a small shop of 3D-printed items Martyn makes
+and posts himself (filter boxes, tripod mounts, clips, coasters, cookie cutters). Success means genuinely
 useful, trustworthy content that reflects the author's actual hands-on experience — not
 generic space content.
 
@@ -55,11 +57,15 @@ gear, new claims — needs to stay traceable to something the author actually di
 ## Capabilities and Constraints
 
 - British English required sitewide, not American English.
-- Monetisation is Amazon Associates affiliate links only; a disclosure banner is required
-  wherever affiliate links appear.
+- Monetisation is Amazon Associates affiliate links (a disclosure banner is required
+  wherever they appear) plus two first-party stores through Stripe: photo prints
+  (Prodigi-fulfilled) and the 3D-printed shop (self-fulfilled, UK-only, basket checkout,
+  flat postage with a free threshold). The shop's copy follows the same traceability rule
+  as everything else: say what was actually printed, in what, on what — no untested claims.
 - No comments/discussion feature currently exists (see Operating Context).
 - Content types: `astroPhoto`, `reviewPost`, `guideArticle`, `calendarEvent`,
-  `researchProject`, plus singletons `siteSettings` and `aboutPage`.
+  `researchProject`, `printProduct`, `shopProduct`, plus singletons `siteSettings`,
+  `aboutPage` and `shopSettings`.
 - Deployed on Vercel at astromar.co.uk; GitHub Actions CI runs typecheck/lint/test/build
   on every push and PR to `main`.
 

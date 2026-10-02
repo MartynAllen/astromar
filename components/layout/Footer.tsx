@@ -1,10 +1,13 @@
 import Link from "next/link";
-import { NAV_LINKS, LEGAL_LINKS, SUPPORT_URL } from "@/lib/navigation";
-import { getSiteSettings } from "@/lib/sanity.queries";
+import { navLinks, LEGAL_LINKS, SUPPORT_URL } from "@/lib/navigation";
+import { getSiteSettings, hasActiveShopProducts } from "@/lib/sanity.queries";
 import { isSafeHref } from "@/lib/safeUrl";
 
 export default async function Footer() {
-  const settings = await getSiteSettings().catch(() => null);
+  const [settings, shopLive] = await Promise.all([
+    getSiteSettings().catch(() => null),
+    hasActiveShopProducts().catch(() => false),
+  ]);
   const siteName = settings?.siteName ?? "Astromar";
   const tagline = settings?.tagline ?? "Astronomy and astrophotography from a garden setup.";
   // socialLinks/shopUrl are free-text Studio fields, not URL-typed —
@@ -59,7 +62,7 @@ export default async function Footer() {
               Explore
             </p>
             <ul className="mt-3 flex flex-col gap-2">
-              {NAV_LINKS.map((link) => (
+              {navLinks(shopLive).map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}

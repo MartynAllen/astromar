@@ -25,20 +25,29 @@ interface SlugRow {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const rows: SlugRow[] = await client.fetch(/* groq */ `*[
-      (_type == "astroPhoto" || _type == "reviewPost" || _type == "guideArticle" || _type == "researchProject")
+      (
+        _type == "astroPhoto" || _type == "reviewPost" || _type == "guideArticle" || _type == "researchProject"
+        || (_type == "shopProduct" && active == true)
+      )
       && defined(slug.current)
     ]{
       "pathPrefix": select(
         _type == "astroPhoto" => "/gallery",
         _type == "reviewPost" => "/reviews",
         _type == "guideArticle" => "/learn",
-        _type == "researchProject" => "/research"
+        _type == "researchProject" => "/research",
+        _type == "shopProduct" => "/shop"
       ),
       "slug": slug.current,
       "updatedAt": _updatedAt
     }`);
 
-  const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((path) => ({
+  // /shop is listed only once it has products (see hasActiveShopProducts) —
+  // an empty shop index isn't worth a crawler's time.
+  const shopLive = rows.some((r) => r.pathPrefix === "/shop");
+  const staticRoutes = shopLive ? [...STATIC_ROUTES, "/shop"] : STATIC_ROUTES;
+
+  const staticEntries: MetadataRoute.Sitemap = staticRoutes.map((path) => ({
     url: `${SITE_URL}${path}`,
     changeFrequency: path === "" ? "weekly" : "monthly",
     priority: path === "" ? 1 : 0.6,

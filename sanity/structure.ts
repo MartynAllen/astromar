@@ -1,6 +1,6 @@
 import type { StructureResolver } from "sanity/structure";
 
-const SINGLETON_TYPES = new Set(["siteSettings", "aboutPage"]);
+const SINGLETON_TYPES = new Set(["siteSettings", "aboutPage", "shopSettings"]);
 const CATEGORIES: Array<{ title: string; value: string }> = [
   { title: "Deep sky", value: "deep-sky" },
   { title: "Lunar", value: "lunar" },
@@ -21,6 +21,10 @@ export const structure: StructureResolver = (S) =>
         .title("About Page")
         .id("aboutPage")
         .child(S.document().schemaType("aboutPage").documentId("aboutPage")),
+      S.listItem()
+        .title("Shop Settings")
+        .id("shopSettings")
+        .child(S.document().schemaType("shopSettings").documentId("shopSettings")),
       S.divider(),
       S.listItem()
         .title("Astro Photos")

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { urlFor } from "@/sanity/image";
 import type { SanityImageSource } from "@sanity/image-url";
+import { priceRangePence, schemaAvailability } from "@/lib/shop/availability";
+import type { ShopFulfilment, ShopVariant } from "@/lib/shop/types";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "http://localhost:3000";
@@ -230,6 +232,59 @@ export function printProductJsonLd(input: {
       availability: "https://schema.org/InStock",
       url: `${SITE_URL}${input.path}`,
     },
+  };
+}
+
+/** Self-fulfilled shop item. A single price is a plain Offer; several
+ * variants at different prices are an AggregateOffer (the same
+ * one-product-many-variants shape printProductJsonLd uses). Deliberately
+ * no shippingDetails/hasMerchantReturnPolicy yet — those must state the
+ * real policy, which isn't final until the shipping & returns page is. */
+export function shopProductJsonLd(input: {
+  name: string;
+  description?: string;
+  path: string;
+  images: SanityImageSource[];
+  category: string;
+  material?: string;
+  fulfilment: ShopFulfilment;
+  variants: Pick<ShopVariant, "sku" | "pricePence" | "stock">[];
+}) {
+  const url = `${SITE_URL}${input.path}`;
+  const { low, high } = priceRangePence(input.variants);
+  const availability = schemaAvailability(input);
+  const offers =
+    low === high
+      ? {
+          "@type": "Offer",
+          priceCurrency: "GBP",
+          price: (low / 100).toFixed(2),
+          availability,
+          itemCondition: "https://schema.org/NewCondition",
+          url,
+        }
+      : {
+          "@type": "AggregateOffer",
+          priceCurrency: "GBP",
+          lowPrice: (low / 100).toFixed(2),
+          highPrice: (high / 100).toFixed(2),
+          offerCount: input.variants.length,
+          availability,
+          itemCondition: "https://schema.org/NewCondition",
+          url,
+        };
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: input.name,
+    description: input.description,
+    image: input.images.map((img) => urlFor(img).width(1200).url()),
+    url,
+    category: input.category,
+    ...(input.material ? { material: input.material } : {}),
+    ...(input.variants.length === 1 ? { sku: input.variants[0].sku } : {}),
+    brand: { "@type": "Brand", name: SITE_NAME },
+    offers,
   };
 }
 

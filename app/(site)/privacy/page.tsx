@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import { hasActiveShopProducts } from "@/lib/sanity.queries";
+
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Privacy",
   description: "What Astromar collects and why.",
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const shopLive = await hasActiveShopProducts().catch(() => false);
   return (
     <div className="mx-auto max-w-2xl px-6 py-14">
       <Breadcrumbs items={[{ name: "Privacy", path: "/privacy" }]} />
@@ -48,6 +52,25 @@ export default function PrivacyPage() {
             here.
           </p>
         </section>
+
+        {shopLive && (
+          <section>
+            <h2 className="font-mono text-xl uppercase tracking-wide text-star-100">Shop orders</h2>
+            <p className="mt-2">
+              Buying from the shop sends your name, delivery address and email to Stripe, who
+              take the payment. I then receive the same details by email, at my own inbox via
+              Resend (an email-delivery service), so I can pack and post your order. I keep order
+              records for as long as I need them for tax and accounting and to deal with any
+              problem with an order. The website itself stores none of it — it runs on a public
+              content database with no private storage, so your details are never written there.
+            </p>
+            <p className="mt-2">
+              Your basket is kept in your own browser&apos;s local storage, on your device rather
+              than on any server of mine. It holds only item and quantity, never payment or
+              personal details, and emptying it or clearing your browser data removes it.
+            </p>
+          </section>
+        )}
 
         <section>
           <h2 className="font-mono text-xl uppercase tracking-wide text-star-100">Contact</h2>

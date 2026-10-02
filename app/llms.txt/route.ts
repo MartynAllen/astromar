@@ -3,6 +3,7 @@ import {
   getAllGuideArticles,
   getAllReviews,
   getAllResearchProjects,
+  getAllShopProducts,
   getFeaturedPhotos,
 } from "@/lib/sanity.queries";
 
@@ -25,11 +26,12 @@ function section(title: string, items: { title: string; href: string; note?: str
 }
 
 export async function GET() {
-  const [reviews, articles, research, featuredPhotos] = await Promise.all([
+  const [reviews, articles, research, featuredPhotos, shopProducts] = await Promise.all([
     getAllReviews(),
     getAllGuideArticles(),
     getAllResearchProjects(),
     getFeaturedPhotos(LIMIT),
+    getAllShopProducts().catch(() => []),
   ]);
 
   const sections = [
@@ -42,6 +44,21 @@ export async function GET() {
       })),
     ]),
     section("Prints", [{ title: "Buy a print", href: `${SITE_URL}/prints` }]),
+    // Empty until the first product is published; section() drops an empty
+    // list, so the heading never appears on its own.
+    section(
+      "Shop",
+      shopProducts.length > 0
+        ? [
+            { title: "Shop", href: `${SITE_URL}/shop`, note: "3D-printed items I make myself" },
+            ...shopProducts.slice(0, LIMIT).map((p) => ({
+              title: p.title,
+              href: `${SITE_URL}/shop/${p.slug.current}`,
+              note: p.summary,
+            })),
+          ]
+        : [],
+    ),
     section(
       "Gear Reviews",
       reviews.slice(0, LIMIT).map((r) => ({

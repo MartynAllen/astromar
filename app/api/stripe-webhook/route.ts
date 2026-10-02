@@ -5,6 +5,7 @@ import { DEFAULT_FRAME_COLOR, isValidFrameColor } from "@/lib/printFrameColors";
 import { isValidPrintFinish } from "@/lib/printFinish";
 import { placeProdigiOrder } from "@/lib/prodigi";
 import { sendOpsAlert } from "@/lib/alert";
+import { handleShopOrder } from "@/lib/shop/handleShopOrder";
 
 const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -19,6 +20,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+
+  // Self-fulfilled 3D-printed shop orders share this Stripe account and
+  // endpoint with the photo prints, so they're told apart by the marker
+  // /api/shop/checkout sets. Anything without it is a print order — the
+  // original behaviour, including for sessions created before the shop
+  // existed.
+  if (paymentIntent.metadata.orderType === "shop") {
+    return handleShopOrder(session, paymentIntent);
+  }
 
   // Idempotency guard — no database, so the PaymentIntent's own metadata is
   // the ledger. Once an order exists at Prodigi it carries a prodigiOrderId;

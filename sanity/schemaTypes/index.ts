@@ -8,6 +8,8 @@ import researchProject from "./documents/researchProject";
 import siteSettings from "./documents/siteSettings";
 import aboutPage from "./documents/aboutPage";
 import printProduct from "./documents/printProduct";
+import shopProduct from "./documents/shopProduct";
+import shopSettings from "./documents/shopSettings";
 
 import shotDetails from "./objects/shotDetails";
 import seo from "./objects/seo";
@@ -36,6 +38,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     siteSettings,
     aboutPage,
     printProduct,
+    shopProduct,
+    shopSettings,
     // Objects
     shotDetails,
     seo,

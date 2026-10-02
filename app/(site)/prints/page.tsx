@@ -3,7 +3,7 @@ import Link from "next/link";
 import PageHero from "@/components/PageHero";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import PhotoGrid from "@/components/gallery/PhotoGrid";
-import { getPrintablePhotos, getPrintProducts } from "@/lib/sanity.queries";
+import { getPrintablePhotos, getPrintProducts, hasActiveShopProducts } from "@/lib/sanity.queries";
 import { cheapestPrintPriceGBP } from "@/lib/print";
 import { buildMetadata } from "@/lib/seo";
 
@@ -32,7 +32,7 @@ export default async function PrintsPage() {
   // into the exact same shape as "no sizes configured" — every price badge
   // and the hero's "From £X" line would vanish with no indication anything
   // was wrong. Track the failure explicitly so the page can say so.
-  const [photos, printProductsResult] = await Promise.all([
+  const [photos, printProductsResult, shopLive] = await Promise.all([
     getPrintablePhotos(),
     getPrintProducts()
       .then((data) => ({ ok: true as const, data }))
@@ -40,6 +40,7 @@ export default async function PrintsPage() {
         console.error("getPrintProducts failed on /prints:", err);
         return { ok: false as const, data: [] as Awaited<ReturnType<typeof getPrintProducts>> };
       }),
+    hasActiveShopProducts().catch(() => false),
   ]);
   const printProducts = printProductsResult.data;
   const catalogUnavailable = !printProductsResult.ok;
@@ -109,6 +110,15 @@ export default async function PrintsPage() {
             </p>
           </div>
         </div>
+
+        {shopLive && (
+          <p className="mb-10 text-sm text-star-500">
+            Looking for small 3D-printed gear rather than a photo print?{" "}
+            <Link href="/shop" className="text-nebula-teal-400 hover:underline">
+              Visit the shop →
+            </Link>
+          </p>
+        )}
 
         {catalogUnavailable && (
           <p className="mb-10 border border-void-600 bg-void-900 px-5 py-4 text-sm text-star-500">

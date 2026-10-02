@@ -179,9 +179,15 @@ Primary/Secondary accents above, used broadly across CTAs, gear categories, and
 whichever section needs a second differentiating accent for content *within* a page
 (see below), not reserved to one section the way the tertiary three are.
 
+The Shop (self-fulfilled 3D-printed items) takes no tertiary colour: its product cards
+use Teal for the Held Accent border and hover, its buy and checkout actions use Rose
+(like Prints and the affiliate buttons), and its homepage teaser hovers Teal so it stays
+distinct from the Rose Prints row beside it. Stock state (In stock / Only N left / Made to
+order / Sold out) is a neutral grey pill — a card has one accent, not two.
+
 **The Held Accent Rule.** A card family that colour-codes its left border by status or
 subsection (`ResearchProjectCard`'s Idea/In progress/Complete; `ReviewSearch`'s rose
-accent; `LearnFilter`'s per-subsection accent) keeps that border lit on hover — only the
+accent; `LearnFilter`'s per-subsection accent; `ShopProductCard`'s teal) keeps that border lit on hover — only the
 other three sides brighten (`hover:border-t/r/b-void-600`), plus a `hover:bg-{accent}/5`
 tint and the title recolouring to match. A plain `hover:border-void-600` shorthand was
 tried first in each case and always regressed the same way: it overrides every side
@@ -313,7 +319,7 @@ button labels, badges, the home page's `01`/`02`/`03` list index, shot-detail ro
 
 Content sits in one of four fixed-width containers depending on the page's density,
 centred with `mx-auto` and `px-6` horizontal padding: `max-w-6xl` for wide, photo-grid
-pages (Home, Gallery), `max-w-3xl` for medium list pages (Reviews, Learn, Workshop
+pages (Home, Gallery, Prints, Shop), `max-w-3xl` for medium list pages (Reviews, Learn, Workshop
 index), `max-w-4xl` for Calendar specifically, and `max-w-2xl` for narrow reading pages
 (About, Privacy, Disclosure, and every article/review/photo detail page). The header is
 a fixed `h-20` sticky bar (`bg-void-950/85` with `backdrop-blur`) with a hairline bottom
@@ -493,7 +499,8 @@ partial-radius middle state anywhere in the system; introducing `rounded-md` or
   left border (`border-l-2 border-l-{section-color}`) to carry their category colour
   without a full-surface tint. The same treatment carries whole list-item cards, not just
   tiles: `ResearchProjectCard` (Workshop, per status), `ReviewSearch`'s review rows
-  (Reviews, rose), and `LearnFilter`'s article rows (Learn, per subsection) all use
+  (Reviews, rose), `LearnFilter`'s article rows (Learn, per subsection) and
+  `ShopProductCard` (Shop, teal, square product photo above the text) all use
   `border border-void-700 border-l-2 border-l-{accent}` — see The Held Accent Rule for
   their shared, deliberately asymmetric hover behaviour.
 - **Internal Padding:** `p-4` for compact tiles (gear, moon phase, event card), `p-5` for
@@ -533,7 +540,7 @@ partial-radius middle state anywhere in the system; introducing `rounded-md` or
   header.
 
 ### Photo Hero (signature component)
-Every section index page (Gallery, Reviews, Learn, Calendar, Workshop) opens with a
+Every section index page (Gallery, Reviews, Learn, Calendar, Workshop, Prints, Shop) opens with a
 full-bleed photo banner (`PageHero`, `h-64 sm:h-80`) instead of a plain text header: the
 featured photo, a light flat wash (`bg-void-950/20`) plus one top-fading gradient
 (`from-void-950 via-void-950/50 to-transparent`) darkening only the text zone at the

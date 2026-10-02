@@ -3,7 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import PhotoCard from "@/components/gallery/PhotoCard";
 import { heroCropUrl } from "@/sanity/image";
-import { getFeaturedPhotos, getPrintProducts, type SanityImageWithDimensions } from "@/lib/sanity.queries";
+import {
+  getFeaturedPhotos,
+  getPrintProducts,
+  hasActiveShopProducts,
+  type SanityImageWithDimensions,
+} from "@/lib/sanity.queries";
 import { cheapestPrintPriceGBP } from "@/lib/print";
 import { formatCaptureDate, formatShotSummary } from "@/lib/astro/shotDetails";
 import { buildMetadata } from "@/lib/seo";
@@ -81,11 +86,27 @@ const SECTION_TEASERS = [
   },
 ];
 
+// Only shown once the shop has something for sale (see
+// hasActiveShopProducts) — never as an empty placeholder row. Teal on hover,
+// not rose: the Prints row directly above is rose, and DESIGN.md records
+// that two adjacent identical teaser colours were already tried and
+// reverted.
+const SHOP_TEASER = {
+  href: "/shop",
+  title: "Shop",
+  body: "Small things I print myself — filter boxes, tripod mounts, clips and the odd coaster. Made and posted from the UK.",
+  color: "group-hover:text-nebula-teal-400",
+};
+
 export default async function HomePage() {
-  const [featured, printProducts] = await Promise.all([
+  const [featured, printProducts, shopLive] = await Promise.all([
     getFeaturedPhotos(),
     getPrintProducts().catch(() => []),
+    hasActiveShopProducts().catch(() => false),
   ]);
+  const teasers = shopLive
+    ? [SECTION_TEASERS[0], SHOP_TEASER, ...SECTION_TEASERS.slice(1)]
+    : SECTION_TEASERS;
   const fromPriceGBP = cheapestPrintPriceGBP(printProducts);
   // Hero is pinned to a specific shot rather than "whichever featured photo
   // is newest" — Andromeda reads better full-bleed than the newer square
@@ -173,7 +194,7 @@ export default async function HomePage() {
       <section className="border-t border-void-700 bg-void-900/30">
         <div className="mx-auto max-w-6xl px-6 py-16">
           <div className="divide-y divide-void-700 border-t border-void-700">
-            {SECTION_TEASERS.map((teaser, i) => (
+            {teasers.map((teaser, i) => (
               <Link
                 key={teaser.href}
                 href={teaser.href}

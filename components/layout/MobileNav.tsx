@@ -2,11 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { NAV_LINKS } from "@/lib/navigation";
+import { navLinks, printsButtonLabel } from "@/lib/navigation";
 import { isSafeHref } from "@/lib/safeUrl";
 import { useFocusTrap } from "@/lib/useFocusTrap";
 
-export default function MobileNav({ shopUrl: rawShopUrl }: { shopUrl?: string }) {
+export default function MobileNav({
+  shopUrl: rawShopUrl,
+  shopLive = false,
+}: {
+  shopUrl?: string;
+  shopLive?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -95,11 +101,11 @@ export default function MobileNav({ shopUrl: rawShopUrl }: { shopUrl?: string })
                 onClick={() => setOpen(false)}
                 className="mb-4 flex min-h-11 items-center justify-center gap-2 border border-nebula-rose-400 px-4 py-3 font-mono text-sm uppercase tracking-widest text-nebula-rose-400 transition-colors hover:bg-nebula-rose-400 hover:text-void-950"
               >
-                Shop Prints
+                {printsButtonLabel(shopLive)}
               </Link>
             )}
             <ul className="flex flex-col divide-y divide-void-700">
-              {NAV_LINKS.map((link, i) => (
+              {navLinks(shopLive).map((link, i) => (
                 <li key={link.href}>
                   <Link
                     ref={!shopUrl && i === 0 ? firstLinkRef : undefined}

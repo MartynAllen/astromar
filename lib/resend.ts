@@ -16,6 +16,71 @@ const ORDERS_FROM_EMAIL = process.env.ORDERS_FROM_EMAIL;
 
 export const contactFormConfigured = Boolean(RESEND_API_KEY && CONTACT_TO_EMAIL);
 export const printShippedEmailConfigured = Boolean(RESEND_API_KEY && ORDERS_FROM_EMAIL);
+// New-shop-order emails go to the owner's own inbox, exactly like the
+// contact form — so they ride the same shared sender and need no verified
+// domain.
+export const shopOrderEmailConfigured = contactFormConfigured;
+
+interface SendEmailParams {
+  from: string;
+  to: string[];
+  replyTo?: string;
+  subject: string;
+  text: string;
+}
+
+// The one place that talks to Resend. Plain text only — never `html:` — so
+// nothing a customer typed can be interpreted as markup. Errors are a short
+// "Resend 422"/"Request failed" string; callers decide what, if anything,
+// to show a visitor.
+export async function sendEmail({
+  from,
+  to,
+  replyTo,
+  subject,
+  text,
+}: SendEmailParams): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!RESEND_API_KEY) return { ok: false, error: "Resend is not configured" };
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to,
+        ...(replyTo ? { reply_to: replyTo } : {}),
+        subject,
+        text,
+      }),
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      console.error("Resend send failed:", res.status, detail);
+      return { ok: false, error: `Resend ${res.status}` };
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("Resend request failed:", err);
+    return { ok: false, error: "Request failed" };
+  }
+}
+
+/** Emails Martyn a paid shop order (with the delivery address) at his own contact address. */
+export async function sendShopOrderEmail(params: {
+  subject: string;
+  text: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!CONTACT_TO_EMAIL) return { ok: false, error: "Shop order email is not configured" };
+  return sendEmail({
+    from: "Astromar Shop <onboarding@resend.dev>",
+    to: [CONTACT_TO_EMAIL],
+    subject: params.subject,
+    text: params.text,
+  });
+}
 
 interface SendContactEmailParams {
   name: string;
@@ -32,40 +97,22 @@ export async function sendContactEmail({
     return { ok: false, error: "Contact form is not configured" };
   }
 
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        // Resend's own shared sending domain — works with zero DNS setup,
-        // which is the point here: this only ever sends to the account
-        // owner's own verified address (see CONTACT_TO_EMAIL), so a custom
-        // verified sending domain buys nothing extra for this use case.
-        from: "Astromar Contact Form <onboarding@resend.dev>",
-        to: [CONTACT_TO_EMAIL],
-        // A real visitor email as reply-to, not from — lets the owner hit
-        // "reply" in their own inbox without the sending domain needing to
-        // accept mail on the visitor's behalf.
-        reply_to: fromEmail,
-        subject: `New message from ${name} — Astromar contact form`,
-        text: `From: ${name} <${fromEmail}>\n\n${message}`,
-      }),
-    });
-
-    if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      console.error("Resend send failed:", res.status, detail);
-      return { ok: false, error: "Could not send message" };
-    }
-
-    return { ok: true };
-  } catch (err) {
-    console.error("Resend request failed:", err);
-    return { ok: false, error: "Could not send message" };
-  }
+  const result = await sendEmail({
+    // Resend's own shared sending domain — works with zero DNS setup,
+    // which is the point here: this only ever sends to the account
+    // owner's own verified address (see CONTACT_TO_EMAIL), so a custom
+    // verified sending domain buys nothing extra for this use case.
+    from: "Astromar Contact Form <onboarding@resend.dev>",
+    to: [CONTACT_TO_EMAIL],
+    // A real visitor email as reply-to, not from — lets the owner hit
+    // "reply" in their own inbox without the sending domain needing to
+    // accept mail on the visitor's behalf.
+    replyTo: fromEmail,
+    subject: `New message from ${name} — Astromar contact form`,
+    text: `From: ${name} <${fromEmail}>\n\n${message}`,
+  });
+  // Visitors never see Resend's own error detail.
+  return result.ok ? result : { ok: false, error: "Could not send message" };
 }
 
 interface PrintShippedParams {
@@ -110,32 +157,13 @@ export async function sendPrintShippedEmail(
     .filter((line, i, arr) => line !== "" || arr[i - 1] !== "")
     .join("\n");
 
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: ORDERS_FROM_EMAIL,
-        to: [p.to],
-        // Replies land in the owner's own inbox (the contact address) when
-        // there is one, so a customer can flag a problem by just replying.
-        ...(CONTACT_TO_EMAIL ? { reply_to: CONTACT_TO_EMAIL } : {}),
-        subject: "Your Astromar print is on its way",
-        text,
-      }),
-    });
-
-    if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      console.error("Resend shipped-print send failed:", res.status, detail);
-      return { ok: false, error: `Resend ${res.status}` };
-    }
-    return { ok: true };
-  } catch (err) {
-    console.error("Resend shipped-print request failed:", err);
-    return { ok: false, error: "Request failed" };
-  }
+  return sendEmail({
+    from: ORDERS_FROM_EMAIL,
+    to: [p.to],
+    // Replies land in the owner's own inbox (the contact address) when
+    // there is one, so a customer can flag a problem by just replying.
+    ...(CONTACT_TO_EMAIL ? { replyTo: CONTACT_TO_EMAIL } : {}),
+    subject: "Your Astromar print is on its way",
+    text,
+  });
 }
